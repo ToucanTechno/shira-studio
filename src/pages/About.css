@@ -1,0 +1,99 @@
+.about-banner {
+    width: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background-image: url('../assets/images/about/toolset.jpg');
+    background-size: 100% auto;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+
+.about-header {
+    width: 52.5vw;
+    margin-block-start: 7vw;
+    margin-inline-end: 10vw;
+    text-align: center;
+}
+
+.about-header h1 {
+    color: white;
+    font-size: 5vw;
+    text-shadow: black 1px 1px 5px;
+}
+
+.about-header hr {
+    border-width: 0;
+    border-top: 3px solid #e0e0e0;
+}
+
+.about-banner-content {
+    background-color: rgba(224, 224, 224, 0.2);
+    color: white;
+    font-size: 2.5vw;
+}
+
+.about-banner-content p {
+}
+
+.about-social {
+    margin-top: 5vw;
+    width: 80%;
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    column-gap: 7.5vw;
+}
+
+.about-social div {
+    width: 25vw;
+    height: 20vw;
+    background-color: white;
+    box-shadow: #aaa 1px 1px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    direction: ltr;
+}
+
+.about-social div svg {
+    font-size: 5vw;
+}
+
+.about-social div h2 {
+    margin: 5px 0 0;
+    font-size: 3vw;
+}
+
+.about-social div p {
+    margin: 0;
+    font-size: 1.8vw;
+}
+
+.about-social .about-fb {
+    color: #3b5998;
+}
+
+.about-social .about-ig {
+    color: #55acee;
+}
+
+.about-social .about-email {
+    color: #bb0000;
+}
+
+.about-intro {
+    font-size: 3vw;
+    text-align: center;
+}
+
+.about-content {
+    color: #888;
+    width: 80%;
+}
+
+.about-content p {
+    font-size: 1rem;
+}

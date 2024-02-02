@@ -1,0 +1,133 @@
+.home-top {
+    width: inherit;
+    background-color: #4e6263;
+}
+
+.home-top img {
+    width: inherit;
+    object-fit: cover;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 96%, 52% 96%, 50% 100%, 48% 96%, 0% 96%) /* Arrow shaped clip */
+}
+
+.button-text-header {
+    width: 80%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 1vw auto 2vw; /* More bottom margin due to clipping mask above */
+    column-gap: 2vw;
+}
+
+.button-text-header h2 {
+    font-size: 2.4vw;
+    padding: 1vw;
+    margin: 0;
+    color: white;
+}
+
+@media screen and (max-width: 600px) {
+    .button-text-header h2{
+        font-size: 1.2rem;
+    }
+    .button-text-header button {
+        font-size: 1rem;
+    }
+}
+
+.flex-row-horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    column-gap: 15vw;
+    width: 75%;
+    margin: 2vw auto;
+}
+
+@media screen and (max-width: 600px) {
+    .flex-row-horizontal{
+        flex-direction: column;
+    }
+    .flex-row-horizontal.reversed {
+        flex-direction: column-reverse;
+    }
+}
+
+.flex-row-horizontal .image-frame-container {
+    flex-grow: .8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-frame-container img {
+    width: 20vw;
+    border: 10px solid white;
+    box-shadow: 10px 10px 20px 0px rgba(0,0,0,0.12);
+}
+
+@media screen and (max-width: 600px) {
+    .image-frame-container img {
+        width: 30vw;
+    }
+}
+
+.article-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: fit-content;
+    flex-grow: 1;
+}
+
+.article-container h2 {
+    color: #cea525;
+    font-size: 3vw;
+    padding: 0;
+    margin: 1vw 0;
+}
+
+.article-container p {
+    margin: 0;
+    font-size: 2vw;
+    line-height: 4vw;
+}
+
+.article-container button {
+    margin-top: 5vw;
+}
+
+@media screen and (max-width: 600px) {
+    .article-container h2 {
+        font-size: 1rem;
+    }
+    .article-container p {
+        font-size: .8rem;
+    }
+}
+@media screen and (min-width: 1200px) {
+    .article-container h2 {
+        font-size: 2rem;
+    }
+    .article-container p {
+        font-size: 1.6rem;
+    }
+}
+
+.content-container span {
+    display: block;
+    width: 50vw;
+    text-align: center;
+    font-size: 1.8vw;
+}
+@media screen and (max-width: 600px) {
+    .content-container span {
+        font-size: .9rem;
+    }
+}
+
+.small-portrait {
+    width: 8vw;
+}

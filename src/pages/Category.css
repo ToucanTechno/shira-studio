@@ -1,0 +1,39 @@
+.gallery {
+    width: 85vw; /* Not % since vw includes scrollbar */
+    display: flex;
+    flex-direction: row;
+    column-gap: 5vw;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.gallery-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 25vw;
+    margin-bottom: 2vw;
+}
+
+.gallery-item img {
+    width: inherit;
+}
+
+.gallery-item a {
+    width: inherit;
+    color: black;
+    text-decoration: none;
+    font-size: 2vw;
+    color: #cea525;
+    text-align: center;
+}
+
+.gallery-item a:hover {
+    color: #9a7918;
+}
+
+.gallery-item mark {
+    background-color: initial;
+}
