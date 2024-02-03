@@ -29,27 +29,25 @@ export const login = async(req: Request, res: Response) => {
             res.status(400).send({ message: "Failed validation", errors: errors.array() });
             return;
         }
-        console.log("1");
         const user = await User.findOne({ email });
-        console.log("2");
 
         if (!user) {
             res.status(404).send({ message: "Email invalid." });
             return;
         }
-        console.log("3");
         user.comparePassword(password, async (err: any, isMatch: boolean) => {
             if (err || !isMatch) {
                 res.status(400).send({ message: "Password invalid." });
                 return;
             }
-            console.log("4");
-            const token = jwt.sign({id: user._id, role: user.role}, process.env["SECRET"] as string);
-            console.log("5");
+            if (!process.env["SECRET"]) {
+                throw new Error("Invalid environment");
+            }
+            const token = jwt.sign({ id: user._id, role: user.role },
+                process.env["SECRET"],
+                { expiresIn: '7d', subject: 'TODO' });
             res.status(200).send({ message: "Password valid.",
-                                               token: token,
-                                               user_name: user?.user_name,
-                                               role: user?.role } );
+                                               token: token } );
         });
     } catch (error) {
         res.status(401).send({ error: error });

@@ -8,9 +8,13 @@ export const authorize = (req: Request, res: Response, next: NextFunction) => {
             throw new Error("Missing authorization field");
         }
         // User expected to use authorization header: "Bearer <token>"
+        if (!process.env["SECRET"]) {
+            throw new Error("Invalid environment");
+        }
         const token = req.headers.authorization.split(" ")[1];
         req.body.user = jwt.verify(token as string,
-                                   process.env["SECRET"] as string);
+                                   process.env["SECRET"],
+            { subject: 'TODO' });
         next();
     } catch (error) {
         res.status(401).send({message: "Failed to authorize"});

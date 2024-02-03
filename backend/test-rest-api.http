@@ -1,0 +1,98 @@
+
+
+###
+GET http://localhost:3001/api/auth/
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YmU2MWQzM2U4YjI2NjU2YzY5ZGM0ZCIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzA2OTc4MTM2LCJleHAiOjE3MDc1ODI5MzYsInN1YiI6IlRPRE8ifQ.yCDhBrdiMc7R3ChHne4rGo-_lzJZR7FsbIfTScohClI
+
+
+<> 2024-02-03T183548.200.json
+<> 2024-02-03T183522.401.json
+<> 2024-02-03T180547.200.json
+<> 2024-02-03T175750.200.json
+<> 2024-02-03T175732.401.json
+<> 2024-02-03T175554.401.json
+
+###
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{"user_name": "matan", "email": "hello@matan.li", "password": "123", "role": "user"}
+
+<> 2024-02-03T175459.201.json
+<> 2024-02-03T165254.401.json
+<> 2024-02-03T163645.401.json
+
+###
+POST http://localhost:3001/api/auth/sign-in
+Accept: application/json
+Content-Type: application/json
+
+{"email": "hello@matan.li", "password": "123"}
+
+<> 2024-02-03T183536.200.json
+<> 2024-02-03T175503.200.json
+<> 2024-02-03T163456.401.json
+<> 2024-02-03T163354.401.json
+<> 2024-02-03T163233.401.json
+<> 2024-02-03T163202.401.json
+###
+POST http://localhost:3001/api/products
+Content-Type: application/json
+
+{ "name": "prod3", "category_id": 1, "price": "123", "image_src": "img/3.png", "stock": 1, "description": "something2" }
+
+<> 2024-02-03T212114.201.json
+<> 2024-02-03T212102.201.json
+
+###
+GET http://localhost:3001/api/products
+Content-Type: application/json
+
+{}
+
+<> 2024-02-03T213124.200.json
+<> 2024-02-03T212120.200.json
+<> 2024-02-03T211939.200.json
+<> 2024-02-03T210843.200.json
+###
+GET http://localhost:3001/api/products/65be7fc5a7e14bf8be7f2861
+Content-Type: application/json
+
+<> 2024-02-03T211740.200.json
+<> 2024-02-03T211119.200.json
+
+###
+PUT http://localhost:3001/api/products/65be7fc5a7e14bf8be7f2861
+Content-Type: application/json
+
+{"stock": 12}
+
+<> 2024-02-03T211723.200.html
+<> 2024-02-03T211655.400.html
+<> 2024-02-03T211421.400.html
+###
+DELETE http://localhost:3001/api/products/65be807ff8b7621e93d5eafd
+Content-Type: application/json
+
+<> 2024-02-03T211928.202.html
+
+###
+GET http://localhost:3001/api/products?skip=0&limit=0
+Content-Type: application/json
+
+{}
+
+<> 2024-02-03T213051.200.json
+<> 2024-02-03T213043.200.json
+<> 2024-02-03T213004.200.json
+<> 2024-02-03T212952.200.json
+<> 2024-02-03T212925.200.json
+<> 2024-02-03T212906.200.json
+<> 2024-02-03T212856.200.json
+<> 2024-02-03T212848.200.json
+<> 2024-02-03T212842.200.json
+<> 2024-02-03T212837.200.json
+<> 2024-02-03T212832.200.json
+<> 2024-02-03T212809.200.json
+<> 2024-02-03T212218.200.json

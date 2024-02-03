@@ -7,7 +7,10 @@ import {authRoutes} from "./routes/authRoutes";
 import mongoose from "mongoose";
 
 dotenv.config({path: "src/.env"});
-mongoose.connect('mongodb://127.0.0.1:27017/' + process.env["DB_NAME"]);
+if (process.env["DB_CONN_STRING"] === undefined || process.env["DB_NAME"] === undefined) {
+    throw new Error("Missing DB Credentials.");
+}
+mongoose.connect(process.env["DB_CONN_STRING"], { dbName: process.env["DB_NAME"] });
 const app: Express = express();
 const port = process.env["PORT"] || 3001;
 
