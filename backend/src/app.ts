@@ -3,11 +3,12 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
 import {productsRouter} from "./routes/productsRouter";
+import {authRoutes} from "./routes/authRoutes";
 
-dotenv.config();
+dotenv.config({path: "src/.env"});
 
 const app: Express = express();
-const port = process.env["PORT"] || 3000;
+const port = process.env["PORT"] || 3001;
 
 // Middleware
 app.use(bodyParser.json());
@@ -24,6 +25,6 @@ app.use('/api/products', productsRouter);
 //
 // // Routes
 // app.use('/api/orders', ordersRouter);
-// app.use('/api/auth', authRouter));
+app.use('/api/auth', authRoutes);
 
 export default app;

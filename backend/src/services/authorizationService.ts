@@ -1,20 +1,20 @@
 import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import {NextFunction, Request, Response} from "express";
 
 export const authorize = (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.headers)
     try {
-        const token = req.headers.authorization!.split(" ")[1];
-        const decode = jwt.verify(token, config.SECRET);
-        req.body.user = decode;
+        if (!req.headers.authorization) {
+            throw new Error("Missing authorization field");
+        }
+        // User expected to use authorization header: "Bearer <token>"
+        const token = req.headers.authorization.split(" ")[1];
+        req.body.user = jwt.verify(token as string,
+                                   process.env["SECRET"] as string);
         next();
     } catch (error) {
-        return ResponseHelper.response({
-            res,
-            code: 401,
-            success: false,
-            message: "Invalid request!",
-            data: {}
-        });
+        res.status(401).send({message: "Failed to authorize"});
+        return;
     }
 };
 
@@ -26,12 +26,7 @@ export const adminAuthorize = (req: Request, res: Response, next: NextFunction) 
         }
         next();
     } catch (error) {
-        return ResponseHelper.response({
-            res,
-            code: 403,
-            success: false,
-            message: "You don't have permission!",
-            data: {}
-        });
+        res.status(403).send({message: "Unauthorized"});
+        return;
     }
 };

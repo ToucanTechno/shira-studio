@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema({
         enum: ["admin", "user"],
         default: "user"
     }
+}, {
+    methods: {
+        comparePassword(candidatePassword: string, cb: (arg: any, isMatch: boolean) => void) {
+            bcrypt.compare(candidatePassword, this["password"], function(err, isMatch) {
+                cb(err, isMatch);
+            });
+        }
+    }
 });
 
 userSchema.pre("save", function(next) {
@@ -54,14 +62,5 @@ userSchema.pre("save", function(next) {
         });
     })
 });
-
-userSchema.methods["comparePassword"] = function(candidatePassword: string, cb: (arg: any, isMatch?: boolean) => void) {
-    bcrypt.compare(candidatePassword, this["password"], function(err, isMatch) {
-        if (err) {
-            return cb(err);
-        }
-        cb(null, isMatch);
-    });
-}
 
 export const User = mongoose.model("User", userSchema);
