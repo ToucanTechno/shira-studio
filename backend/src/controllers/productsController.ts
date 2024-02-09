@@ -23,11 +23,13 @@ export const getSingleProduct = async (req: Request, res: Response) => {
             throw new Error("Missing product ID");
         }
         const product = await Product.findById(id);
-        if (product) {
-            res.status(200).send(product);
+        if (!product) {
+            res.status(404).send({ message: `Unable to find matching product with id: ${req.params['id']}` });
+            return;
         }
-    } catch (error) {
-        res.status(404).send(`Unable to find matching document with id: ${req.params['id']}`);
+        res.status(200).send(product);
+    } catch (error: any) {
+        res.status(400).send(error.message);
     }
 };
 
