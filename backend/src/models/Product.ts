@@ -1,14 +1,7 @@
 import mongoose, { ObjectId } from 'mongoose';
+import {IProduct} from "../../../src/models/Product";
 
-export interface IProduct {
-    name: string;
-    category_id: number;
-    price: number;
-    image_src: string;
-    date: Date;
-    stock: number;
-    description: string;
-    views: number;
+export interface IProductDB extends IProduct {
     id?: ObjectId;
 }
 

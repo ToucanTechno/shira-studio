@@ -1,6 +1,6 @@
 import {Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { Product, IProduct } from "../models/Product";
+import { Product, IProductDB } from "../models/Product";
 
 export const getProducts = async (req: Request, res: Response) => {
     try {
@@ -32,7 +32,7 @@ export const getSingleProduct = async (req: Request, res: Response) => {
 };
 
 export const insertProduct = async (req: Request, res: Response) => {
-    const product: IProduct = req.body;
+    const product: IProductDB = req.body;
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
