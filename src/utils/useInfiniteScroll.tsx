@@ -29,9 +29,10 @@ export const useInfiniteScroll = (products: IProduct[]): UseInfiniteScroll => {
 
                 // this timeout debounces the intersection events
                 loadMoreTimeoutRef.current = setTimeout(() => {
-                    axios.get(`/api/products/${page}`).then((resp) => {
+                    axios.get(`http://127.0.0.1:3001/api/products?skip=${10 * (page - 1)}&limit=10`).then((resp) => {
                         setPage(page + 1);
                         const newProducts = resp?.data["products"];
+                        console.log(resp);
 
                         if (newProducts?.length) {
                             const newDynamicProducts = [...dynamicProducts, ...newProducts];
