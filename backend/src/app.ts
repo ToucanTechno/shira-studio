@@ -5,6 +5,9 @@ import cors from "cors";
 import {productsRouter} from "./routes/productsRouter";
 import {authRoutes} from "./routes/authRoutes";
 import mongoose from "mongoose";
+import { cartRoutes } from "./routes/cartRoutes";
+
+
 
 dotenv.config({path: "src/.env"});
 if (process.env["DB_CONN_STRING"] === undefined || process.env["DB_NAME"] === undefined) {
@@ -30,5 +33,7 @@ app.use('/api/products', productsRouter);
 // // Routes
 // app.use('/api/orders', ordersRouter);
 app.use('/api/auth', authRoutes);
+
+app.use('/api/cart', cartRoutes);
 
 export default app;

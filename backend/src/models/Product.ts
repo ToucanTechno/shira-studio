@@ -39,23 +39,4 @@ const productSchema = new mongoose.Schema({
     },
 });
 
-// productSchema.pre("save", function(next) {
-    // const product = this;
-    // if (!product.isModified("password")) {
-    //     return next();
-    // }
-    // bcrypt.genSalt(10, function(err, salt) {
-    //     if (err) {
-    //         return next(err);
-    //     }
-    //     bcrypt.hash(product.password, salt, function(err, hash) {
-    //         if (err) {
-    //             return next(err);
-    //         }
-    //         Product.password = hash;
-    //         next();
-    //     });
-    // })
-// });
-
 export const Product = mongoose.model("Product", productSchema);

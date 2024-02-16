@@ -56,14 +56,14 @@ Content-Type: application/json
 <> 2024-02-03T211939.200.json
 <> 2024-02-03T210843.200.json
 ###
-GET http://localhost:3001/api/products/65be7fc5a7e14bf8be7f2861
+GET http://localhost:3001/api/products/65cf814bd10a6f80dcc1cb32
 Content-Type: application/json
 
 <> 2024-02-03T211740.200.json
 <> 2024-02-03T211119.200.json
 
 ###
-PUT http://localhost:3001/api/products/65be7fc5a7e14bf8be7f2861
+PUT http://localhost:3001/api/products/65cf814bd10a6f80dcc1cb32
 Content-Type: application/json
 
 {"stock": 12}
@@ -72,7 +72,7 @@ Content-Type: application/json
 <> 2024-02-03T211655.400.html
 <> 2024-02-03T211421.400.html
 ###
-DELETE http://localhost:3001/api/products/65be807ff8b7621e93d5eafd
+DELETE http://localhost:3001/api/products/65cf814bd10a6f80dcc1cb32
 Content-Type: application/json
 
 <> 2024-02-03T211928.202.html

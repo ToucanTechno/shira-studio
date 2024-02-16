@@ -13,7 +13,7 @@ export const productsRouter = express.Router();
 productsRouter.use(express.json());
 
 // GET
-productsRouter.get('/id/:id', getSingleProduct);
+productsRouter.get('/:id', getSingleProduct);
 productsRouter.get('/', getProducts);
 productsRouter.get('/c/:category/:subcategory/', getProducts);
 productsRouter.get('/c/:category/', getProducts);
