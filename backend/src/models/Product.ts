@@ -5,7 +5,7 @@ export interface IProduct {
     category_id: number;
     price: number;
     image_src: string;
-    date: Date;
+    date: Date;//TODO: change to timestamps from mongoose
     stock: number;
     description: string;
     views: number;
