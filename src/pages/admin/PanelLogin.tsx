@@ -1,13 +1,13 @@
 import React from "react";
 
-const Panel = () => {
+const PanelLogin = () => {
     return (
         <div className="container">
             <div className="content-container">
-                here
+                loginhere
             </div>
         </div>
-    );
+    )
 };
 
-export default Panel;
+export default PanelLogin;

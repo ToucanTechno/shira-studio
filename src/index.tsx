@@ -4,12 +4,11 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import App from "./App";
+import PanelApp from "./pages/admin/PanelApp";
 
 const router = createBrowserRouter([
-    {
-        path: "*",
-        Component: App
-    }
+    { path: "control-panel/*", Component: PanelApp},
+    { path: "*", Component: App }
 ]);
 
 const root = ReactDOM.createRoot(
