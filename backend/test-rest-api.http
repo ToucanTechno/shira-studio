@@ -17,11 +17,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1YmU2MWQzM
 POST http://localhost:3001/api/auth
 Content-Type: application/json
 
-{"user_name": "matan", "email": "hello@matan.li", "password": "123", "role": "user"}
+{"user_name": "matan", "email": "hello@matan.li", "password": "123456789a", "role": "admin"}
 
-<> 2024-02-03T175459.201.json
-<> 2024-02-03T165254.401.json
-<> 2024-02-03T163645.401.json
+###
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{"user_name": "abc", "email": "helloa@matan.li", "password": "123456789a", "role": "user"}
 
 ###
 POST http://localhost:3001/api/auth/sign-in

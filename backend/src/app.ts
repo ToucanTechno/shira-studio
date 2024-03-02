@@ -19,6 +19,7 @@ const port = process.env["PORT"] || 3001;
 
 // Middleware
 app.use(bodyParser.json());
+// TODO: configure cors
 app.use(cors());
 
 // Start the server
