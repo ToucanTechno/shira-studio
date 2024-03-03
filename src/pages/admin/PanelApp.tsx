@@ -9,7 +9,7 @@ const PanelApp = () => {
     return (
         <AuthProvider>
             <Routes>
-                <Route element={<RequireAuth />}>
+                <Route element={<RequireAuth/>}>
                     <Route path="/" element={<Panel/>}/>
                 </Route>
                 <Route path="/login" element={<PanelLogin/>}/>

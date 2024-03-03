@@ -3,14 +3,14 @@ import { jwtDecode } from "jwt-decode";
 import "core-js/stable/atob";
 
 type AccessTokensType = {
-    access: string | undefined;
+    access: string | null;
 };
 
 interface CurrentUserContextType {
     authTokens: AccessTokensType;
     setAuthTokens: React.Dispatch<React.SetStateAction<AccessTokensType>>;
-    user: string | undefined;
-    setUser: React.Dispatch<React.SetStateAction<string | undefined>>;
+    user: string | null;
+    setUser: React.Dispatch<React.SetStateAction<string | null>>;
     callLogout: () => void;
 }
 
@@ -23,39 +23,41 @@ export const AuthContext = createContext<CurrentUserContextType>(
 );
 
 export const AuthProvider = (props: Props) => {
+    console.log("Starting AuthProvider...")
     let [authTokens, setAuthTokens] = useState<AccessTokensType>(() => {
             let tokenInfo = localStorage.getItem("authTokens");
-            console.log("hello2", tokenInfo);
+            console.log("Getting tokenInfo from localStorage, setting initial authTokens in context", tokenInfo);
             return tokenInfo
                 ? JSON.parse(localStorage.getItem("authTokens") || "")
-                : undefined;
+                : null;
         }
     );
 
-    let [user, setUser] = useState<string | undefined>(() => {
+    let [user, setUser] = useState<string | null>(() => {
             let tokenInfo = localStorage.getItem("authTokens");
-            console.log("hello", tokenInfo);
+            console.log("setting initial user", tokenInfo);
+            console.log("Decoded user is: ", (tokenInfo) ? jwtDecode(tokenInfo || "") : null);
             return tokenInfo
                 ? jwtDecode(tokenInfo || "")
-                : undefined;
+                : null;
         }
     );
 
     function callLogout() {
-        setAuthTokens({ access: undefined });
-        setUser(undefined);
+        setAuthTokens({ access: null });
+        setUser(null);
         localStorage.removeItem("authTokens");
     }
 
     return (
         <AuthContext.Provider value={{
-            setAuthTokens,
             authTokens,
+            setAuthTokens,
             callLogout,
             user,
             setUser
         }}>
-            {/*loading ? props.children : null*/ props.children}
+            { props.children }
         </AuthContext.Provider>
     );
 };

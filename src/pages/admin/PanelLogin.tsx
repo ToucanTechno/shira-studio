@@ -1,6 +1,7 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import "./PanelLogin.css"
+import {AuthContext} from "../../services/AuthContext";
 
 const PanelLogin = (props: any) => {
     const [email, setEmail] = useState('')
@@ -8,6 +9,7 @@ const PanelLogin = (props: any) => {
     const [emailError, setEmailError] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [loginError, setLoginError] = useState('')
+    const { setAuthTokens } = useContext(AuthContext)
     const navigate = useNavigate()
 
     const onLogin = () => {
@@ -78,8 +80,11 @@ const PanelLogin = (props: any) => {
     const logIn = (accountData: {message: string, token: string}) => {
         //setAuthTokens(accountData.token);
         // TODO: should we store accountData.email too?
-        localStorage.setItem("authTokens", JSON.stringify(accountData.token));
-        navigate('/control-panel');
+        const token = JSON.stringify(accountData.token);
+        localStorage.setItem("authTokens", token);
+        console.log("navigate", localStorage.getItem("authTokens"));
+        setAuthTokens({ access: token });
+        navigate('/control-panel/');
     }
 
     return (
