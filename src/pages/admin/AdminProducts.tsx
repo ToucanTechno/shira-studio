@@ -58,11 +58,11 @@ const AdminProducts = () => {
                     <td>{item.views}</td>
                     <td>
                         <button className="adminButton"
-                                onClick={() => navigate('control-panel/products/' + 1 + '/edit')}>
+                                onClick={() => navigate(`${item._id}/edit`)}>
                             עריכה
                         </button>
                         <button className="adminButton"
-                                onClick={() => navigate('control-panel/products/' + 1 + '/delete')}>
+                                onClick={() => navigate(`${item._id}/delete`)}>
                             מחיקה
                         </button>
                     </td>

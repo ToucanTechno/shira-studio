@@ -58,6 +58,16 @@ input, textarea {
     box-sizing: border-box;
 }
 
+input#picture {
+    width: fit-content;
+    margin-inline-end: 10px;
+    vertical-align: top;
+}
+img.pictureImage {
+    width: 40px;
+    height: 40px;
+}
+
 select {
     width: 100%;
     padding: 2px;
