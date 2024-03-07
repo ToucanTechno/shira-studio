@@ -1,0 +1,12 @@
+tr:hover {
+    background-color: #ddd;
+}
+.status-pending {
+    color: orange;
+}
+.status-shipped {
+    color: green;
+}
+.status-delivered {
+    color: blue;
+}

@@ -7,7 +7,8 @@ const RequireAuth = () => {
     let { authTokens } = useContext(AuthContext);
     /* TODO improve check */
     if (authTokens) {
-        const decodedUser: any = jwtDecode(authTokens.access || "")
+        console.log("Trying to decode:", authTokens)
+        const decodedUser: any = jwtDecode(authTokens || "")
         if (decodedUser && decodedUser["role"] === "admin") {
             return <Outlet />
         }

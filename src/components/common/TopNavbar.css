@@ -24,6 +24,10 @@
     background-color: black;
 }
 
+.TopNavbarContainer.adminNavbar {
+    background-color: #22313F;
+}
+
 .TopNavbar {
     width: 80%;
     margin: 0 auto;
@@ -74,7 +78,7 @@
     padding: 10px;
 }
 
-.TopNavbarSocial, .TopNavbarActions {
+.TopNavbarSocial, .TopNavbarActions, .TopNavbarSide {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -95,4 +99,21 @@
     margin: 0;
     align-self: center;
     color: white;
+}
+
+.TopNavbarSide > button {
+    height: fit-content;
+    align-self: center;
+    background: none repeat scroll 0 0 transparent;
+    border-width: 1px;
+    border-color: black;
+    border-style: outset;
+    border-radius: 5px;
+    border-spacing: 0;
+    background-color: #008CBA;
+    color: white;
+    cursor: pointer;
+    margin: 0;
+    padding: 5px;
+    font-size: 2vw;
 }

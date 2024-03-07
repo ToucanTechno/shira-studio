@@ -2,13 +2,9 @@ import React, { createContext, useState, ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 import "core-js/stable/atob";
 
-type AccessTokensType = {
-    access: string | null;
-};
-
 interface CurrentUserContextType {
-    authTokens: AccessTokensType;
-    setAuthTokens: React.Dispatch<React.SetStateAction<AccessTokensType>>;
+    authTokens: string | null;
+    setAuthTokens: React.Dispatch<React.SetStateAction<string | null>>;
     user: string | null;
     setUser: React.Dispatch<React.SetStateAction<string | null>>;
     callLogout: () => void;
@@ -24,11 +20,11 @@ export const AuthContext = createContext<CurrentUserContextType>(
 
 export const AuthProvider = (props: Props) => {
     console.log("Starting AuthProvider...")
-    let [authTokens, setAuthTokens] = useState<AccessTokensType>(() => {
+    let [authTokens, setAuthTokens] = useState<string | null>(() => {
             let tokenInfo = localStorage.getItem("authTokens");
             console.log("Getting tokenInfo from localStorage, setting initial authTokens in context", tokenInfo);
             return tokenInfo
-                ? JSON.parse(localStorage.getItem("authTokens") || "")
+                ? JSON.parse(tokenInfo || "")
                 : null;
         }
     );
@@ -44,7 +40,7 @@ export const AuthProvider = (props: Props) => {
     );
 
     function callLogout() {
-        setAuthTokens({ access: null });
+        setAuthTokens(null);
         setUser(null);
         localStorage.removeItem("authTokens");
     }

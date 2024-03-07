@@ -43,9 +43,11 @@ POST http://localhost:3001/api/products
 Content-Type: application/json
 
 { "name": "prod3", "category_id": 1, "price": "123", "image_src": "img/3.png", "stock": 1, "description": "something2" }
+###
+POST http://localhost:3001/api/products
+Content-Type: application/json
 
-<> 2024-02-03T212114.201.json
-<> 2024-02-03T212102.201.json
+{ "name": "prod4", "category_id": 1, "price": "124", "image_src": "img/4.png", "stock": 0, "description": "something4" }
 
 ###
 GET http://localhost:3001/api/products

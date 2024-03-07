@@ -4,8 +4,10 @@ export interface IProduct {
     category_id: string;
     price: number;
     image_src: string;
-    date?: Date;
+    created?: Date;
+    modified?: Date;
     stock?: number;
     description: string;
     views?: number;
+    _id?: string;
 }
