@@ -6,7 +6,7 @@ export interface IProduct {
     image_src: string;
     created?: Date;
     modified?: Date;
-    stock?: number;
+    stock: number;
     description: string;
     views?: number;
     _id?: string;

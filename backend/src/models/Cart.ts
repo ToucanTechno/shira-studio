@@ -1,11 +1,17 @@
 import mongoose, { Types } from 'mongoose';
 import { IProductDB } from './Product';
 
+export interface CartProduct {
+    product:IProductDB | string;
+    amount:number;
+};
+
 export interface ICart {
     userId?: Types.ObjectId;
-    products: Map<string , {product:IProductDB | string,amount:number}>
+    products: Map<string , CartProduct>
     createdAt?: Date 
     updatedAt?: Date //TODO: add accessedAt so we can delete cart more gracefully 
+    lock: Boolean
 }
 
 const cartSchema = new mongoose.Schema<ICart>({
@@ -22,6 +28,10 @@ const cartSchema = new mongoose.Schema<ICart>({
                 ref: 'Product'},
             amount: Number
         })
+    },
+    lock: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true , minimize: false});
 
