@@ -42,12 +42,12 @@ Content-Type: application/json
 POST http://localhost:3001/api/products
 Content-Type: application/json
 
-{ "name": "prod3", "category_id": 1, "price": "123", "image_src": "img/3.png", "stock": 1, "description": "something2" }
+{ "name": "prod1", "category_id": 1, "price": "123", "image_src": "img/3.png", "stock": 1, "description": "something2" }
 ###
 POST http://localhost:3001/api/products
 Content-Type: application/json
 
-{ "name": "prod4", "category_id": 1, "price": "124", "image_src": "img/4.png", "stock": 0, "description": "something4" }
+{ "name": "prod2", "category_id": 1, "price": "124", "image_src": "img/4.png", "stock": 0, "description": "something4" }
 
 ###
 GET http://localhost:3001/api/products
