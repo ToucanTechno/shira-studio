@@ -22,13 +22,14 @@ export const register = async(req: Request, res: Response) => {
 }
 
 /**
+ * @type function(Request, Response):Promise<void>)
  * Gives client a token if email and password match DB.
  * TODO: remove errors so that client is not aware of what happens in backend
- * @param req: contains email and password as a json POST request.
- * @param res: Wrong email/password, error 404 with a corresponding message.
- *             Failed validation at server side, error 400 with a corresponding message.
- *             Any other failure, error 401 with error message.
- *             On success, status 200 with corresponding message and token valid for 7days.
+ * @param {Request}  req contains email and password as a json POST request.
+ * @param {Response} res email/password, error 404 with a corresponding message.
+ *                       Failed validation at server side, error 400 with a corresponding message.
+ *                       Any other failure, error 401 with error message.
+ *                       On success, status 200 with corresponding message and token valid for 7days.
  */
 export const login = async(req: Request, res: Response) => {
     const { email, password }: IUserLogin = req.body;

@@ -1,18 +1,23 @@
-import React, {Component, useContext} from "react";
+import React, {useContext} from "react";
 import './TopNavbar.css';
 import { BsFacebook, BsInstagram, BsBasket3, BsBookmarks, BsFillPersonFill, BsGlobe2  } from "react-icons/bs";
 import MenuItem, {ItemType} from "./MenuItem";
 import {AuthContext} from "../../services/AuthContext";
+import {Link} from "react-router-dom";
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
 const TopNavbar = ({ isAdmin, logoutCallback }: { isAdmin?: boolean, logoutCallback?: () => void}) => {
     const navbar: ItemType[] = (!isAdmin) ? [
         {'name': 'home', 'link': '/', 'text': 'Home'},
-        {'name': 'about', 'link': '/about', 'text': 'About',
+        {'name': 'about', 'link': '/about', 'text': 'About'},
+        {'name': 'jewelry', 'link': '/category/jewelry', 'text': 'Jewelry',
             'submenu': [
-                {'name': 'earrings', 'link': '/earrings', 'text': 'Earrings'},
-                {'name': 'brooches', 'link': '/brooches', 'text': 'Brooches'},
+                {'name': 'earrings', 'link': '/category/jewelry/earrings', 'text': 'Earrings'},
+                {'name': 'brooches', 'link': '/category/jewelry/brooches', 'text': 'Brooches'},
+                {'name': 'bracelets', 'link': '/category/jewelry/bracelets', 'text': 'Bracelets'},
+                {'name': 'necklaces', 'link': '/category/jewelry/necklaces', 'text': 'Necklaces'},
+                {'name': 'body_jewelry', 'link': '/category/jewelry/body_jewelry', 'text': 'Body Jewelry'},
             ]
         },
     ] : [
@@ -44,7 +49,7 @@ const TopNavbar = ({ isAdmin, logoutCallback }: { isAdmin?: boolean, logoutCallb
                     <BsGlobe2/>{/*<!-- TODO: language & currency, insert into person -->*/}
                     <BsFillPersonFill/>
                     <BsBookmarks/>{/*<!-- TODO: insert into person -->*/}
-                    <BsBasket3/>
+                    <Link to="/cart"><BsBasket3/></Link>
                 </div>
                 }
                 <nav className="TopNavbarNav">

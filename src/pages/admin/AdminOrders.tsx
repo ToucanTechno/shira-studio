@@ -13,11 +13,11 @@ const AdminOrders = () => {
     }
 
     // Search and filter functionality
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
+    // const searchInput = document.getElementById('searchInput');
+    // const statusFilter = document.getElementById('statusFilter');
     const rows = document.querySelectorAll('tbody tr');
 
-    function applyFilters() {
+    /* function applyFilters() {
         // const searchText = searchInput.value.toLowerCase();
         // const selectedStatus = statusFilter.value.toLowerCase();
 
@@ -31,7 +31,7 @@ const AdminOrders = () => {
 
             // row.style.display = matchesSearch && matchesStatus ? 'table-row' : 'none';
         });
-    }
+    } */
 
     // searchInput.addEventListener('input', applyFilters);
     // statusFilter.addEventListener('change', applyFilters);
