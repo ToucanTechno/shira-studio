@@ -11,9 +11,10 @@ const productSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    category_id: {
-        type: Number,
-        required: true
+    categories: {
+        type: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Category'}]
     },
     price: {
         type: Number,
@@ -39,4 +40,4 @@ const productSchema = new mongoose.Schema({
     },
 });
 
-export const Product = mongoose.model("Product", productSchema);
+export const Product = mongoose.model<IProductDB>("Product", productSchema);

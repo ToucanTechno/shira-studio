@@ -1,6 +1,8 @@
 import {Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { Product, IProductDB } from "../models/Product";
+import { Category } from "../models/Category";
+import mongoose, { ObjectId } from "mongoose";
 
 export const getProducts = async (req: Request, res: Response) => {
     console.log("get products", req.params);
@@ -45,7 +47,7 @@ export const insertProduct = async (req: Request, res: Response) => {
         }
         const productObj = new Product({
             name: product.name,
-            category_id: product.category_id,
+            categories: product.categories, //TODO: make sure that it checks its valid ref to categories and update categories as well
             price: product.price,
             image_src: product.image_src,
             date: Date.now(),
@@ -69,7 +71,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         }
         const id = req.params['id'];
         // TODO: add validations to req.body
-        const result = await Product.updateOne({'_id': id}, req.body);
+        const result = await Product.updateOne({'_id': id}, req.body);//TODO: add check for categories change
 
         if (result && result.modifiedCount == 1) {
             res.status(200).send(`Successfully updated product with id ${id}`)
@@ -88,7 +90,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
             throw new Error("Invalid product ID");
         }
         const id = req.params['id'];
-        const result = await Product.deleteOne({ '_id': id });
+        const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
 
         if (result && result.deletedCount == 1) {
             res.status(202).send(`Successfully removed product with id ${id}`);
@@ -102,3 +104,67 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res.status(400).send(error.message);
     }
 };
+
+
+
+async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>, productObj: mongoose.Document<unknown, {}, IProductDB> & IProductDB ){
+    const promiseArr = []
+    if(actionType === 'add'){
+        for (const elm of categories){
+            const category = await Category.findOne({name:elm});//this is the double call can be saved
+            if(!productObj.categories.includes(category?.id)){//ignore if wanted to add category that already in the product 
+                productObj.categories.push(category?.id);
+                category?.products.push(productObj?.id);
+                promiseArr.push(category?.save());
+            }
+        }
+    }
+    else {
+        for(const elm of categories){
+            const category = await Category.findOne({name:elm});//this is the double call can be saved
+            const categoryIndex = productObj.categories.indexOf(category?.id)
+            if(categoryIndex !== -1){//ignore if wanted to delete product that not in the category 
+                productObj?.categories.splice(categoryIndex,1);
+                category?.products.splice(category?.products.indexOf(productObj.id),1);
+                promiseArr.push(category?.save());
+            }
+        }
+    }
+    promiseArr.push(productObj?.save());
+    Promise.all(promiseArr);
+}
+
+export const changeProdMul = async (req:Request, res:Response) => {
+    const categories:Array<any> = req.body['names'];
+    const productId = req.params['id'];
+    const actionType = req.body['action'];
+    if(!categories) {
+        res.status(400).send('missing category name');
+    }
+    else if(!productId) {
+        res.status(400).send('missing product id');
+    }
+    else if (actionType !== 'add' && actionType !== 'del') {
+        res.status(400).send('missing action type send add/del');
+    }
+    else {
+        const invalidIds = []
+        for(const category of categories){
+            if(!await Category.findOne({name:category})){
+                invalidIds.push(category)
+            }
+        }
+        if(invalidIds.length > 0){
+            res.status(400).send('couldn\'t find categories with ids: ' + invalidIds);
+        }
+        else {
+            const prodObj = await Product.findById(productId)
+            if (!prodObj){
+                res.status(400).send('could not find category with name: ' + categories);
+                return;
+            }
+            await changeProdMulLogic(actionType,categories,prodObj)
+            res.status(200).send('change successful')
+        }
+    }
+}

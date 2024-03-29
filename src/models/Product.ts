@@ -1,7 +1,9 @@
+import {ICategory} from "../../backend/src/models/Category"
+import mongoose from 'mongoose';
 export interface IProduct {
     product_id: string;
     name: string;
-    category_id: string;
+    categories: Array<ICategory | mongoose.Schema.Types.ObjectId>;
     price: number;
     image_src: string;
     created?: Date;
