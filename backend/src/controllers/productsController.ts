@@ -11,9 +11,12 @@ export const getProducts = async (req: Request, res: Response) => {
         // Forbid limit=0 since it requests all entries
         const limit = Math.max(1, Math.min(parseInt(req.query["limit"] as string) || 10, 50));
         // TODO: add sort as a parameter
-        const products = await Product.find().sort({ date: -1 }).skip(skip).limit(limit);
+        const [products, productsCount] = await Promise.all([
+            Product.find().sort({ date: -1 }).skip(skip).limit(limit),
+            Product.countDocuments()
+        ]);
 
-        res.status(200).send(products);
+        res.status(200).send({ products: products, total: productsCount });
     } catch (error: any) {
         res.status(500).send(error.message);
     }
@@ -73,7 +76,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         // TODO: add validations to req.body
         const result = await Product.updateOne({'_id': id}, req.body);//TODO: add check for categories change
 
-        if (result && result.modifiedCount == 1) {
+        if (result && result.modifiedCount === 1) {
             res.status(200).send(`Successfully updated product with id ${id}`)
         } else {
             res.status(304).send(`Product with id: ${id} not updated`);
@@ -92,7 +95,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
         const id = req.params['id'];
         const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
 
-        if (result && result.deletedCount == 1) {
+        if (result && result.deletedCount === 1) {
             res.status(202).send(`Successfully removed product with id ${id}`);
         } else if (!result) {
             res.status(400).send(`Failed to remove product with id ${id}`);

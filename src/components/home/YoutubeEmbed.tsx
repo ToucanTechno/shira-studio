@@ -5,7 +5,7 @@ interface YoutubeProps {
     embedID: string;
     className?: string;
     customBorder?: boolean;
-};
+}
 
 class YoutubeEmbed extends Component<YoutubeProps> {
     private readonly embedID: string;

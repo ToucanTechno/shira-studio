@@ -82,14 +82,14 @@ const PanelLogin = (props: any) => {
         // TODO: should we store accountData.email too?
         const token = JSON.stringify(accountData.token);
         localStorage.setItem("authTokens", token);
-        console.log("navigate", localStorage.getItem("authTokens"));
+        // console.log("navigate", localStorage.getItem("authTokens"));
         setAuthTokens(token);
         navigate('/control-panel/');
     }
 
     useEffect(() => {
         if (user) {
-            console.log("Redirecting back to control-panel with user:", user);
+            // console.log("Redirecting back to control-panel with user:", user);
             navigate('/control-panel/');
         }
     }, [user]);

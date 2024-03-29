@@ -5,6 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import App from "./App";
 import PanelApp from "./pages/admin/PanelApp";
+import {ChakraProvider} from "@chakra-ui/react";
 
 const router = createBrowserRouter([
     { path: "control-panel/*", Component: PanelApp},
@@ -17,7 +18,9 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <ChakraProvider>
+            <RouterProvider router={router} />
+        </ChakraProvider>
     </React.StrictMode>
 );
 

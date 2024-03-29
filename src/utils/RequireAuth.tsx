@@ -7,13 +7,13 @@ const RequireAuth = () => {
     let { authTokens } = useContext(AuthContext);
     /* TODO improve check */
     if (authTokens) {
-        console.log("Trying to decode:", authTokens)
+        // console.log("Trying to decode:", authTokens)
         const decodedUser: any = jwtDecode(authTokens || "")
         if (decodedUser && decodedUser["role"] === "admin") {
             return <Outlet />
         }
     }
-    console.log("Navigating back to login");
+    // console.log("Navigating back to login");
     return <Navigate to="/control-panel/login" />;
 };
 

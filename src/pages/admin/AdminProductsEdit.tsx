@@ -7,13 +7,16 @@ const AdminProductsEdit = () => {
     const params = useParams();
     const isEdit = ('id' in params);
     let [product, setProduct]: [null | IProduct, any] = useState(null);
-    const productID = useRef<HTMLInputElement>(null);
-    const productName = useRef<HTMLInputElement>(null);
-    const productCategories = useRef<HTMLSelectElement>(null);
-    const productPrice = useRef<HTMLInputElement>(null);
-    const productImage = useRef<HTMLInputElement>(null);
-    const productStock = useRef<HTMLInputElement>(null);
-    const productDescription = useRef<HTMLTextAreaElement>(null);
+    const productRefs = {
+        ID: useRef<HTMLInputElement>(null),
+        name: useRef<HTMLInputElement>(null),
+        categories: useRef<HTMLSelectElement>(null),
+        price: useRef<HTMLInputElement>(null),
+        image: useRef<HTMLInputElement>(null),
+        stock: useRef<HTMLInputElement>(null),
+        description: useRef<HTMLTextAreaElement>(null),
+        submit: useRef<HTMLButtonElement>(null)
+    }
     useEffect(() => {
         if (isEdit) {
             axios.get(`http://localhost:3001/api/products/${params['id']}`)
@@ -26,21 +29,53 @@ const AdminProductsEdit = () => {
                     console.error(error);
                 });
         }
-    }, [])
+    }, [isEdit, params])
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        let product = {
-            productID: productID.current?.value,
-            productName: productName.current?.value,
-            categories: productCategories.current ?
-                Array.from(productCategories.current.selectedOptions, option => option.value) :
+        let update = {
+            productID: productRefs.ID.current?.value,
+            productName: productRefs.name.current?.value,
+            categories: productRefs.categories.current ?
+                Array.from(productRefs.categories.current.selectedOptions, option => option.value) :
                 [],
-            price: productPrice.current?.value,
-            image: productImage.current?.value,
-            stock: productStock.current?.value,
-            description: productDescription.current?.value
+            price: productRefs.price.current?.value,
+            image: productRefs.image.current?.value,
+            stock: productRefs.stock.current?.value,
+            description: productRefs.description.current?.value
         };
-        console.log(product);
+        if (product && update.image === "") {
+            // keep image
+            update.image = product['image_src']
+        }
+        // TODO: select categories
+        console.log(update);
+        let updateEntry: IProduct = {
+            product_id: update.productID as string,
+            name: update.productName as string,
+            category_id: update.categories[0], // TODO: update IProduct to include multiple categories
+            price: parseInt(update.price as string),
+            image_src: update.image as string,
+            description: update.description as string,
+            stock: parseInt(update.stock as string)
+        };
+
+        if (isEdit) {
+            const updateURL = `http://localhost:3001/api/products/${params['id']}`;
+            axios.put<IProduct>(updateURL, updateEntry).then(response => {
+                console.log(response);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        } else {
+            const updateURL = `http://localhost:3001/api/products/`;
+            axios.post<IProduct>(updateURL, updateEntry).then(response => {
+                console.log(response);
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        }
         event.preventDefault();
     }
 
@@ -56,7 +91,8 @@ const AdminProductsEdit = () => {
                                name="productID"
                                defaultValue={product ? product['_id'] : ''}
                                required
-                               ref={productID}/>
+                               disabled
+                               ref={productRefs.ID}/>
                     </>
                 }
 
@@ -66,10 +102,11 @@ const AdminProductsEdit = () => {
                        name="productName"
                        defaultValue={product ? product['name'] : ''}
                        required
-                       ref={productName}/>
+                       ref={productRefs.name}/>
 
+                {/* TODO: Choose categories as in DB */}
                 <label htmlFor="categoriesDropdown">קטגוריות:</label>
-                <select id="categoryDropdown" multiple ref={productCategories}>
+                <select id="categoryDropdown" multiple ref={productRefs.categories}>
                     <option value="category1">Category 1</option>
                     <option value="category2">Category 2</option>
                 </select>
@@ -80,12 +117,12 @@ const AdminProductsEdit = () => {
                        name="price"
                        step="10"
                        defaultValue={product ? product['price'] : ''}
-                       ref={productPrice}
+                       ref={productRefs.price}
                        required/>
 
                 <label htmlFor="picture">תמונה:</label>
-                <input type="file" id="picture" name="picture" required={!isEdit} ref={productImage}/>
-                { product ? <img className="pictureImage" src={product['image_src']} /> : ''}
+                <input type="file" id="picture" name="picture" required={!isEdit} ref={productRefs.image}/>
+                { product ? <img className="pictureImage" alt={product['name']} src={product['image_src']} /> : ''}
 
                 <label htmlFor="stock">מלאי:</label>
                 <input type="number"
@@ -93,17 +130,17 @@ const AdminProductsEdit = () => {
                        name="stock"
                        defaultValue={product ? product['stock'] : ''}
                        required
-                       ref={productStock}/>
+                       ref={productRefs.stock}/>
 
                 <label htmlFor="description">תיאור המוצר:</label>
                 <textarea id="description"
                           name="description"
                           rows={4}
                           defaultValue={product ? product['description'] : ''}
-                          ref={productDescription}>
+                          ref={productRefs.description}>
                 </textarea>
 
-                <button type="submit">הוספת מוצר</button>
+                <button type="submit" ref={productRefs.submit}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</button>
             </form>
         </div>
     )

@@ -1,9 +1,9 @@
-import React, {useContext} from "react";
+import React from "react";
 import {Route, Routes, useLocation} from "react-router-dom";
 import PanelLogin from "./PanelLogin";
 import AdminStatistics from "./AdminStatistics";
 import RequireAuth from "../../utils/RequireAuth";
-import {AuthContext, AuthProvider} from "../../services/AuthContext";
+import {AuthProvider} from "../../services/AuthContext";
 import AdminCategories from "./AdminCategories";
 import AdminProducts from "./AdminProducts";
 import AdminOrders from "./AdminOrders";
@@ -15,7 +15,6 @@ import AdminProductsDelete from "./AdminProductsDelete";
 
 const PanelApp = () => {
     const { pathname } = useLocation();
-    console.log(pathname)
     return (
         <AuthProvider>
             {!pathname.startsWith("/control-panel/login") &&

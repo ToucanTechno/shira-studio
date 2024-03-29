@@ -11,7 +11,7 @@ type ItemType = {
 interface MenuItemProps {
     item: ItemType;
     menuRefs: {[key: string] : React.RefObject<HTMLUListElement>};
-};
+}
 
 class MenuItem extends Component<MenuItemProps> {
     private item: ItemType;
