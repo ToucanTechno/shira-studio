@@ -2,6 +2,7 @@ import {useParams} from "react-router-dom";
 import React, {useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
 import axios from "axios";
+import map from "core-js/fn/array/map";
 
 const AdminProductsEdit = () => {
     const params = useParams();
@@ -52,7 +53,7 @@ const AdminProductsEdit = () => {
         let updateEntry: IProduct = {
             product_id: update.productID as string,
             name: update.productName as string,
-            category_id: update.categories[0], // TODO: update IProduct to include multiple categories
+            categories: update.categories, // TODO: update IProduct to include multiple categories
             price: parseInt(update.price as string),
             image_src: update.image as string,
             description: update.description as string,

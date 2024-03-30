@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 export interface IProduct {
     product_id: string;
     name: string;
-    categories: Array<ICategory | mongoose.Schema.Types.ObjectId>;
+    categories: Array<ICategory | mongoose.Schema.Types.ObjectId | string>;
     price: number;
     image_src: string;
     created?: Date;
