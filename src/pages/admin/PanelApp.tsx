@@ -8,17 +8,17 @@ import AdminCategories from "./AdminCategories";
 import AdminProducts from "./AdminProducts";
 import AdminOrders from "./AdminOrders";
 import AdminUsers from "./AdminUsers";
-import TopNavbar from "../../components/common/TopNavbar";
 import './PanelApp.css';
 import AdminProductsEdit from "./AdminProductsEdit";
 import AdminProductsDelete from "./AdminProductsDelete";
+import TopAdminNavbar from "./TopAdminNavbar";
 
 const PanelApp = () => {
     const { pathname } = useLocation();
     return (
         <AuthProvider>
             {!pathname.startsWith("/control-panel/login") &&
-            <TopNavbar isAdmin={true}/>
+            <TopAdminNavbar/>
             }
             <Routes>
                 <Route element={<RequireAuth/>}>

@@ -4,16 +4,17 @@ import axios from 'axios'
 import {IProduct} from "../../models/Product";
 
 const AdminProducts = () => {
-    let [page] = useState(1);  // TODO: add setPage
+    let [page] = useState(0);  // TODO: add setPage
     const navigate = useNavigate();
-    let [categories, setCategories]: [IProduct[], any] = useState([]);
+    let [products, setProducts]: [IProduct[], any] = useState([]);
     const productsPerPage = 10;
     useEffect(() => {
         let skip = page * productsPerPage;
-        axios.get(`http://localhost:3001/api/products?skip=${skip}&limit=${page}`)
+        axios.get(`http://localhost:3001/api/products?skip=${skip}&limit=${productsPerPage}`)
             .then(response => {
                 // Process the response data
-                setCategories(response.data);
+                console.log(response.data);
+                setProducts(response.data.products);
             })
             .catch(error => {
                 // Handle any errors
@@ -43,7 +44,8 @@ const AdminProducts = () => {
             </tr>
             </thead>
             <tbody>
-            { categories.map((item: IProduct) => {
+            { products.length > 0 && products.map((item: IProduct) => {
+                console.log(item);
                 return (
                 <tr key={item._id}>
                     <td><img src="necklace.jpg" alt="Gold Necklace"/></td>

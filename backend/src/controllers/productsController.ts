@@ -5,7 +5,7 @@ import { Category } from "../models/Category";
 import mongoose, { ObjectId } from "mongoose";
 
 export const getProducts = async (req: Request, res: Response) => {
-    console.log("get products", req.params);
+    console.log("get products", req.params, req.query['skip'], req.query['limit']);
     try {
         const skip = Math.max(0, parseInt(req.query["skip"] as string) || 0);
         // Forbid limit=0 since it requests all entries
@@ -24,7 +24,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const getSingleProduct = async (req: Request, res: Response) => {
     const id = req.params['id'];
-    console.log("get single product");
+    console.log("get single product", req.params);
     try {
         if (!id) {
             throw new Error("Missing product ID");
