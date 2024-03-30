@@ -1,10 +1,7 @@
-import React, {useEffect, useState} from "react";
-import ProductSampleImage from "../assets/images/products/סיכת-אריזה.webp";
+import React, {useState} from "react";
 import {Link} from "react-router-dom";
-import {IProduct} from "../models/Product";
 import {useInfiniteScroll} from "../utils/useInfiniteScroll";
 import {Loader} from "../components/infinite_scroll/Loader";
-import axios from "axios";
 
 interface ProductCategoryInfo {
     category_name: string;
@@ -28,20 +25,8 @@ export const ProductCategory = () => {
         dynamicProducts,
         isLastPage
     } = useInfiniteScroll([]);
+    /* TODO: use productsPerPage */
     const productsPerPage = 10;
-
-    // useEffect(() => {
-    //     let skip = page * productsPerPage;
-    //     axios.get(`http://localhost:3001/api/products?skip=${skip}&limit=${page}`)
-    //         .then(response => {
-    //             // Process the response data
-    //             setProducts(response.data);
-    //         })
-    //         .catch(error => {
-    //             // Handle any errors
-    //             console.error(error);
-    //         });
-    // }, [page]);
 
     return (
         <div className="container">
@@ -49,7 +34,7 @@ export const ProductCategory = () => {
             <div className="gallery">
                 {dynamicProducts.map((product) => (
                     <div className="gallery-item" key={product.name}>
-                        <Link to={"/products/" + product.product_id}>
+                        <Link to={"/product/" + product._id}>
                             <img src={product.image_src} alt={product.name}/>
                             {product.description}
                         </Link>
