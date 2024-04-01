@@ -26,8 +26,9 @@ const HoverMenuItem = (props: HoverMenuItemProps) => {
     }
 
     return (
-        <Menu offset={[0, 0]} isOpen={isOpen} key={props.item.name + '-item'}>
+        <Menu offset={[0, 0]} isOpen={isOpen}>
             <MenuButton as={Button}
+                        size='lg'
                         variant='ghost'
                         border='0'
                         color='white'
@@ -46,7 +47,11 @@ const HoverMenuItem = (props: HoverMenuItemProps) => {
                           borderRadius='0'>
                     {props.item.submenu?.map((subItem) => {
                         return (
-                            <MenuSubItem closeHandle={onClose} item={subItem} parentItem={props.item}></MenuSubItem>
+                            <MenuSubItem
+                                key={props.item.name + '-' + subItem.name + '-item'}
+                                closeHandle={onClose}
+                                item={subItem}
+                                parentItem={props.item}></MenuSubItem>
                         );
                     })}
                 </MenuList>

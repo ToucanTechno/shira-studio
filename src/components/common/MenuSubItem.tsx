@@ -15,7 +15,6 @@ const MenuSubItem = (props: MenuSubItemProps ) => {
     return (
         <MenuItem bg='black'
                   color='white'
-                  key={props.parentItem.name + '-' + props.item.name + '-item'}
                   onClick={() => {props.closeHandle(); navigate(props.item.link)}}>
             {props.item.text}
         </MenuItem>

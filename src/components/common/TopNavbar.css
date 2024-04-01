@@ -41,50 +41,50 @@
     width: 100%;
 }
 
-.TopNavbarList{
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: stretch;
-    padding-inline-start: 0; /* override browser default */
-    margin: 1vw 0
-}
+/*.TopNavbarList{*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: flex-start;*/
+/*    align-items: stretch;*/
+/*    padding-inline-start: 0; !* override browser default *!*/
+/*    margin: 1vw 0*/
+/*}*/
 
-.TopNavbarList li {
-    list-style: none;
-    padding: 1vw; /* menuBorder */
-    font-size: 2vw;
-    font-weight: normal;
-    position: relative;
-}
+/*.TopNavbarList li {*/
+/*    list-style: none;*/
+/*    padding: 1vw; !* menuBorder *!*/
+/*    font-size: 2vw;*/
+/*    font-weight: normal;*/
+/*    position: relative;*/
+/*}*/
 
-.TopNavbarList li a {
-    text-decoration: none;
-    color: white;
-}
+/*.TopNavbarList li a {*/
+/*    text-decoration: none;*/
+/*    color: white;*/
+/*}*/
 
-.TopNavbarSub {
-    display: none;
-    position: absolute;
-    margin-top: 1vw; /* menuBorder */
-    padding: 0;
-    right: 0;
-    background-color: black;
-    z-index: 2;
-}
+/*.TopNavbarSub {*/
+/*    display: none;*/
+/*    position: absolute;*/
+/*    margin-top: 1vw; !* menuBorder *!*/
+/*    padding: 0;*/
+/*    right: 0;*/
+/*    background-color: black;*/
+/*    z-index: 2;*/
+/*}*/
 
-.TopNavbarSub li {
-    font-size: 1.4vw;
-    padding: 10px;
-}
+/*.TopNavbarSub li {*/
+/*    font-size: 1.4vw;*/
+/*    padding: 10px;*/
+/*}*/
 
-.TopNavbarSocial, .TopNavbarActions, .TopNavbarSide {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: stretch;
-    font-size: 3.5vw;
-}
+/*.TopNavbarSocial, .TopNavbarActions, .TopNavbarSide {*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*    align-items: stretch;*/
+/*    !*font-size: 3.5vw;*!*/
+/*}*/
 
 .TopNavbarActions  {
     margin-inline-end: 10px;
@@ -95,7 +95,7 @@
 }
 
 .TopNavbarSocial > *, .TopNavbarActions > * {
-    padding: .5vw;
+    /*padding: .5vw;*/
     margin: 0;
     align-self: center;
     color: white;
