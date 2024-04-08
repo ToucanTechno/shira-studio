@@ -6,19 +6,42 @@ import mongoose, { ObjectId } from "mongoose";
 
 export const insertCategory = async (req: Request, res: Response) => {
     const name:string = req.body['name'];
+    const parent = req.body['parent'] ? req.body['parent'] : '' //'' for main parent category
+    console.log(parent)
     if (name === undefined ) {
-        res.status(400).send('missing category name')
+        res.status(400).send('missing category name');
         return    
     }
     else if(await Category.findOne({name:name})) {
-        res.status(400).send('category already exist')
+        res.status(400).send('category already exist');
         return    
     }
-    const categoryObj = new Category({name: name});
+    else if(parent !== '' && !await Category.findOne({name:parent})){
+        res.status(400).send('no parent category');
+        return
+    }
+    const categoryObj = new Category({name: name, parent:parent});
     const result = await categoryObj.save();
     res.status(201).send({message: "category created successfully.", id:result._id});
 };
 
+export const getAllCategories = async (_req:Request, res:Response) => {
+    const categories = (await Category.find()).map((category) => category.name)//find() is ok here because categories number is small
+    res.status(200).send(categories);
+}
+
+//to get the main parent category need to send None as name
+export const getCategoryByParent = async (req: Request, res: Response) => {
+    let name = req.params['name'];
+    if(name === undefined){
+        res.status(400).send('missing category name')
+        return;
+    }
+    if(name === 'None')//this is because cant have /parent/ to get main parent categories
+        name = '';
+    const categories = (await Category.find({parent:name})).map((category) => category.name)
+    res.status(200).send(categories);
+}
 
 async function changeCatMulLogic(actionType:string, products:Array<ObjectId>, categoryObj: mongoose.Document<unknown, {}, ICategory> & ICategory ){
     const promiseArr = []
