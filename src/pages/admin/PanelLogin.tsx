@@ -9,7 +9,7 @@ const PanelLogin = (props: any) => {
     const [emailError, setEmailError] = useState('')
     const [passwordError, setPasswordError] = useState('')
     const [loginError, setLoginError] = useState('')
-    const { setAuthTokens, user } = useContext(AuthContext)
+    const { authTokens, setAuthTokens} = useContext(AuthContext)
     const navigate = useNavigate()
 
     const onLogin = () => {
@@ -78,7 +78,6 @@ const PanelLogin = (props: any) => {
 
 // Log in a user using email and password
     const logIn = (accountData: {message: string, token: string}) => {
-        //setAuthTokens(accountData.token);
         // TODO: should we store accountData.email too?
         const token = JSON.stringify(accountData.token);
         localStorage.setItem("authTokens", token);
@@ -88,11 +87,11 @@ const PanelLogin = (props: any) => {
     }
 
     useEffect(() => {
-        if (user) {
+        if (authTokens) {
             // console.log("Redirecting back to control-panel with user:", user);
             navigate('/control-panel/');
         }
-    }, [user]);
+    }, [authTokens]);
 
     return (
         <div className="login-container">

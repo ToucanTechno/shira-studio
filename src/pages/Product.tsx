@@ -1,47 +1,85 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    Card,
-    CardBody,
-    Flex,
+    Breadcrumb, BreadcrumbItem, BreadcrumbLink,
+    Card, CardBody,
+    Flex, Wrap,
     Heading,
     Image,
-    Wrap,
     Text,
     Button,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    NumberIncrementStepper, NumberDecrementStepper
+    NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
+    useConst,
+    PopoverTrigger, Popover,
+    Portal,
+    PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, PopoverFooter, Link, Icon
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, {AxiosInstance} from "axios";
 import {useParams} from "react-router-dom";
 import {IProduct} from "../models/Product";
+import {AuthContext} from "../services/AuthContext";
+import {BsCartCheckFill} from "react-icons/bs";
 
-const Product = () => {
+const Product = (props: any) => {
     const [product, setProduct] = useState({} as IProduct);
     const [itemsCount, setItemsCount] = useState(1);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const params = useParams();
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const { guestData, setGuestData} = useContext(AuthContext)
 
     useEffect(() => {
-        axios.get(`http://localhost:3001/api/products/${params.product}`)
-            .then(response => {
-                // Process the response data
-                console.log(response.data);
-                setProduct(response.data);
-            })
-            .catch(error => {
+        api.get(`/products/${params.product}`).then((response: any) => {
+            // Process the response data
+            if (response.data.stock === 0) {
+                setItemsCount(0);
+            }
+            setProduct(response.data);
+        }).catch((error: any) => {
                 // Handle any errors
                 console.error(error);
-            });
-    }, []);
+            }
+        );
+    }, [api]);
 
     const handleItemsCountChange = (_: string, itemsCount: number) => {
         setItemsCount(itemsCount);
     };
+
+    const handleAddToCart = async (event: any) => {
+        let cartID = localStorage.getItem("cartID");
+        setIsAddingToCart(true);
+        // TODO: set userId in request to avoid creating double cart
+        if (cartID === null) {
+            await api.post(`/cart`,
+                {})
+                .then(response => {
+                    console.log('Done creating cart', response)
+                    cartID = response.data['id'];
+                    localStorage.setItem("cartID", cartID as string);
+                    setGuestData({guestID: guestData.guestID, cartID: cartID});
+                })
+                .catch(error => {
+                    // Handle any errors
+                    console.error(error);
+                });
+        }
+
+        if (cartID === null) {
+            console.log('exiting');
+            return
+        }
+        console.log("Adding product", params.product, itemsCount);
+        api.put(`/cart/${cartID}`, {productId: params.product, amount: itemsCount})
+            .then(response => {
+                console.log(response);
+                /* TODO: update stock */
+                //setItemsCount(product.stock - itemsCount)
+                setIsAddingToCart(false);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
 
     return (
         <Flex m={4} direction='column'>
@@ -82,8 +120,34 @@ const Product = () => {
                             <Text fontSize='md'>{product.price}₪</Text>
                             <Text flexGrow='1' fontSize='md'>{product.description}</Text>
                             <Flex direction='row'>
-                                <Button size='lg' me={2} colorScheme='blue'>הוסף לסל</Button>
-                                <NumberInput onChange={handleItemsCountChange} allowMouseWheel dir='ltr' size='lg' maxW={20} defaultValue={1} min={0} max={product.stock}>
+                                <Popover>
+                                    <PopoverTrigger>
+                                        <Button isDisabled={isAddingToCart}
+                                                onClick={handleAddToCart}
+                                                size='lg'
+                                                me={2}
+                                                colorScheme='blue'>הוסף לסל</Button>
+                                    </PopoverTrigger>
+                                    <Portal>
+                                        <PopoverContent>
+                                            <PopoverArrow />
+                                            <PopoverCloseButton />
+                                            <PopoverBody dir="ltr">
+                                                { /* TODO: on hover color = black */ }
+                                                <Link href='/cart'><Icon boxSize={8} aria-label='Cart' as={BsCartCheckFill} color='gray' /></Link>
+                                                <Text>Products: {product.name} x {itemsCount} added successfully!</Text>
+                                            </PopoverBody>
+                                        </PopoverContent>
+                                    </Portal>
+                                </Popover>
+                                <NumberInput onChange={handleItemsCountChange}
+                                             allowMouseWheel
+                                             dir='ltr'
+                                             size='lg'
+                                             maxW={20}
+                                             value={itemsCount}
+                                             min={0}
+                                             max={product.stock}>
                                     <NumberInputField />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />
