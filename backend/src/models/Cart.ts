@@ -17,8 +17,7 @@ export interface ICart {
 const cartSchema = new mongoose.Schema<ICart>({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        unique: true
+        ref:'User'
     },
     products: {
         type: Map,
