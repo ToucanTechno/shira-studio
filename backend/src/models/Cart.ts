@@ -1,14 +1,14 @@
 import mongoose, { Types } from 'mongoose';
 import { IProductDB } from './Product';
 
-export interface CartProduct {
+export interface ProductOrder {//maybe have better name used both in cart and in orders
     product:IProductDB | string;
     amount:number;
 };
 
 export interface ICart {
     userId?: Types.ObjectId;
-    products: Map<string , CartProduct>
+    products: Map<string , ProductOrder>
     createdAt?: Date 
     updatedAt?: Date //TODO: add accessedAt so we can delete cart more gracefully 
     lock: Boolean

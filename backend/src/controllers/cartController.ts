@@ -1,8 +1,25 @@
 import {Request, Response } from "express";
 import { Cart, ICart } from "../models/Cart";
-import { Product } from "../models/Product";
+import {  Product } from "../models/Product";
 import mongoose, { isValidObjectId } from "mongoose";
 
+
+
+export const getCart = async (req:Request,res:Response) => {
+    const cartId = req.params['id'];
+    if(!cartId){
+        res.status(400).send('Missing cart id');
+        return;
+    }
+    let cart = (await Cart.findById(cartId).populate('products.$*.product'))
+    cart?.products.forEach((prod,_key) => {
+        delete (prod.product as any)._doc.__v
+        delete (prod as any)._doc._id
+    });
+    delete (cart as any)._doc.__v
+    res.status(200).send(cart)
+
+}
 
 export const getCartSummery = async (req: Request, res: Response) => {
     const cartId = req.params['id'];
