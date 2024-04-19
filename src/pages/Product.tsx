@@ -39,6 +39,14 @@ const Product = (props: any) => {
                 console.error(error);
             }
         );
+        console.log(guestData.cartID);
+        if (guestData.cartID) {
+            api.get(`/cart/${guestData.cartID}`).then(response => {
+                console.log(response);
+            }).catch(error => {
+                console.log("error:", error);
+            })
+        }
     }, [api]);
 
     const handleItemsCountChange = (_: string, itemsCount: number) => {
