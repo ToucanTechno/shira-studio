@@ -3,8 +3,10 @@ import { IProduct } from '../../../src/models/Product';
 
 export interface ICategory {
     name: string;
+    text: string;
     parent: string
     products: Array<IProduct | mongoose.Schema.Types.ObjectId>
+    _id?: string;
 }
 
 const CategorySchema = new mongoose.Schema({
@@ -12,6 +14,9 @@ const CategorySchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
+    },
+    text: {
+        type: String,
     },
     parent: {
         type: String

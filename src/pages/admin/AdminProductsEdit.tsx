@@ -1,13 +1,32 @@
-import {useParams} from "react-router-dom";
+import {Form, useParams} from "react-router-dom";
 import React, {useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
-import axios from "axios";
-import map from "core-js/fn/array/map";
+import axios, {AxiosInstance} from "axios";
+import Select, {MultiValue} from 'react-select';
+import {
+    Button,
+    Flex,
+    FormControl,
+    FormLabel,
+    Heading,
+    Input, NumberDecrementStepper, NumberIncrementStepper,
+    NumberInput,
+    NumberInputField, NumberInputStepper,
+    Textarea, useConst
+} from "@chakra-ui/react";
+import FileUpload from "../../components/common/FileUpload";
+import {ICategory} from "../../../backend/src/models/Category";
+
+type IProductWCat = IProduct & {parsedCategories: {value: string, label: string}[]};
 
 const AdminProductsEdit = () => {
     const params = useParams();
     const isEdit = ('id' in params);
-    let [product, setProduct]: [null | IProduct, any] = useState(null);
+    const [product, setProduct] =
+        useState<IProductWCat | null>(null);
+    const [categories, setCategories] =
+        useState<{value: string, label: string}[]>([]);
+    const [uploadedImage, setUploadedImage] = useState("");
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
@@ -18,17 +37,41 @@ const AdminProductsEdit = () => {
         description: useRef<HTMLTextAreaElement>(null),
         submit: useRef<HTMLButtonElement>(null)
     }
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+
     useEffect(() => {
         if (isEdit) {
-            axios.get(`http://localhost:3001/api/products/${params['id']}`)
+            api.get(`/products/${params['id']}`)
                 .then(response => {
                     // Process the response data
+                    let product: IProductWCat = response.data;
+                    for (const category of product.categories) {
+                        product.parsedCategories.push({
+                            value: (category as ICategory).name,
+                            label: (category as ICategory).text
+                        });
+                    }
                     setProduct(response.data);
                 })
                 .catch(error => {
                     // Handle any errors
                     console.error(error);
                 });
+            api.get(`/categories`).then(response => {
+                let categoriesSkeleton: {[key: string]: ICategory} = {} ;
+                for (const category of response.data) {
+                    categoriesSkeleton[category.name] = category;
+                }
+                if (response.data.length == 0) {
+                    return;
+                }
+                console.log(categoriesSkeleton);
+                setCategories(Object.keys(categoriesSkeleton as {[key: string]: ICategory})
+                    .map(key => {
+                        console.log(key, categoriesSkeleton[key])
+                        return {"value": categoriesSkeleton[key]['name'], "label": categoriesSkeleton[key]['text']}
+                    }));
+            })
         }
     }, [isEdit, params])
 
@@ -80,70 +123,112 @@ const AdminProductsEdit = () => {
         event.preventDefault();
     }
 
+    const handleSelectCategories = (el: MultiValue<{ value: string, label: string }>) => {
+        console.log(el);
+    };
+
+    const handleImageUpload = (files: FileList) => {
+        console.log(files);
+        if (files !== null && files.length > 0) {
+            setUploadedImage(URL.createObjectURL(files[0]));
+        }
+    }
+
     return (
-        <div className="content">
-            <h1>{(isEdit) ? "Edit Product" : "Add Product"}</h1>
-            <form onSubmit={handleSubmit}>
+        <Flex direction='column' m={4}>
+            <Heading as='h1' size='xl' mb={2}>{(isEdit) ? "עריכת מוצר" : "הוספת מוצר"}</Heading>
+            <Form onSubmit={handleSubmit}>
                 {isEdit &&
-                    <>
-                        <label htmlFor="productID">מזהה מוצר</label>
-                        <input type="text"
+                    <FormControl>
+                        <FormLabel htmlFor="productID">מזהה מוצר</FormLabel>
+                        <Input type="text"
                                id="productID"
                                name="productID"
                                defaultValue={product ? product['_id'] : ''}
                                required
                                disabled
                                ref={productRefs.ID}/>
-                    </>
+                    </FormControl>
                 }
 
-                <label htmlFor="productName">שם המוצר:</label>
-                <input type="text"
-                       id="productName"
-                       name="productName"
-                       defaultValue={product ? product['name'] : ''}
-                       required
-                       ref={productRefs.name}/>
+                <FormControl>
+                    <FormLabel htmlFor="productName">שם המוצר:</FormLabel>
+                    <Input type="text"
+                           id="productName"
+                           name="productName"
+                           defaultValue={product ? product['name'] : ''}
+                           required
+                           ref={productRefs.name}
+                           size='lg'/>
+                </FormControl>
 
                 {/* TODO: Choose categories as in DB */}
-                <label htmlFor="categoriesDropdown">קטגוריות:</label>
-                <select id="categoryDropdown" multiple ref={productRefs.categories}>
-                    <option value="category1">Category 1</option>
-                    <option value="category2">Category 2</option>
-                </select>
+                <FormControl>
+                <FormLabel htmlFor="categoriesDropdown">קטגוריות:</FormLabel>
+                <Select id="categoryDropdown"
+                        isMulti
+                        isSearchable
+                        onChange={handleSelectCategories}
+                        defaultValue={product?.parsedCategories}
+                        options={categories}/>
+                </FormControl>
 
-                <label htmlFor="price">מחיר:</label>
-                <input type="number"
-                       id="price"
-                       name="price"
-                       step="10"
-                       defaultValue={product ? product['price'] : ''}
-                       ref={productRefs.price}
-                       required/>
+                <FormControl>
+                <FormLabel htmlFor="price">מחיר:</FormLabel>
+                    <NumberInput defaultValue={product ? product['price'] : 0}
+                                 min={0}
+                                 max={99999}
+                                 ref={productRefs.price}
+                                 isRequired
+                                 name='price'
+                                 dir='ltr'
+                                 w='140px'>
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </FormControl>
 
-                <label htmlFor="picture">תמונה:</label>
-                <input type="file" id="picture" name="picture" required={!isEdit} ref={productRefs.image}/>
-                { product ? <img className="pictureImage" alt={product['name']} src={product['image_src']} /> : ''}
+                <FileUpload defaultImage={(product) ? product['image_src'] : ""}
+                            handleUpload={handleImageUpload}
+                            isRequired={!isEdit}
+                            name="picture">
+                    העלאת תמונה
+                </FileUpload>
 
-                <label htmlFor="stock">מלאי:</label>
-                <input type="number"
-                       id="stock"
-                       name="stock"
-                       defaultValue={product ? product['stock'] : ''}
-                       required
-                       ref={productRefs.stock}/>
+                <FormControl>
+                <FormLabel htmlFor="stock">מלאי:</FormLabel>
+                    <NumberInput defaultValue={product ? product['stock'] : 1}
+                                 min={0}
+                                 max={999}
+                                 ref={productRefs.stock}
+                                 isRequired
+                                 name='stock'
+                                 dir='ltr'
+                                 w='140px'>
+                        <NumberInputField/>
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </FormControl>
 
-                <label htmlFor="description">תיאור המוצר:</label>
-                <textarea id="description"
+                <FormControl>
+                <FormLabel htmlFor="description">תיאור המוצר:</FormLabel>
+                <Textarea id="description"
                           name="description"
                           rows={4}
                           defaultValue={product ? product['description'] : ''}
                           ref={productRefs.description}>
-                </textarea>
+                </Textarea>
+                </FormControl>
 
-                <button type="submit" ref={productRefs.submit}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</button>
-            </form>
-        </div>
+                <Button type="submit" mt={2} ref={productRefs.submit}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</Button>
+            </Form>
+        </Flex>
     )
 };
 

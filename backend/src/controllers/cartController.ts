@@ -20,7 +20,7 @@ export const getCart = async (req:Request,res:Response) => {
     res.status(200).send(cart)
 }
 
-export const getCartSummery = async (req: Request, res: Response) => {
+export const getCartSummary = async (req: Request, res: Response) => {
     const cartId = req.params['id'];
     try {
         if (!cartId) {
@@ -117,7 +117,7 @@ export const updateCart = async (req: Request, res:Response) => {
     }
 }
 
-async function controlCart(cart: mongoose.Document<unknown,{},ICart> & ICart, lock:Boolean): Promise<string>{
+async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & ICart, lock:Boolean): Promise<string>{
     const session = await Cart.startSession();
     session.startTransaction();
     cart.$session(session);
@@ -139,7 +139,7 @@ async function controlCart(cart: mongoose.Document<unknown,{},ICart> & ICart, lo
     return 'success';
 }
 
-export const cartAction = async(req: Request, res: Response) => {
+export const cartLockAction = async(req: Request, res: Response) => {
     const cartId = req.params['id'];
     const lock = req.body['lock'];
     console.log("lock is " + lock)
@@ -166,12 +166,15 @@ export const cartAction = async(req: Request, res: Response) => {
         else if(!cart.lock && !lock){
             res.status(400).send('cart already unlocked')
         }
-        else{
-            const result = await controlCart(cart,lock)
-            if (result === 'success')
-                res.status(200).send('cart action successful');
-            else
+        else {
+            const result = await updateCartItemsStock(cart,lock)
+            if (result === 'success') {
+                const action = (lock) ? 'lock' : 'unlock';
+                res.status(200).send(`cart ${action} successful`);
+            }
+            else {
                 res.status(400).send(result);
+            }
         }
     }
 }

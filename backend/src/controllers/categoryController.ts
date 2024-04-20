@@ -26,7 +26,10 @@ export const insertCategory = async (req: Request, res: Response) => {
 };
 
 export const getAllCategories = async (_req:Request, res:Response) => {
-    const categories = (await Category.find()).map((category) => category.name)//find() is ok here because categories number is small
+    const categories = (await Category.find()).map((category) => {
+        const {__v: _, ...modifiedCategory}: any = category.toObject();
+        return modifiedCategory;
+    }) // find() is ok here because categories number is small
     res.status(200).send(categories);
 }
 
@@ -37,9 +40,13 @@ export const getCategoryByParent = async (req: Request, res: Response) => {
         res.status(400).send('missing category name')
         return;
     }
-    if(name === 'None')//this is because cant have /parent/ to get main parent categories
+    if(name === 'root')//this is because cant have /parent/ to get main parent categories
         name = '';
-    const categories = (await Category.find({parent:name})).map((category) => category.name)
+    const categories = (await Category.find({parent:name}).populate('products'))
+        .map((category) => {
+            const {__v: _, ...modifiedCategory}: any = category.toObject();
+            return modifiedCategory;
+        })
     res.status(200).send(categories);
 }
 

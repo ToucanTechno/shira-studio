@@ -3,11 +3,11 @@ import { changeCatMul, getAllCategories, getCategoryByParent, insertCategory } f
 
 export const categoryRoutes = express.Router();
 
-categoryRoutes.get('/all',getAllCategories);
+categoryRoutes.get('/',getAllCategories);
 
 categoryRoutes.get('/parent/:name', getCategoryByParent);
 
 categoryRoutes.post('/', insertCategory);
 
-categoryRoutes.put("/:name/change", changeCatMul);
+categoryRoutes.put("/:name", changeCatMul);
 
