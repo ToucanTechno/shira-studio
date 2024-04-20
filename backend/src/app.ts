@@ -7,6 +7,7 @@ import {authRoutes} from "./routes/authRoutes";
 import mongoose from "mongoose";
 import { cartRoutes } from "./routes/cartRoutes";
 import { categoryRoutes } from "./routes/categoryRouter";
+import { orderRoutes } from "./routes/orderRoutes";
 
 
 
@@ -38,6 +39,8 @@ app.use('/api/auth', authRoutes);
 
 app.use('/api/cart', cartRoutes);
 
-app.use('/api/category',categoryRoutes)
+app.use('/api/category',categoryRoutes);
+
+app.use('/api/order',orderRoutes);
 
 export default app;

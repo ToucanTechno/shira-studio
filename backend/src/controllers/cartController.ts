@@ -12,13 +12,12 @@ export const getCart = async (req:Request,res:Response) => {
         return;
     }
     let cart = (await Cart.findById(cartId).populate('products.$*.product'))
-    cart?.products.forEach((prod,_key) => {
+    cart?.products.forEach((prod) => {
         delete (prod.product as any)._doc.__v
         delete (prod as any)._doc._id
     });
     delete (cart as any)._doc.__v
     res.status(200).send(cart)
-
 }
 
 export const getCartSummery = async (req: Request, res: Response) => {

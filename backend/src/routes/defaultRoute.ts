@@ -2,6 +2,6 @@ import { Router } from 'express';
 
 export const defaultRoute = Router();
 
-defaultRoute.get('/', (req, res) => {
-    res.send("Unknown page");
+defaultRoute.get('/', (_req, res) => {
+    res.send("default route unknown page");
 });
