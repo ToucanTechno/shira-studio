@@ -2,7 +2,7 @@ import {Form, useParams} from "react-router-dom";
 import React, {useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
 import axios, {AxiosInstance} from "axios";
-import Select, {MultiValue} from 'react-select';
+import Select, { MultiValue } from 'react-select';
 import {
     Button,
     Flex,
@@ -17,22 +17,25 @@ import {
 import FileUpload from "../../components/common/FileUpload";
 import {ICategory} from "../../../backend/src/models/Category";
 
-type IProductWCat = IProduct & {parsedCategories: {value: string, label: string}[]};
+interface SelectOption {
+    value: string;
+    label: string;
+}
 
 const AdminProductsEdit = () => {
     const params = useParams();
     const isEdit = ('id' in params);
     const [product, setProduct] =
-        useState<IProductWCat | null>(null);
+        useState<IProduct | null>(null);
     const [categories, setCategories] =
         useState<{value: string, label: string}[]>([]);
     const [uploadedImage, setUploadedImage] = useState("");
+    const [selectedCategories, setSelectedCategories] =
+        useState<SelectOption[]>([]);
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
-        categories: useRef<HTMLSelectElement>(null),
         price: useRef<HTMLInputElement>(null),
-        image: useRef<HTMLInputElement>(null),
         stock: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null),
         submit: useRef<HTMLButtonElement>(null)
@@ -43,15 +46,17 @@ const AdminProductsEdit = () => {
         if (isEdit) {
             api.get(`/products/${params['id']}`)
                 .then(response => {
+                    let parsedCategories = [];
                     // Process the response data
-                    let product: IProductWCat = response.data;
-                    for (const category of product.categories) {
-                        product.parsedCategories.push({
-                            value: (category as ICategory).name,
+                    let productSkeleton: IProduct = response.data;
+                    for (const category of productSkeleton.categories) {
+                        parsedCategories.push({
+                            value: (category as ICategory)._id as string,
                             label: (category as ICategory).text
                         });
                     }
-                    setProduct(response.data);
+                    setSelectedCategories(parsedCategories)
+                    setProduct(productSkeleton);
                 })
                 .catch(error => {
                     // Handle any errors
@@ -62,28 +67,24 @@ const AdminProductsEdit = () => {
                 for (const category of response.data) {
                     categoriesSkeleton[category.name] = category;
                 }
-                if (response.data.length == 0) {
+                if (response.data.length === 0) {
                     return;
                 }
-                console.log(categoriesSkeleton);
                 setCategories(Object.keys(categoriesSkeleton as {[key: string]: ICategory})
                     .map(key => {
-                        console.log(key, categoriesSkeleton[key])
-                        return {"value": categoriesSkeleton[key]['name'], "label": categoriesSkeleton[key]['text']}
+                        return {"value": categoriesSkeleton[key]['_id'] as string, "label": categoriesSkeleton[key]['text']}
                     }));
             })
         }
-    }, [isEdit, params])
+    }, [isEdit, params, api])
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         let update = {
             productID: productRefs.ID.current?.value,
             productName: productRefs.name.current?.value,
-            categories: productRefs.categories.current ?
-                Array.from(productRefs.categories.current.selectedOptions, option => option.value) :
-                [],
+            categories: selectedCategories,
             price: productRefs.price.current?.value,
-            image: productRefs.image.current?.value,
+            image: uploadedImage,
             stock: productRefs.stock.current?.value,
             description: productRefs.description.current?.value
         };
@@ -96,7 +97,7 @@ const AdminProductsEdit = () => {
         let updateEntry: IProduct = {
             product_id: update.productID as string,
             name: update.productName as string,
-            categories: update.categories, // TODO: update IProduct to include multiple categories
+            categories: update.categories.map(category => category.value), // TODO: update IProduct to include multiple categories
             price: parseInt(update.price as string),
             image_src: update.image as string,
             description: update.description as string,
@@ -123,12 +124,11 @@ const AdminProductsEdit = () => {
         event.preventDefault();
     }
 
-    const handleSelectCategories = (el: MultiValue<{ value: string, label: string }>) => {
-        console.log(el);
+    const handleSelectCategories = (el: MultiValue<SelectOption>) => {
+        setSelectedCategories(el as SelectOption[]);
     };
 
     const handleImageUpload = (files: FileList) => {
-        console.log(files);
         if (files !== null && files.length > 0) {
             setUploadedImage(URL.createObjectURL(files[0]));
         }
@@ -166,24 +166,24 @@ const AdminProductsEdit = () => {
                 <FormControl>
                 <FormLabel htmlFor="categoriesDropdown">קטגוריות:</FormLabel>
                 <Select id="categoryDropdown"
+                        name="categories"
                         isMulti
                         isSearchable
                         onChange={handleSelectCategories}
-                        defaultValue={product?.parsedCategories}
+                        value={selectedCategories}
                         options={categories}/>
                 </FormControl>
 
                 <FormControl>
                 <FormLabel htmlFor="price">מחיר:</FormLabel>
-                    <NumberInput defaultValue={product ? product['price'] : 0}
+                    <NumberInput defaultValue={product ? product.price : 0}
                                  min={0}
                                  max={99999}
-                                 ref={productRefs.price}
                                  isRequired
                                  name='price'
                                  dir='ltr'
                                  w='140px'>
-                        <NumberInputField />
+                        <NumberInputField ref={productRefs.price} />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />
@@ -191,7 +191,7 @@ const AdminProductsEdit = () => {
                     </NumberInput>
                 </FormControl>
 
-                <FileUpload defaultImage={(product) ? product['image_src'] : ""}
+                <FileUpload defaultImage={(product) ? product.image_src : ""}
                             handleUpload={handleImageUpload}
                             isRequired={!isEdit}
                             name="picture">
@@ -200,15 +200,14 @@ const AdminProductsEdit = () => {
 
                 <FormControl>
                 <FormLabel htmlFor="stock">מלאי:</FormLabel>
-                    <NumberInput defaultValue={product ? product['stock'] : 1}
+                    <NumberInput defaultValue={product ? product.stock : 1}
                                  min={0}
                                  max={999}
-                                 ref={productRefs.stock}
                                  isRequired
                                  name='stock'
                                  dir='ltr'
                                  w='140px'>
-                        <NumberInputField/>
+                        <NumberInputField ref={productRefs.stock} />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />
@@ -221,7 +220,7 @@ const AdminProductsEdit = () => {
                 <Textarea id="description"
                           name="description"
                           rows={4}
-                          defaultValue={product ? product['description'] : ''}
+                          defaultValue={product ? product.description : ''}
                           ref={productRefs.description}>
                 </Textarea>
                 </FormControl>

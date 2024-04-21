@@ -29,7 +29,7 @@ export const getSingleProduct = async (req: Request, res: Response) => {
         if (!id) {
             throw new Error("Missing product ID");
         }
-        const product = await Product.findById(id);
+        const product = await Product.findById(id).populate('categories');
         if (!product) {
             res.status(404).send({ message: `Unable to find matching product with id: ${req.params['id']}` });
             return;
