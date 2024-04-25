@@ -1,49 +1,55 @@
-import React, {useEffect, useState} from "react";
-import axios, {AxiosInstance} from 'axios'
-import {IProduct} from "../../models/Product";
-import { Link as ReactRouterLink, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from "react";
+import axios, { AxiosInstance } from 'axios'
+import { IProduct } from "../../models/Product";
+import { Link as ReactRouterLink, useNavigate, useSearchParams } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import {
-    Box,
-    Button,
-    Flex,
-    Heading,
-    Image,
-    Table,
-    TableContainer,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr,
+    Box, Flex, Image, Button, Heading,
+    Table, TableContainer, Tbody, Td, Th, Thead, Tr,
     useConst
 } from "@chakra-ui/react";
 import {ICategory} from "../../../backend/src/models/Category";
+import Pagination from "../../components/common/Pagination";
+
+interface ProductData {
+    total: number;
+    totalPages: number;
+    page: number;
+    products: IProduct[];
+}
 
 const AdminProducts = () => {
-    let [page] = useState(0);  // TODO: add setPage
+    let [params, setParams] = useSearchParams();  // TODO: add setPage
     const productsPerPage = 10;
     const navigate = useNavigate();
-    let [products, setProducts]: [IProduct[], any] = useState([]);
+    let [products, setProducts] =
+        useState<ProductData>({total: 0, totalPages: 0, page: 0, products: []});
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
-        let skip = page * productsPerPage;
+        const tmpPage = (params.get('page') === null) ? 0 : parseInt(params.get('page') as string) - 1
+        let skip = tmpPage * productsPerPage;
         api.get(`/products?skip=${skip}&limit=${productsPerPage}`)
             .then(response => {
                 // Process the response data
-                console.log(response.data);
-                setProducts(response.data.products);
+                const totalPages = Math.floor((response.data.total + productsPerPage - 1) / productsPerPage);
+                setProducts({
+                    total: response.data.total,
+                    totalPages: totalPages,
+                    page: tmpPage,
+                    products: response.data.products
+                });
             })
             .catch(error => {
                 // Handle any errors
                 console.error(error);
             });
-    }, [page, api]);
+    }, [params, api]);
+
     return (<Flex flexDirection='column' alignItems='center'>
         <Heading as='h1' size='xl' mb={2}>ניהול מוצרים</Heading>
         <Box>
-            <Button onClick={() => navigate('/control-panel/products/add')}>הוספת מוצר חדש</Button>
+            <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} onClick={() => navigate('/control-panel/products/add')}>הוספת מוצר חדש</Button>
         </Box>
         <TableContainer w='100%'>
             <Table colorScheme='gray' variant='striped'>
@@ -63,7 +69,7 @@ const AdminProducts = () => {
                     </Tr>
                 </Thead>
                 <Tbody>
-                    { products.length > 0 && products.map((item: IProduct) => {
+                    { products.products.length > 0 && products.products.map((item: IProduct) => {
                         return (
                             <Tr key={item._id}>
                                 <Td><Image boxSize='60px' src="necklace.jpg" alt="Gold Necklace"/></Td>
@@ -75,18 +81,18 @@ const AdminProducts = () => {
                                     {new Intl.NumberFormat('he-il', {minimumFractionDigits: 2}).format(item.price)}
                                 </Td>
                                 <Td>{(item.categories) ? item.categories.map((cat) => {
-                                    console.log(cat); return (cat as ICategory).text;
-                                }) : []}</Td>
+                                    return (cat as ICategory).text;
+                                }).toString() : []}</Td>
                                 <Td>{item.created?.toString()}</Td>
                                 <Td>{item.modified?.toString()}</Td>
                                 {/* TODO: what if description is too long? Create a hover */}
                                 <Td>{item.description}</Td>
                                 <Td>{item.views}</Td>
                                 <Td>
-                                    <Button colorScheme='blackAlpha' me={1} onClick={() => navigate(`${item._id}/edit`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => navigate(`${item._id}/edit`)}>
                                         עריכה
                                     </Button>
-                                    <Button colorScheme='blackAlpha' onClick={() => navigate(`${item._id}/delete`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => navigate(`${item._id}/delete`)}>
                                         מחיקה
                                     </Button>
                                 </Td>
@@ -95,6 +101,7 @@ const AdminProducts = () => {
                 </Tbody>
             </Table>
         </TableContainer>
+        <Pagination page={products.page} totalPages={products.totalPages} />
     </Flex>)
 };
 

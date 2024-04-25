@@ -1,8 +1,8 @@
-import MenuItem, {ItemType} from "../../components/common/MenuItem";
-import React, {useContext} from "react";
-import {AuthContext} from "../../services/AuthContext";
-import {Box, Button, Flex, Icon, Link} from "@chakra-ui/react";
-import {BsBasket3, BsFacebook, BsFillPersonFill, BsGlobe2, BsInstagram} from "react-icons/bs";
+import { ItemType } from "../../components/common/MenuItem";
+import React, { useContext } from "react";
+import { AuthContext } from "../../services/AuthContext";
+import {Box, Button, Flex } from "@chakra-ui/react";
+// import {BsBasket3, BsFacebook, BsFillPersonFill, BsGlobe2, BsInstagram} from "react-icons/bs";
 import HoverMenuItem from "../../components/common/HoverMenuItem";
 
 const TopAdminNavbar = () => {

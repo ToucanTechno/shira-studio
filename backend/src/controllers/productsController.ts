@@ -12,7 +12,7 @@ export const getProducts = async (req: Request, res: Response) => {
         const limit = Math.max(1, Math.min(parseInt(req.query["limit"] as string) || 10, 50));
         // TODO: add sort as a parameter
         const [products, productsCount] = await Promise.all([
-            Product.find().sort({ date: -1 }).skip(skip).limit(limit),
+            Product.find().populate('categories').sort({ date: -1 }).skip(skip).limit(limit),
             Product.countDocuments()
         ]);
 
@@ -109,7 +109,6 @@ export const deleteProduct = async (req: Request, res: Response) => {
 };
 
 
-
 async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>, productObj: mongoose.Document<unknown, {}, IProductDB> & IProductDB ){
     const promiseArr = []
     if(actionType === 'add'){
@@ -137,17 +136,23 @@ async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>,
     Promise.all(promiseArr);
 }
 
+// TODO (CR): called changeProd but better name would be changeCategoriesOfProduct
+// was surprised to find this changes both products and categories. Maybe find a better name?
 export const changeProdMul = async (req:Request, res:Response) => {
     const categories:Array<any> = req.body['names'];
     const productId = req.params['id'];
     const actionType = req.body['action'];
+    console.log(`updating categories ${categories} of product ${productId}`)
     if(!categories) {
+        console.log('missing categories')
         res.status(400).send('missing category name');
     }
     else if(!productId) {
+        console.log('missing productId')
         res.status(400).send('missing product id');
     }
     else if (actionType !== 'add' && actionType !== 'del') {
+        console.log('missing action type')
         res.status(400).send('missing action type send add/del');
     }
     else {

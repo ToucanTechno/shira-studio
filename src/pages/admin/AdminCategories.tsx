@@ -3,7 +3,7 @@ import {
     Heading,
     Table,
     TableContainer,
-    Tbody,
+    Tbody, Td,
     Th,
     Thead,
     Tr, useConst
@@ -36,12 +36,13 @@ const AdminCategories = () => {
         <Heading as='h1' size='xl' mb={2}>ניהול קטגוריות</Heading>
         <Button alignSelf='flex-start'>הוסף קטגוריה חדשה</Button>
         <TableContainer w='100%'>
-            <Table colorScheme='cyan' variant='striped'>
+            <Table colorScheme='gray' variant='striped'>
                 <Thead>
                     <Tr>
                         <Th isNumeric>#</Th>
                         <Th>שם הקטגוריה</Th>
                         <Th>קטגוריית אב</Th>
+                        <Th>מס׳ מוצרים</Th>
                         <Th>פעולות</Th>
                     </Tr>
                 </Thead>
@@ -49,13 +50,18 @@ const AdminCategories = () => {
                     { categories.length > 0 && categories.map((item: ICategory) => {
                         return (
                             <Tr key={item._id}>
-                                <td>{item._id}</td>
-                                <td>{item.name}</td>
-                                <td>{item.text}</td>
-                                <td>
-                                    <Button colorScheme='cyan' me={1} onClick={() => navigate(`${item._id}/edit`)}>עריכה</Button>
-                                    <Button colorScheme='cyan' onClick={() => navigate(`${item._id}/delete`)}>מחיקה</Button>
-                                </td>
+                                <Td>{item._id}</Td>
+                                <Td>{item.name}</Td>
+                                <Td>{item.text}</Td>
+                                <Td>{item.products.length}</Td>
+                                <Td>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => navigate(`${item._id}/edit`)}>
+                                        עריכה
+                                    </Button>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => navigate(`${item._id}/delete`)}>
+                                        מחיקה
+                                    </Button>
+                                </Td>
                             </Tr>
                         )
                     })}

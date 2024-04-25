@@ -1,5 +1,5 @@
 import {Form, useParams} from "react-router-dom";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
 import axios, {AxiosInstance} from "axios";
 import Select, { MultiValue } from 'react-select';
@@ -16,10 +16,18 @@ import {
 } from "@chakra-ui/react";
 import FileUpload from "../../components/common/FileUpload";
 import {ICategory} from "../../../backend/src/models/Category";
+import {StatusCodes} from "http-status-codes";
 
 interface SelectOption {
     value: string;
     label: string;
+    name: string;
+}
+
+interface CategoriesData {
+    all: SelectOption[];
+    selected: SelectOption[];
+    old: SelectOption[];
 }
 
 const AdminProductsEdit = () => {
@@ -27,62 +35,76 @@ const AdminProductsEdit = () => {
     const isEdit = ('id' in params);
     const [product, setProduct] =
         useState<IProduct | null>(null);
-    const [categories, setCategories] =
-        useState<{value: string, label: string}[]>([]);
+    const [categoriesData, setCategoriesData] =
+        useState<CategoriesData>({all: [], selected: [], old: []});
     const [uploadedImage, setUploadedImage] = useState("");
-    const [selectedCategories, setSelectedCategories] =
-        useState<SelectOption[]>([]);
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
         price: useRef<HTMLInputElement>(null),
         stock: useRef<HTMLInputElement>(null),
-        description: useRef<HTMLTextAreaElement>(null),
-        submit: useRef<HTMLButtonElement>(null)
+        description: useRef<HTMLTextAreaElement>(null)
     }
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
-    useEffect(() => {
+    const fetchProducts = useCallback(async () => {
         if (isEdit) {
-            api.get(`/products/${params['id']}`)
+            await api.get(`/products/${params['id']}`)
                 .then(response => {
-                    let parsedCategories = [];
+                    let parsedCategories: SelectOption[] = [];
                     // Process the response data
                     let productSkeleton: IProduct = response.data;
                     for (const category of productSkeleton.categories) {
                         parsedCategories.push({
                             value: (category as ICategory)._id as string,
-                            label: (category as ICategory).text
+                            label: (category as ICategory).text,
+                            name: (category as ICategory).name
                         });
                     }
-                    setSelectedCategories(parsedCategories)
+                    setCategoriesData((data) => {
+                        return {
+                        ...data,
+                            selected: parsedCategories,
+                            old: parsedCategories
+                        };
+                    });
                     setProduct(productSkeleton);
-                })
-                .catch(error => {
-                    // Handle any errors
-                    console.error(error);
                 });
-            api.get(`/categories`).then(response => {
-                let categoriesSkeleton: {[key: string]: ICategory} = {} ;
-                for (const category of response.data) {
-                    categoriesSkeleton[category.name] = category;
-                }
-                if (response.data.length === 0) {
-                    return;
-                }
-                setCategories(Object.keys(categoriesSkeleton as {[key: string]: ICategory})
-                    .map(key => {
-                        return {"value": categoriesSkeleton[key]['_id'] as string, "label": categoriesSkeleton[key]['text']}
-                    }));
-            })
         }
-    }, [isEdit, params, api])
+        await api.get(`/categories`).then(response => {
+            let categoriesSkeleton: {[key: string]: ICategory} = {} ;
+            for (const category of response.data) {
+                categoriesSkeleton[category.name] = category;
+            }
+            if (response.data.length === 0) {
+                return;
+            }
+            setCategoriesData((data) => {
+                return { ...data,
+                    all:
+                        Object.keys(categoriesSkeleton as {[key: string]: ICategory})
+                            .map(key => {
+                                return {
+                                    "value": categoriesSkeleton[key]['_id'] as string,
+                                    "label": categoriesSkeleton[key]['text'],
+                                    "name": categoriesSkeleton[key]['name']
+                                };
+                            })
+                };
+            });
+        });
+    }, [api, isEdit, params]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        fetchProducts().then((res) => {}).catch(error => console.error(error));
+    }, [fetchProducts])
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         let update = {
             productID: productRefs.ID.current?.value,
             productName: productRefs.name.current?.value,
-            categories: selectedCategories,
+            categories: categoriesData.selected,
             price: productRefs.price.current?.value,
             image: uploadedImage,
             stock: productRefs.stock.current?.value,
@@ -90,46 +112,70 @@ const AdminProductsEdit = () => {
         };
         if (product && update.image === "") {
             // keep image
+            // TODO: probably need to have no image to avoid changing it
             update.image = product['image_src']
         }
         // TODO: select categories
-        console.log(update);
+        console.log("update: ", update);
         let updateEntry: IProduct = {
             product_id: update.productID as string,
             name: update.productName as string,
-            categories: update.categories.map(category => category.value), // TODO: update IProduct to include multiple categories
+            categories: update.categories.map(category => category.value),  // saves us category update request
             price: parseInt(update.price as string),
             image_src: update.image as string,
             description: update.description as string,
             stock: parseInt(update.stock as string)
         };
 
+        let updatePromises = [];
         if (isEdit) {
-            const updateURL = `http://localhost:3001/api/products/${params['id']}`;
-            axios.put<IProduct>(updateURL, updateEntry).then(response => {
-                console.log(response);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        } else {
-            const updateURL = `http://localhost:3001/api/products/`;
-            axios.post<IProduct>(updateURL, updateEntry).then(response => {
-                console.log(response);
-            })
-            .catch(error => {
-                console.error(error);
-            });
+            const updateURL = `products/${params['id']}`;
+            let deletedCategories = new Set(categoriesData.old.map(el => el.name));
+            for (const el of update.categories) {
+                deletedCategories.delete(el.name);
+            }
+            let addedCategories = new Set(update.categories.map(el => el.name));
+            for (const el of categoriesData.old) {
+                addedCategories.delete(el.name);
+            }
+            updatePromises.push(api.put<IProduct>(updateURL, updateEntry));
+            updatePromises.push(api.put(`products/${params['id']}/categories`, {
+                names: Array.from(addedCategories),
+                id: update.productID,
+                action: 'add'
+            }));
+            updatePromises.push(api.put(`products/${params['id']}/categories`, {
+                names: Array.from(deletedCategories),
+                id: update.productID,
+                action: 'del'
+            }));
+        } else {  // Adding product
+            const updateURL = 'products/';
+            let addedCategories = update.categories.map(el => el.name);
+            updatePromises.push(api.post(updateURL, updateEntry).then(res => {
+                const productID = res.data['id'];
+                api.put(`products/${productID}/categories`, {
+                    names: Array.from(addedCategories),
+                    action: 'add'
+                })
+            }));
         }
-        event.preventDefault();
+        await Promise.all(updatePromises).catch(error => {
+            if (error.response.status === StatusCodes.NOT_MODIFIED) {
+                return;
+            }
+            console.error(error);
+        });
+        // await fetchProducts();
     }
 
     const handleSelectCategories = (el: MultiValue<SelectOption>) => {
-        setSelectedCategories(el as SelectOption[]);
+        setCategoriesData({...categoriesData, selected: el as SelectOption[]});
     };
 
     const handleImageUpload = (files: FileList) => {
         if (files !== null && files.length > 0) {
+            // TODO: is that how we send it to server?
             setUploadedImage(URL.createObjectURL(files[0]));
         }
     }
@@ -170,8 +216,8 @@ const AdminProductsEdit = () => {
                         isMulti
                         isSearchable
                         onChange={handleSelectCategories}
-                        value={selectedCategories}
-                        options={categories}/>
+                        value={categoriesData.selected}
+                        options={categoriesData.all}/>
                 </FormControl>
 
                 <FormControl>
@@ -225,7 +271,7 @@ const AdminProductsEdit = () => {
                 </Textarea>
                 </FormControl>
 
-                <Button type="submit" mt={2} ref={productRefs.submit}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</Button>
+                <Button type="submit" mt={2}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</Button>
             </Form>
         </Flex>
     )

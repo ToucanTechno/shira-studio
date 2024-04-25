@@ -91,7 +91,7 @@ const PanelLogin = (props: any) => {
             // console.log("Redirecting back to control-panel with user:", user);
             navigate('/control-panel/');
         }
-    }, [authTokens]);
+    }, [navigate, authTokens]);
 
     return (
         <div className="login-container">
