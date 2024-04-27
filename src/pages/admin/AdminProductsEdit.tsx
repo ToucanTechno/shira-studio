@@ -37,12 +37,13 @@ const AdminProductsEdit = () => {
         useState<IProduct | null>(null);
     const [categoriesData, setCategoriesData] =
         useState<CategoriesData>({all: [], selected: [], old: []});
+    const [stock,  setStock] =
+        useState(0);
     const [uploadedImage, setUploadedImage] = useState("");
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
         price: useRef<HTMLInputElement>(null),
-        stock: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null)
     }
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
@@ -54,12 +55,14 @@ const AdminProductsEdit = () => {
                     let parsedCategories: SelectOption[] = [];
                     // Process the response data
                     let productSkeleton: IProduct = response.data;
-                    for (const category of productSkeleton.categories) {
-                        parsedCategories.push({
-                            value: (category as ICategory)._id as string,
-                            label: (category as ICategory).text,
-                            name: (category as ICategory).name
-                        });
+                    if (productSkeleton.categories) {
+                        for (const category of productSkeleton.categories) {
+                            parsedCategories.push({
+                                value: (category as ICategory)._id as string,
+                                label: (category as ICategory).text,
+                                name: (category as ICategory).name
+                            });
+                        }
                     }
                     setCategoriesData((data) => {
                         return {
@@ -107,7 +110,7 @@ const AdminProductsEdit = () => {
             categories: categoriesData.selected,
             price: productRefs.price.current?.value,
             image: uploadedImage,
-            stock: productRefs.stock.current?.value,
+            stock: stock,
             description: productRefs.description.current?.value
         };
         if (product && update.image === "") {
@@ -124,7 +127,7 @@ const AdminProductsEdit = () => {
             price: parseInt(update.price as string),
             image_src: update.image as string,
             description: update.description as string,
-            stock: parseInt(update.stock as string)
+            stock: parseInt(update.stock.toString())
         };
 
         let updatePromises = [];
@@ -228,7 +231,8 @@ const AdminProductsEdit = () => {
                                  isRequired
                                  name='price'
                                  dir='ltr'
-                                 w='140px'>
+                                 w='140px'
+                                 allowMouseWheel>
                         <NumberInputField ref={productRefs.price} />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
@@ -246,14 +250,16 @@ const AdminProductsEdit = () => {
 
                 <FormControl>
                 <FormLabel htmlFor="stock">מלאי:</FormLabel>
-                    <NumberInput defaultValue={product ? product.stock : 1}
+                    <NumberInput value={(product) ? stock : 1}
+                                 onChange={(_stringStock, numberStock) => setStock(numberStock)}
                                  min={0}
                                  max={999}
                                  isRequired
                                  name='stock'
                                  dir='ltr'
-                                 w='140px'>
-                        <NumberInputField ref={productRefs.stock} />
+                                 w='140px'
+                                 allowMouseWheel>
+                        <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />

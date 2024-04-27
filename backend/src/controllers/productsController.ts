@@ -157,7 +157,9 @@ export const changeProdMul = async (req:Request, res:Response) => {
     }
     else {
         const invalidIds = []
+        console.log("here1", categories);
         for(const category of categories){
+            console.log("here2", category);
             if(!await Category.findOne({name:category})){
                 invalidIds.push(category)
             }
@@ -166,11 +168,13 @@ export const changeProdMul = async (req:Request, res:Response) => {
             res.status(400).send('couldn\'t find categories with ids: ' + invalidIds);
         }
         else {
+            console.log("here3", productId);
             const prodObj = await Product.findById(productId)
             if (!prodObj){
                 res.status(400).send('could not find category with name: ' + categories);
                 return;
             }
+            console.log("here4", prodObj);
             await changeProdMulLogic(actionType,categories,prodObj)
             res.status(200).send('change successful')
         }

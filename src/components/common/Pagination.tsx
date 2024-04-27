@@ -40,7 +40,7 @@ const Pagination = (props: PaginationProps) => {
                     </Badge>
                     <Badge m={1}
                            colorScheme='blue'
-                           bgColor={props.page == toPaginationPage(props.page) - 2 ? 'orange.200' : ''}>
+                           bgColor={props.page === toPaginationPage(props.page) - 2 ? 'orange.200' : ''}>
                         <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) - 1)}`}>
                             {toPaginationPage(props.page) - 1}
                         </ChakraLink>
@@ -48,7 +48,7 @@ const Pagination = (props: PaginationProps) => {
                     { props.totalPages > 1 &&
                         <Badge m={1}
                                colorScheme='blue'
-                               bgColor={props.page == toPaginationPage(props.page) - 1 ? 'orange.200' : ''}>
+                               bgColor={props.page === toPaginationPage(props.page) - 1 ? 'orange.200' : ''}>
                             <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page))}`}>
                                 {toPaginationPage(props.page)}
                             </ChakraLink>
@@ -56,7 +56,7 @@ const Pagination = (props: PaginationProps) => {
                     } { props.totalPages > 2 &&
                     <Badge m={1}
                            colorScheme='blue'
-                           bgColor={props.page == toPaginationPage(props.page) ? 'orange.200' : ''}>
+                           bgColor={props.page === toPaginationPage(props.page) ? 'orange.200' : ''}>
                         <ChakraLink as={ReactRouterLink} to={`?page=${toPaginationPage(props.page) + 1}`}>
                             {toPaginationPage(props.page) + 1}
                         </ChakraLink>
@@ -64,7 +64,7 @@ const Pagination = (props: PaginationProps) => {
                 } { props.totalPages > 3 &&
                     <Badge m={1}
                            colorScheme='blue'
-                           bgColor={props.page == toPaginationPage(props.page) + 1 ? 'orange.200' : ''}>
+                           bgColor={props.page === toPaginationPage(props.page) + 1 ? 'orange.200' : ''}>
                         <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) + 2)}`}>
                             {toPaginationPage(props.page) + 2}
                         </ChakraLink>
@@ -72,7 +72,7 @@ const Pagination = (props: PaginationProps) => {
                 } { props.totalPages > 4 &&
                     <Badge m={1}
                            colorScheme='blue'
-                           bgColor={props.page == toPaginationPage(props.page) + 2 ? 'orange.200' : ''}>
+                           bgColor={props.page === toPaginationPage(props.page) + 2 ? 'orange.200' : ''}>
                         <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) + 3)}`}>
                             {toPaginationPage(props.page) + 3}
                         </ChakraLink>
