@@ -13,16 +13,12 @@ import React, {useEffect, useRef, useState} from "react";
 import {Form} from "react-router-dom";
 import Select, {SingleValue} from "react-select";
 import axios, {AxiosInstance} from "axios";
+import {SelectOption} from "../../utils/ChakraTypes";
 
 interface CategoriesAddProps {
     categories: ICategory[];
     onAdd: () => void;
     disabled: boolean;
-}
-
-interface SelectOption {
-    label: string;
-    value: string;
 }
 
 const AdminCategoriesAdd = (props: CategoriesAddProps) => {
@@ -65,10 +61,13 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
 
     return (
         <Box mx='2' alignSelf='flex-start'>
-            <Collapse in={!isOpen}>
+            <Collapse in={!isOpen}
+                      transition={{ exit: { duration: .5 }, enter: { duration: .5 } }}>
                 <Button colorScheme='blackAlpha' isDisabled={props.disabled} onClick={onToggle}>הוספת קטגוריה חדשה</Button>
             </Collapse>
-            <ScaleFade in={isOpen} initialScale={0.9} unmountOnExit={true} style={{overflow: 'visible'}}>
+            <Collapse in={isOpen}
+                       transition={{ exit: { delay: .5, duration: .5 }, enter: { delay: .5, duration: .5 } }}
+                       style={{overflow: 'visible'}}>
                 <Box my='2' p='2' bg='gray.100' rounded='md'>
                     <Form onSubmit={handleAddCategory}>
                         <Flex direction='row'>
@@ -103,7 +102,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                         </Flex>
                     </Form>
                 </Box>
-            </ScaleFade>
+            </Collapse>
         </Box>
     )
 };

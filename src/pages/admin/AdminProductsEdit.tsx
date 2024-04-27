@@ -1,4 +1,4 @@
-import {Form, useParams} from "react-router-dom";
+import {Form, useNavigate, useParams} from "react-router-dom";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
 import axios, {AxiosInstance} from "axios";
@@ -37,8 +37,8 @@ const AdminProductsEdit = () => {
         useState<IProduct | null>(null);
     const [categoriesData, setCategoriesData] =
         useState<CategoriesData>({all: [], selected: [], old: []});
-    const [stock,  setStock] =
-        useState(0);
+    const [stock,  setStock] = useState(0);
+    const [price,  setPrice] = useState(0);
     const [uploadedImage, setUploadedImage] = useState("");
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
@@ -47,6 +47,7 @@ const AdminProductsEdit = () => {
         description: useRef<HTMLTextAreaElement>(null)
     }
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const navigate = useNavigate();
 
     const fetchProducts = useCallback(async () => {
         if (isEdit) {
@@ -72,6 +73,8 @@ const AdminProductsEdit = () => {
                             old: parsedCategories
                         };
                     });
+                    setStock(productSkeleton.stock);
+                    setPrice(productSkeleton.price);
                     setProduct(productSkeleton);
                 });
         }
@@ -143,7 +146,6 @@ const AdminProductsEdit = () => {
             for (const el of categoriesData.old) {
                 addedCategories.delete(el.name);
             }
-            console.log(addedCategories, "del", deletedCategories)
             updatePromises.push(api.put<IProduct>(updateURL, updateEntry));
             updatePromises.push(api.put(`products/${params['id']}/categories`, {
                 names: Array.from(addedCategories),
@@ -172,7 +174,7 @@ const AdminProductsEdit = () => {
             }
             console.error(error);
         });
-        // await fetchProducts();
+        navigate('/control-panel/products');
     }
 
     const handleSelectCategories = (el: MultiValue<SelectOption>) => {
@@ -228,7 +230,8 @@ const AdminProductsEdit = () => {
 
                 <FormControl>
                 <FormLabel htmlFor="price">מחיר:</FormLabel>
-                    <NumberInput defaultValue={product ? product.price : 0}
+                    <NumberInput value={product ? price : 0}
+                                 onChange={(_stringPrice, numberPrice) => setPrice(numberPrice)}
                                  min={0}
                                  max={99999}
                                  isRequired

@@ -1,22 +1,31 @@
 import {
-    Flex,
-    Heading,
-    Table,
-    TableContainer,
-    Tbody,
-    Td,
-    Tr,
-    Th,
-    Thead,
+    Flex, Heading,
+    Table, TableContainer, Tbody, Td, Tr, Th, Thead,
     Image,
-    NumberInput,
-    NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, TableCaption,
+    NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, TableCaption,
     Text, Card, Wrap, Spacer, FormControl, FormLabel, RadioGroup, Radio, FormHelperText, Stack, Input,
-    Tfoot, Button
+    Tfoot, Button, CloseButton, useConst
 } from "@chakra-ui/react";
-import React from "react";
+import React, {useContext, useEffect, useState} from "react";
+import axios, {AxiosInstance} from "axios";
+import {AuthContext} from "../services/AuthContext";
+import {ICartModel} from "../models/CartModel";
 
 const Cart = () => {
+    const [cart, setCart] = useState<ICartModel | null>(null);
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const { guestData, setGuestData} = useContext(AuthContext)
+
+    useEffect(() => {
+        if (guestData.cartID) {
+            api.get(`/cart/${guestData.cartID}`).then(response => {
+                console.log(response.data)
+                setCart(response.data);
+            }).catch(error => {
+                console.log("error:", error);
+            })
+        }
+    }, [guestData]);
     const handleItemCountChange = (inputName: string, strVal: string, val: number) => {
         console.log(inputName, strVal, val);
     }
@@ -29,43 +38,45 @@ const Cart = () => {
                         <Tr>
                             <Th></Th>
                             <Th>מוצר</Th>
-                            <Th>מחיר</Th>
+                            <Th>מחיר פריט</Th>
                             <Th>כמות</Th>
-                            <Th>סה"כ</Th>
+                            <Th></Th>
                         </Tr>
                     </Thead>
                     <Tbody>
-                        <Tr>
-                            <Td><Image src='test.jpg' alt='test.jpg' /></Td>
-                            <Td>אריזה, סיכת כסף 925</Td>
-                            <Td>600₪</Td>
-                            <Td>
-                                {/* TODO: on blue ask user whether to remove item */}
-                                <NumberInput name="0001" onChange={handleItemCountChange.bind(null, "0001")} allowMouseWheel dir='ltr' size='sm' w={16} defaultValue={1} min={0} max={99}>
-                                    <NumberInputField />
-                                    <NumberInputStepper>
-                                        <NumberIncrementStepper />
-                                        <NumberDecrementStepper />
-                                    </NumberInputStepper>
-                                </NumberInput>
-                            </Td>
-                            <Td>600₪</Td>
-                        </Tr>
-                        <Tr>
-                            <Td><Image src='test.jpg' alt='test.jpg' /></Td>
-                            <Td>דומם-צדפים</Td>
-                            <Td>450₪</Td>
-                            <Td>
-                                <NumberInput name="0002" onChange={handleItemCountChange.bind(null, "0002")} allowMouseWheel dir='ltr' size='sm' w={16} defaultValue={1} min={0} max={99}>
-                                    <NumberInputField />
-                                    <NumberInputStepper>
-                                        <NumberIncrementStepper />
-                                        <NumberDecrementStepper />
-                                    </NumberInputStepper>
-                                </NumberInput>
-                            </Td>
-                            <Td>450₪</Td>
-                        </Tr>
+                        {cart && Object.keys(cart.products).map(cartKey => {
+                            let item = cart.products[cartKey];
+                            console.log(cartKey, 'item', item);
+                            return (
+                                <Tr key={item.product._id}>
+                                    <Td><Image src='test.jpg' alt='test.jpg' /></Td>
+                                    <Td>{item.product.name}</Td>
+                                    <Td>{item.product.price}₪</Td>
+                                    <Td>
+                                        {/* TODO: on blue ask user whether to remove item */}
+                                        <NumberInput name='amount'
+                                                     value={cart.products[cartKey].amount}
+                                                     onChange={(_, val) => {
+                                                         cart.products[cartKey].amount = val;
+                                                         setCart({...cart, products: cart.products});
+                                                     }}
+                                                     allowMouseWheel
+                                                     dir='ltr'
+                                                     size='sm'
+                                                     w={16}
+                                                     min={0}
+                                                     max={99}>
+                                            <NumberInputField />
+                                            <NumberInputStepper>
+                                                <NumberIncrementStepper />
+                                                <NumberDecrementStepper />
+                                            </NumberInputStepper>
+                                        </NumberInput>
+                                    </Td>
+                                    <Td><CloseButton/></Td>
+                                </Tr>
+                            );
+                        })}
                     </Tbody>
                 </Table>
             </TableContainer>

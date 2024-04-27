@@ -1,11 +1,12 @@
 import React from "react";
+import {Box} from "@chakra-ui/react";
 
 const AdminStatistics = () => {
 
     return (
-            <div className="container">
-                TBD Statistics
-            </div>
+            <Box m={2}>
+                בבנייה
+            </Box>
     );
 };
 

@@ -18,6 +18,7 @@ productsRouter.use(express.json());
 
 // GET
 productsRouter.get('/:id', getSingleProduct);
+// TODO: get product position (for now only by ID)
 productsRouter.get('/', getProducts);
 productsRouter.get('/c/:category/:subcategory/', getProducts);
 productsRouter.get('/c/:category/', getProducts);

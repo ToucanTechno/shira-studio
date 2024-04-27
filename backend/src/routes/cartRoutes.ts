@@ -11,4 +11,6 @@ cartRoutes.post('/', insertCart);
 
 cartRoutes.put('/:id', updateCart);
 
+// TODO: add delete item from cart
+
 cartRoutes.put('/:id/lock', cartLockAction)

@@ -150,6 +150,8 @@ export const deleteProduct = async (req: Request, res: Response) => {
         }
         const id = req.params['id'];
         const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
+        // TODO: make sure there are no orders with this product
+        // TODO: delete it from all categories that have this product
 
         if (result && result.deletedCount === 1) {
             res.status(202).send(`Successfully removed product with id ${id}`);
@@ -213,9 +215,7 @@ export const changeProdMul = async (req:Request, res:Response) => {
     }
     else {
         const invalidIds = []
-        console.log("here1", categories);
         for(const category of categories){
-            console.log("here2", category);
             if(!await Category.findOne({name:category})){
                 invalidIds.push(category)
             }
@@ -224,13 +224,11 @@ export const changeProdMul = async (req:Request, res:Response) => {
             res.status(400).send('couldn\'t find categories with ids: ' + invalidIds);
         }
         else {
-            console.log("here3", productId);
             const prodObj = await Product.findById(productId)
             if (!prodObj){
                 res.status(400).send('could not find category with name: ' + categories);
                 return;
             }
-            console.log("here4", prodObj);
             await changeProdMulLogic(actionType,categories,prodObj)
             res.status(200).send('change successful')
         }

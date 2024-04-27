@@ -65,7 +65,7 @@ const AdminCategories = () => {
                         { categories.length > 0 && categories.map((item: ICategory) => {
                             return (
                                 <Tr key={item._id}>
-                                    <Td>{item._id}</Td>
+                                    <Td py={6}>{item._id}</Td>
                                     <Td>{(editID === item._id) ?
                                         // eslint-disable-next-line react/jsx-no-undef
                                         <FormControl isRequired>
@@ -93,11 +93,13 @@ const AdminCategories = () => {
                                                 <Button colorScheme='blackAlpha'
                                                         _hover={{'backgroundColor': 'cyan.700'}}
                                                         me={1}
+                                                        size='sm'
                                                         onClick={() => setEditID(item._id as string)}>
                                                     עריכה
                                                 </Button>
                                                 <Button colorScheme='blackAlpha'
                                                         _hover={{'backgroundColor': 'red.600'}}
+                                                        size='sm'
                                                         onClick={() => navigate(`${item._id}/delete`)}>
                                                     מחיקה
                                                 </Button>
@@ -107,10 +109,12 @@ const AdminCategories = () => {
                                             <>
                                                 <Button colorScheme='green'
                                                         me={1}
+                                                        size='sm'
                                                         type='submit'>
                                                     עריכה
                                                 </Button>
                                                 <Button colorScheme='blackAlpha'
+                                                        size='sm'
                                                         onClick={() => setEditID(null)}>
                                                     ביטול
                                                 </Button>

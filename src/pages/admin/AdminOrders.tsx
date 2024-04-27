@@ -1,77 +1,109 @@
-import './AdminOrders.css';
+import {
+    Box,
+    Button,
+    Flex,
+    FormControl,
+    Heading,
+    IconButton,
+    Input,
+    Table, TableContainer,
+    Tbody, Td, Th, Thead, Tr, useConst
+} from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons"
+import Select, {SingleValue} from "react-select";
+import {Form} from "react-router-dom";
+import {ChangeEvent, useEffect, useState} from "react";
+import {SelectOption} from "../../utils/ChakraTypes";
+import {IOrder} from "../../../backend/src/models/Order";
+import axios, {AxiosInstance} from "axios";
 
 const AdminOrders = () => {
-    // Example functions (you can implement these in your backend)
-    function viewOrderDetails(orderId: string) {
-        // Show order details modal or navigate to a details page
-        console.log(`View details for order ${orderId}`);
-    }
+    const [searchPhrase, setSearchPhrase] = useState('');
+    const [typeFilter, setTypeFilter] =
+        useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
+    const [orders, setOrders] = useState<IOrder[]>([]);
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
-    function updateOrderStatus(orderId: string, status: string) {
-        // Update order status (e.g., via API call)
-        console.log(`Update status for order ${orderId} to ${status}`);
-    }
+    useEffect(() => {
+        api.get('/orders');
+    }, []);
 
-    // Search and filter functionality
-    // const searchInput = document.getElementById('searchInput');
-    // const statusFilter = document.getElementById('statusFilter');
-    const rows = document.querySelectorAll('tbody tr');
+    const handleSelectTypeFilter = (el: SingleValue<SelectOption>) => {
+        setTypeFilter(el)
+    };
 
-    /* function applyFilters() {
-        // const searchText = searchInput.value.toLowerCase();
-        // const selectedStatus = statusFilter.value.toLowerCase();
-
-        rows.forEach(row => {
-            // const orderId = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-            // const customerName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-            // const status = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-
-            // const matchesSearch = orderId.includes(searchText) || customerName.includes(searchText);
-            // const matchesStatus = selectedStatus === '' || status === selectedStatus;
-
-            // row.style.display = matchesSearch && matchesStatus ? 'table-row' : 'none';
-        });
-    } */
-
+    const handleSearch = () => {
+        console.log('handling search: ', searchPhrase)
+    };
     // searchInput.addEventListener('input', applyFilters);
     // statusFilter.addEventListener('change', applyFilters);
-    return (<div>
-        <h1>Order Management</h1>
-        <input type="text" id="searchInput" placeholder="Search by Order ID or Customer Name"/>
-        <select id="statusFilter">
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-        </select>
-        <table>
-            <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer Name</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Shipping Option</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>1001</td>
-                <td>John Doe</td>
-                <td>$250</td>
-                <td className="status-pending">Pending</td>
-                <td>Paid</td>
-                <td>Shipping</td>
-                <td>
-                    <button onClick={() => viewOrderDetails('1001')}>View Details</button>
-                    <button onClick={() => updateOrderStatus('1001', 'shipped')}>Mark as Shipped</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>)
+    return (
+        <Flex direction='column'>
+            <Heading as='h1'>ניהול הזמנות</Heading>
+            <Box w='300px'>
+            <Form onSubmit={handleSearch}>
+                <FormControl m={2}>
+                    <Flex>
+                        <Input type='text'
+                               value={searchPhrase}
+                               onChange={(el: ChangeEvent<HTMLInputElement>) => {
+                                   setSearchPhrase(el.target.value);
+                               }}
+                               name='search'
+                               placeholder='Order ID or Customer Name'
+                               me={2}/>
+                        <IconButton aria-label='Search Order' icon={<SearchIcon />} />
+                    </Flex>
+                </FormControl>
+                <FormControl m={2}>
+                    <Select name='statusFilter'
+                            isSearchable
+                            onChange={handleSelectTypeFilter}
+                            value={typeFilter}
+                            options={[
+                                {label: 'כל ההזמנות', value: 'all'},
+                                {label: 'ממתין לטיפול', value: 'pending'},
+                                {label: 'נשלח', value: 'shipped'},
+                                {label: 'הגיע ליעדו', value: 'delivered'}]} />
+                </FormControl>
+            </Form>
+            </Box>
+            <TableContainer>
+                <Table>
+                    <Thead>
+                        <Tr>
+                            <Th>מספר הזמנה</Th>
+                            <Th>שם לקוח</Th>
+                            <Th>סכום הזמנה</Th>
+                            <Th>סטטוס</Th>
+                            <Th>צורת תשלום</Th>
+                            <Th>צורת משלוח</Th>
+                            <Th>פעולות</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        { orders.length > 0 && orders.map((item: IOrder) => {
+                            console.log(item)
+                            return (
+                            <Tr>
+                                <Td>1001</Td>
+                                <Td>John Doe</Td>
+                                <Td>$250</Td>
+                                <Td className="status-pending">Pending</Td>
+                                <Td>Paid</Td>
+                                <Td>Shipping</Td>
+                                <Td>
+                                    <Button me={2}>צפייה בהזמנה</Button>
+                                    <Button>סימון כנשלח</Button>
+                                </Td>
+                            </Tr>
+                            );
+                        })}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        </Flex>
+    )
 };
 
 export default AdminOrders;
