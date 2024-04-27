@@ -1,149 +1,288 @@
-import {useParams} from "react-router-dom";
-import React, {useEffect, useRef, useState} from "react";
+import {Form, useParams} from "react-router-dom";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
-import axios from "axios";
-import map from "core-js/fn/array/map";
+import axios, {AxiosInstance} from "axios";
+import Select, { MultiValue } from 'react-select';
+import {
+    Button,
+    Flex,
+    FormControl,
+    FormLabel,
+    Heading,
+    Input, NumberDecrementStepper, NumberIncrementStepper,
+    NumberInput,
+    NumberInputField, NumberInputStepper,
+    Textarea, useConst
+} from "@chakra-ui/react";
+import FileUpload from "../../components/common/FileUpload";
+import {ICategory} from "../../../backend/src/models/Category";
+import {StatusCodes} from "http-status-codes";
+
+interface SelectOption {
+    value: string;
+    label: string;
+    name: string;
+}
+
+interface CategoriesData {
+    all: SelectOption[];
+    selected: SelectOption[];
+    old: SelectOption[];
+}
 
 const AdminProductsEdit = () => {
     const params = useParams();
     const isEdit = ('id' in params);
-    let [product, setProduct]: [null | IProduct, any] = useState(null);
+    const [product, setProduct] =
+        useState<IProduct | null>(null);
+    const [categoriesData, setCategoriesData] =
+        useState<CategoriesData>({all: [], selected: [], old: []});
+    const [stock,  setStock] =
+        useState(0);
+    const [uploadedImage, setUploadedImage] = useState("");
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
-        categories: useRef<HTMLSelectElement>(null),
         price: useRef<HTMLInputElement>(null),
-        image: useRef<HTMLInputElement>(null),
-        stock: useRef<HTMLInputElement>(null),
-        description: useRef<HTMLTextAreaElement>(null),
-        submit: useRef<HTMLButtonElement>(null)
+        description: useRef<HTMLTextAreaElement>(null)
     }
-    useEffect(() => {
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+
+    const fetchProducts = useCallback(async () => {
         if (isEdit) {
-            axios.get(`http://localhost:3001/api/products/${params['id']}`)
+            await api.get(`/products/${params['id']}`)
                 .then(response => {
+                    let parsedCategories: SelectOption[] = [];
                     // Process the response data
-                    setProduct(response.data);
-                })
-                .catch(error => {
-                    // Handle any errors
-                    console.error(error);
+                    let productSkeleton: IProduct = response.data;
+                    if (productSkeleton.categories) {
+                        for (const category of productSkeleton.categories) {
+                            // TODO: replace label back to text when available
+                            parsedCategories.push({
+                                value: (category as ICategory)._id as string,
+                                label: (category as ICategory).name,
+                                name: (category as ICategory).name
+                            });
+                        }
+                    }
+                    setCategoriesData((data) => {
+                        return {
+                        ...data,
+                            selected: parsedCategories,
+                            old: parsedCategories
+                        };
+                    });
+                    setProduct(productSkeleton);
                 });
         }
-    }, [isEdit, params])
+        await api.get(`/categories`).then(response => {
+            let categoriesSkeleton: {[key: string]: ICategory} = {} ;
+            for (const category of response.data) {
+                categoriesSkeleton[category.name] = category;
+            }
+            if (response.data.length === 0) {
+                return;
+            }
+            setCategoriesData((data) => {
+                return { ...data,
+                    all:
+                        Object.keys(categoriesSkeleton as {[key: string]: ICategory})
+                            .map(key => {
+                                // TODO replace label back to text when available
+                                return {
+                                    "value": categoriesSkeleton[key]['_id'] as string,
+                                    "label": categoriesSkeleton[key]['name'],
+                                    "name": categoriesSkeleton[key]['name']
+                                };
+                            })
+                };
+            });
+        });
+    }, [api, isEdit, params]);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        fetchProducts().catch(error => console.error(error));
+    }, [fetchProducts])
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         let update = {
             productID: productRefs.ID.current?.value,
             productName: productRefs.name.current?.value,
-            categories: productRefs.categories.current ?
-                Array.from(productRefs.categories.current.selectedOptions, option => option.value) :
-                [],
+            categories: categoriesData.selected,
             price: productRefs.price.current?.value,
-            image: productRefs.image.current?.value,
-            stock: productRefs.stock.current?.value,
+            image: uploadedImage,
+            stock: stock,
             description: productRefs.description.current?.value
         };
         if (product && update.image === "") {
             // keep image
+            // TODO: probably need to have no image to avoid changing it
             update.image = product['image_src']
         }
         // TODO: select categories
-        console.log(update);
+        console.log("update: ", update);
         let updateEntry: IProduct = {
             product_id: update.productID as string,
             name: update.productName as string,
-            categories: update.categories, // TODO: update IProduct to include multiple categories
+            categories: update.categories.map(category => category.value),  // saves us category update request
             price: parseInt(update.price as string),
             image_src: update.image as string,
             description: update.description as string,
-            stock: parseInt(update.stock as string)
+            stock: parseInt(update.stock.toString())
         };
 
+        let updatePromises = [];
         if (isEdit) {
-            const updateURL = `http://localhost:3001/api/products/${params['id']}`;
-            axios.put<IProduct>(updateURL, updateEntry).then(response => {
-                console.log(response);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        } else {
-            const updateURL = `http://localhost:3001/api/products/`;
-            axios.post<IProduct>(updateURL, updateEntry).then(response => {
-                console.log(response);
-            })
-            .catch(error => {
-                console.error(error);
-            });
+            const updateURL = `products/${params['id']}`;
+            let deletedCategories = new Set(categoriesData.old.map(el => el.name));
+            for (const el of update.categories) {
+                deletedCategories.delete(el.name);
+            }
+            let addedCategories = new Set(update.categories.map(el => el.name));
+            for (const el of categoriesData.old) {
+                addedCategories.delete(el.name);
+            }
+            console.log(addedCategories, "del", deletedCategories)
+            updatePromises.push(api.put<IProduct>(updateURL, updateEntry));
+            updatePromises.push(api.put(`products/${params['id']}/categories`, {
+                names: Array.from(addedCategories),
+                id: update.productID,
+                action: 'add'
+            }));
+            updatePromises.push(api.put(`products/${params['id']}/categories`, {
+                names: Array.from(deletedCategories),
+                id: update.productID,
+                action: 'del'
+            }));
+        } else {  // Adding product
+            const updateURL = 'products/';
+            let addedCategories = update.categories.map(el => el.name);
+            updatePromises.push(api.post(updateURL, updateEntry).then(res => {
+                const productID = res.data['id'];
+                api.put(`products/${productID}/categories`, {
+                    names: Array.from(addedCategories),
+                    action: 'add'
+                })
+            }));
         }
-        event.preventDefault();
+        await Promise.all(updatePromises).catch(error => {
+            if (error.response.status === StatusCodes.NOT_MODIFIED) {
+                return;
+            }
+            console.error(error);
+        });
+        // await fetchProducts();
+    }
+
+    const handleSelectCategories = (el: MultiValue<SelectOption>) => {
+        setCategoriesData({...categoriesData, selected: el as SelectOption[]});
+    };
+
+    const handleImageUpload = (files: FileList) => {
+        if (files !== null && files.length > 0) {
+            // TODO: is that how we send it to server?
+            setUploadedImage(URL.createObjectURL(files[0]));
+        }
     }
 
     return (
-        <div className="content">
-            <h1>{(isEdit) ? "Edit Product" : "Add Product"}</h1>
-            <form onSubmit={handleSubmit}>
+        <Flex direction='column' m={4}>
+            <Heading as='h1' size='xl' mb={2}>{(isEdit) ? "עריכת מוצר" : "הוספת מוצר"}</Heading>
+            <Form onSubmit={handleSubmit}>
                 {isEdit &&
-                    <>
-                        <label htmlFor="productID">מזהה מוצר</label>
-                        <input type="text"
+                    <FormControl>
+                        <FormLabel htmlFor="productID">מזהה מוצר</FormLabel>
+                        <Input type="text"
                                id="productID"
                                name="productID"
                                defaultValue={product ? product['_id'] : ''}
                                required
                                disabled
                                ref={productRefs.ID}/>
-                    </>
+                    </FormControl>
                 }
 
-                <label htmlFor="productName">שם המוצר:</label>
-                <input type="text"
-                       id="productName"
-                       name="productName"
-                       defaultValue={product ? product['name'] : ''}
-                       required
-                       ref={productRefs.name}/>
+                <FormControl>
+                    <FormLabel htmlFor="productName">שם המוצר:</FormLabel>
+                    <Input type="text"
+                           id="productName"
+                           name="productName"
+                           defaultValue={product ? product['name'] : ''}
+                           required
+                           ref={productRefs.name}
+                           size='lg'/>
+                </FormControl>
 
                 {/* TODO: Choose categories as in DB */}
-                <label htmlFor="categoriesDropdown">קטגוריות:</label>
-                <select id="categoryDropdown" multiple ref={productRefs.categories}>
-                    <option value="category1">Category 1</option>
-                    <option value="category2">Category 2</option>
-                </select>
+                <FormControl>
+                <FormLabel htmlFor="categoriesDropdown">קטגוריות:</FormLabel>
+                <Select id="categoryDropdown"
+                        name="categories"
+                        isMulti
+                        isSearchable
+                        onChange={handleSelectCategories}
+                        value={categoriesData.selected}
+                        options={categoriesData.all}/>
+                </FormControl>
 
-                <label htmlFor="price">מחיר:</label>
-                <input type="number"
-                       id="price"
-                       name="price"
-                       step="10"
-                       defaultValue={product ? product['price'] : ''}
-                       ref={productRefs.price}
-                       required/>
+                <FormControl>
+                <FormLabel htmlFor="price">מחיר:</FormLabel>
+                    <NumberInput defaultValue={product ? product.price : 0}
+                                 min={0}
+                                 max={99999}
+                                 isRequired
+                                 name='price'
+                                 dir='ltr'
+                                 w='140px'
+                                 allowMouseWheel>
+                        <NumberInputField ref={productRefs.price} />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </FormControl>
 
-                <label htmlFor="picture">תמונה:</label>
-                <input type="file" id="picture" name="picture" required={!isEdit} ref={productRefs.image}/>
-                { product ? <img className="pictureImage" alt={product['name']} src={product['image_src']} /> : ''}
+                <FileUpload defaultImage={(product) ? product.image_src : ""}
+                            handleUpload={handleImageUpload}
+                            isRequired={!isEdit}
+                            name="picture">
+                    העלאת תמונה
+                </FileUpload>
 
-                <label htmlFor="stock">מלאי:</label>
-                <input type="number"
-                       id="stock"
-                       name="stock"
-                       defaultValue={product ? product['stock'] : ''}
-                       required
-                       ref={productRefs.stock}/>
+                <FormControl>
+                <FormLabel htmlFor="stock">מלאי:</FormLabel>
+                    <NumberInput value={(product) ? stock : 1}
+                                 onChange={(_stringStock, numberStock) => setStock(numberStock)}
+                                 min={0}
+                                 max={999}
+                                 isRequired
+                                 name='stock'
+                                 dir='ltr'
+                                 w='140px'
+                                 allowMouseWheel>
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </FormControl>
 
-                <label htmlFor="description">תיאור המוצר:</label>
-                <textarea id="description"
+                <FormControl>
+                <FormLabel htmlFor="description">תיאור המוצר:</FormLabel>
+                <Textarea id="description"
                           name="description"
                           rows={4}
-                          defaultValue={product ? product['description'] : ''}
+                          defaultValue={product ? product.description : ''}
                           ref={productRefs.description}>
-                </textarea>
+                </Textarea>
+                </FormControl>
 
-                <button type="submit" ref={productRefs.submit}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</button>
-            </form>
-        </div>
+                <Button type="submit" mt={2}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</Button>
+            </Form>
+        </Flex>
     )
 };
 

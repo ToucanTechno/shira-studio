@@ -26,7 +26,10 @@ export const insertCategory = async (req: Request, res: Response) => {
 };
 
 export const getAllCategories = async (_req:Request, res:Response) => {
-    const categories = (await Category.find()).map((category) => category.name)//find() is ok here because categories number is small
+    const categories = (await Category.find()).map((category) => {
+        const {__v: _, ...modifiedCategory}: any = category.toObject();
+        return modifiedCategory;
+    }) // find() is ok here because categories number is small
     res.status(200).send(categories);
 }
 
@@ -37,9 +40,13 @@ export const getCategoryByParent = async (req: Request, res: Response) => {
         res.status(400).send('missing category name')
         return;
     }
-    if(name === 'None')//this is because cant have /parent/ to get main parent categories
+    if(name === 'root')//this is because cant have /parent/ to get main parent categories
         name = '';
-    const categories = (await Category.find({parent:name})).map((category) => category.name)
+    const categories = (await Category.find({parent:name}).populate('products'))
+        .map((category) => {
+            const {__v: _, ...modifiedCategory}: any = category.toObject();
+            return modifiedCategory;
+        })
     res.status(200).send(categories);
 }
 
@@ -57,6 +64,7 @@ async function changeCatMulLogic(actionType:string, products:Array<ObjectId>, ca
     }
     else {
         for(const elm of products){
+            // TODO (CR): not very efficient to use indexOf each time. Use 'for ( .. in .. )' that returns the key instead.
             const productIndex = categoryObj.products.indexOf(elm)
             if(productIndex !== -1){//ignore if wanted to delete product that not in the category 
                 categoryObj?.products.splice(productIndex,1);
@@ -70,6 +78,8 @@ async function changeCatMulLogic(actionType:string, products:Array<ObjectId>, ca
     Promise.all(promiseArr);
 }
 
+// TODO (CR): called changeCat but better name would be changeProductsOfCategory
+// was surprised to find this changes both products and categories. Maybe find a better name?
 export const changeCatMul = async (req:Request, res:Response) => {
     const categoryName = req.params['name'];
     const products: Array<any> = req.body['products'];

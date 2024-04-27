@@ -3,11 +3,14 @@ import { changeCatMul, getAllCategories, getCategoryByParent, insertCategory } f
 
 export const categoryRoutes = express.Router();
 
-categoryRoutes.get('/all',getAllCategories);
+categoryRoutes.get('/',getAllCategories);
 
 categoryRoutes.get('/parent/:name', getCategoryByParent);
 
+// TODO: add text field when editing/inserting a category
 categoryRoutes.post('/', insertCategory);
 
-categoryRoutes.put("/:name/change", changeCatMul);
+// TODO: missing regular put query getting a category id/name and editing the name and parent of it.
+
+categoryRoutes.put("/:name", changeCatMul);
 

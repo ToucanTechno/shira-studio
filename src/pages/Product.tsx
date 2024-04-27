@@ -11,7 +11,7 @@ import {
     useConst,
     PopoverTrigger, Popover,
     Portal,
-    PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, PopoverFooter, Link, Icon
+    PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Link, Icon
 } from "@chakra-ui/react";
 import axios, {AxiosInstance} from "axios";
 import {useParams} from "react-router-dom";
@@ -47,7 +47,7 @@ const Product = (props: any) => {
                 console.log("error:", error);
             })
         }
-    }, [api]);
+    }, [params.product, guestData.cartID, api]);
 
     const handleItemsCountChange = (_: string, itemsCount: number) => {
         setItemsCount(itemsCount);
@@ -113,7 +113,6 @@ const Product = (props: any) => {
             </Flex>
             <Card>
                 <CardBody>
-                    { product !== null &&
                     <Wrap direction='row'>
                         <Flex w={['100%', '40%']} direction='column'>
                             <Image h={[300, 180, 250, 360, 430]} bg='#00ee70' fit='contain' src={product.image_src} alt={product.description} />
@@ -130,7 +129,7 @@ const Product = (props: any) => {
                             <Flex direction='row'>
                                 <Popover>
                                     <PopoverTrigger>
-                                        <Button isDisabled={isAddingToCart}
+                                        <Button isDisabled={isAddingToCart || product.stock === 0}
                                                 onClick={handleAddToCart}
                                                 size='lg'
                                                 me={2}
@@ -165,7 +164,6 @@ const Product = (props: any) => {
                             </Flex>
                         </Flex>
                     </Wrap>
-                    }
                     {/* TODO: customer reviews */}
                     {/* TODO: related products */}
                 </CardBody>

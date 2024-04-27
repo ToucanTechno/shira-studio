@@ -1,6 +1,9 @@
-import MenuItem, {ItemType} from "../../components/common/MenuItem";
-import React, {useContext} from "react";
-import {AuthContext} from "../../services/AuthContext";
+import { ItemType } from "../../components/common/MenuItem";
+import React, { useContext } from "react";
+import { AuthContext } from "../../services/AuthContext";
+import {Box, Button, Flex } from "@chakra-ui/react";
+// import {BsBasket3, BsFacebook, BsFillPersonFill, BsGlobe2, BsInstagram} from "react-icons/bs";
+import HoverMenuItem from "../../components/common/HoverMenuItem";
 
 const TopAdminNavbar = () => {
     const navbar: ItemType[] = [
@@ -25,20 +28,19 @@ const TopAdminNavbar = () => {
     }
 
     return (
-        <div className={"TopNavbarContainer adminNavbar"}>
-            <div className="TopNavbar">
+        <Box backgroundColor='cyan.900'>
+            <Box className="TopNavbar">
                 <nav className="TopNavbarNav">
-                    <ul className="TopNavbarList">
-                        {navbar.map(item => {
-                            return <MenuItem key={item.name + '-item'} item={item} menuRefs={menuRefs} />
-                        })}
-                    </ul>
+                    {navbar.map(item =>
+                        <HoverMenuItem
+                            key={item.name + '-item'}
+                            item={item}/>)}
                 </nav>
-                    <div className="TopNavbarSide">
-                        <button onClick={callLogout}>התנתקות</button>
-                    </div>
-            </div>
-        </div>
+                <Flex direction='row' align='center' gap={2}>
+                    <Button colorScheme='whiteAlpha' onClick={callLogout}>התנתקות</Button>
+                </Flex>
+            </Box>
+        </Box>
     );
 }
 export default TopAdminNavbar;

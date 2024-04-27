@@ -1,33 +1,58 @@
-import React, {useContext} from "react";
+import React, {useEffect, useState} from "react";
 import './TopNavbar.css';
 import { BsFacebook, BsInstagram, BsBasket3, BsBookmarks, BsFillPersonFill, BsGlobe2  } from "react-icons/bs";
 import {ItemType} from "./MenuItem";
 import {useNavigate} from "react-router-dom";
-import { Link, Icon, Flex } from "@chakra-ui/react";
-import MenuSubItem from "./MenuSubItem";
+import {Link, Icon, Flex, useConst, Box} from "@chakra-ui/react";
 import HoverMenuItem from "./HoverMenuItem";
+import axios, {AxiosInstance, AxiosResponse} from "axios";
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
 const TopNavbar = () => {
-    const navbar: ItemType[] = [
-        {'name': 'home', 'link': '/', 'text': 'Home'},
-        {'name': 'about', 'link': '/about', 'text': 'About'},
-        {'name': 'jewelry', 'link': '/category/jewelry', 'text': 'Jewelry',
-            'submenu': [
-                {'name': 'earrings', 'link': '/category/jewelry/earrings', 'text': 'Earrings'},
-                {'name': 'brooches', 'link': '/category/jewelry/brooches', 'text': 'Brooches'},
-                {'name': 'bracelets', 'link': '/category/jewelry/bracelets', 'text': 'Bracelets'},
-                {'name': 'necklaces', 'link': '/category/jewelry/necklaces', 'text': 'Necklaces'},
-                {'name': 'body_jewelry', 'link': '/category/jewelry/body_jewelry', 'text': 'Body Jewelry'},
-            ]
-        },
-    ];
+    const [navbar, setNavbar] = useState<ItemType[]>([]);
     const navigate = useNavigate();
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+
+    useEffect(() => {
+        let navbarSkeleton: {[key: string]: ItemType} = {
+               'home': {'name': 'home', 'link': '/', 'text': 'Home'},
+               'about': {'name': 'about', 'link': '/about', 'text': 'About'},
+        };
+        let promises: Promise<void | AxiosResponse<any, any>>[] = [];
+        api.get(`/categories/parent/root`).then((response: any) => {
+            let topCategories = response.data;
+            for (let category of topCategories) {
+                navbarSkeleton[category.name] = {
+                    name: category.name,
+                    link: `/categories/${category.name}`,
+                    text: category.text
+                };
+                promises.push(api.get(`/categories/parent/${category.name}`).then((response) => {
+                    if (response.data.length > 0) {
+                        navbarSkeleton[category.name]['submenu'] = response.data.map((subcategory: any) => {
+                            return {
+                                name: subcategory.name,
+                                link: `/categories/${category.name}/${subcategory.name}`,
+                                text: subcategory.text
+                            };
+                        });
+                    }
+                }));
+            }
+            Promise.all(promises).then(() => {
+                setNavbar(Object.values(navbarSkeleton));
+            });
+        }).catch((error: any) => {
+            // Handle any errors
+            console.error(error);
+        });
+
+    }, []);
 
     return (
-        <div className={"TopNavbarContainer"}>
-            <div className="TopNavbar">
+        <Box backgroundColor='black'>
+            <Box className="TopNavbar">
                 <Flex direction='row' align='center' gap={1}>
                     <Icon boxSize={8} aria-label='Choose Language' as={BsGlobe2} color='white' />
                     <Icon boxSize={8} aria-label='Login' as={BsFillPersonFill} color='white' />
@@ -44,8 +69,8 @@ const TopNavbar = () => {
                     <Icon boxSize={8} aria-label='Facebook Profile' as={BsFacebook} color='white' />
                     <Icon boxSize={8} aria-label='Instagram Profile' as={BsInstagram} color='white' />
                 </Flex>
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 }
 export default TopNavbar;

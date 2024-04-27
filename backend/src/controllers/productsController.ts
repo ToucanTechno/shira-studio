@@ -68,7 +68,7 @@ export const getProducts = async (req: Request, res: Response) => {
         const limit = Math.max(1, Math.min(parseInt(req.query["limit"] as string) || 10, 50));
         // TODO: add sort as a parameter
         const [products, productsCount] = await Promise.all([
-            Product.find().sort({ date: -1 }).skip(skip).limit(limit),
+            Product.find().populate('categories').sort({ date: -1 }).skip(skip).limit(limit),
             Product.countDocuments()
         ]);
 
@@ -85,7 +85,7 @@ export const getSingleProduct = async (req: Request, res: Response) => {
         if (!id) {
             throw new Error("Missing product ID");
         }
-        const product = await Product.findById(id);
+        const product = await Product.findById(id).populate('categories');
         if (!product) {
             res.status(404).send({ message: `Unable to find matching product with id: ${req.params['id']}` });
             return;
@@ -165,7 +165,6 @@ export const deleteProduct = async (req: Request, res: Response) => {
 };
 
 
-
 async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>, productObj: mongoose.Document<unknown, {}, IProductDB> & IProductDB ){
     const promiseArr = []
     if(actionType === 'add'){
@@ -193,22 +192,30 @@ async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>,
     Promise.all(promiseArr);
 }
 
+// TODO (CR): called changeProd but better name would be changeCategoriesOfProduct
+// was surprised to find this changes both products and categories. Maybe find a better name?
 export const changeProdMul = async (req:Request, res:Response) => {
     const categories:Array<any> = req.body['names'];
     const productId = req.params['id'];
     const actionType = req.body['action'];
+    console.log(`updating categories ${categories} of product ${productId}`)
     if(!categories) {
+        console.log('missing categories')
         res.status(400).send('missing category name');
     }
     else if(!productId) {
+        console.log('missing productId')
         res.status(400).send('missing product id');
     }
     else if (actionType !== 'add' && actionType !== 'del') {
+        console.log('missing action type')
         res.status(400).send('missing action type send add/del');
     }
     else {
         const invalidIds = []
+        console.log("here1", categories);
         for(const category of categories){
+            console.log("here2", category);
             if(!await Category.findOne({name:category})){
                 invalidIds.push(category)
             }
@@ -217,11 +224,13 @@ export const changeProdMul = async (req:Request, res:Response) => {
             res.status(400).send('couldn\'t find categories with ids: ' + invalidIds);
         }
         else {
+            console.log("here3", productId);
             const prodObj = await Product.findById(productId)
             if (!prodObj){
                 res.status(400).send('could not find category with name: ' + categories);
                 return;
             }
+            console.log("here4", prodObj);
             await changeProdMulLogic(actionType,categories,prodObj)
             res.status(200).send('change successful')
         }
