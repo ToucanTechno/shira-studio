@@ -57,9 +57,10 @@ const AdminProductsEdit = () => {
                     let productSkeleton: IProduct = response.data;
                     if (productSkeleton.categories) {
                         for (const category of productSkeleton.categories) {
+                            // TODO: replace label back to text when available
                             parsedCategories.push({
                                 value: (category as ICategory)._id as string,
-                                label: (category as ICategory).text,
+                                label: (category as ICategory).name,
                                 name: (category as ICategory).name
                             });
                         }
@@ -87,9 +88,10 @@ const AdminProductsEdit = () => {
                     all:
                         Object.keys(categoriesSkeleton as {[key: string]: ICategory})
                             .map(key => {
+                                // TODO replace label back to text when available
                                 return {
                                     "value": categoriesSkeleton[key]['_id'] as string,
-                                    "label": categoriesSkeleton[key]['text'],
+                                    "label": categoriesSkeleton[key]['name'],
                                     "name": categoriesSkeleton[key]['name']
                                 };
                             })
@@ -99,7 +101,7 @@ const AdminProductsEdit = () => {
     }, [api, isEdit, params]);
 
     useEffect(() => {
-        fetchProducts().then((res) => {}).catch(error => console.error(error));
+        fetchProducts().catch(error => console.error(error));
     }, [fetchProducts])
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -141,6 +143,7 @@ const AdminProductsEdit = () => {
             for (const el of categoriesData.old) {
                 addedCategories.delete(el.name);
             }
+            console.log(addedCategories, "del", deletedCategories)
             updatePromises.push(api.put<IProduct>(updateURL, updateEntry));
             updatePromises.push(api.put(`products/${params['id']}/categories`, {
                 names: Array.from(addedCategories),
