@@ -1,8 +1,64 @@
-import {Request, Response } from "express";
+import {NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { Product, IProductDB } from "../models/Product";
 import { Category } from "../models/Category";
 import mongoose, { ObjectId } from "mongoose";
+import multer from "multer"
+
+//how to send multiple files for multer to look at
+//https://stackoverflow.com/questions/39350040/uploading-multiple-files-with-multer
+
+
+const storage = multer.diskStorage({
+    destination: function (_req:Request, _file, cb) {
+        cb(null, process.cwd() + '/products')//TODO:when on actual server use better path
+    },
+    filename: function (_req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
+    }, 
+});
+const fileFilter = function(_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) {
+    const fileType = file.mimetype.split('/');
+    if (fileType[0] !== 'image' ) {
+        cb(new Error('only images are allowed'));
+        //cb(null,false);
+    }
+    else if(fileType[1] !== 'jpeg' && fileType[1] !== 'jpg' && fileType[1] !== 'png') {
+        cb(new Error('only send file of type jpeg/jpg/png'));
+        //cb(null,false);
+    }
+    else{
+        cb(null,true);
+    }
+
+}
+export const ProductUpload = multer({ storage: storage, fileFilter: fileFilter});
+
+//think what to do about if we change picture do we delete the changed picture? currently it only replace the link to the image
+export const ProductUploadLogic = async (req:Request,res:Response) =>{
+    const productId = req.params['id'];
+    if(!productId){//TODO: probably need to move this error checks to fileFilter so the upload wont be saved if wrong product info is sent
+        res.status(400).send('missing product id');
+        return;
+    }
+    const product = await Product.findById(productId);
+    if(!product){
+        res.status(400).send('no product with given id');
+        return;
+    }
+    if(!req.file?.filename){//this could not happen check how to explain that to compiler
+        res.status(400).send('no file name??');
+        return;
+    }
+    product.image_src = req.file.filename;
+    await product.save();
+    res.status(200).send('upload completed');
+}
+
+export const productUploadErr = (err: Error, _req: Request, res: Response,_next:NextFunction) => {
+    res.status(400).send(err.message)
+}
 
 export const getProducts = async (req: Request, res: Response) => {
     console.log("get products", req.params, req.query['skip'], req.query['limit']);

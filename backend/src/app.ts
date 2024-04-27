@@ -15,7 +15,10 @@ dotenv.config({path: "src/.env"});
 if (process.env["DB_CONN_STRING"] === undefined || process.env["DB_NAME"] === undefined) {
     throw new Error("Missing DB Credentials.");
 }
-mongoose.connect(process.env["DB_CONN_STRING"] + '?replicaSet=' + process.env["REPLICA_NAME"], { dbName: process.env["DB_NAME"] });
+mongoose.connect(process.env["DB_CONN_STRING"] + '?replicaSet=' + process.env["REPLICA_NAME"], { dbName: process.env["DB_NAME"] }).
+        catch((error) => {
+            throw error;
+        });
 const app: Express = express();
 const port = process.env["PORT"] || 3001;
 

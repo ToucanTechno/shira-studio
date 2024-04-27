@@ -1,10 +1,13 @@
 import express from "express";
 import {
+    ProductUpload,
+    ProductUploadLogic,
     changeProdMul,
     deleteProduct,
     getProducts,
     getSingleProduct,
     insertProduct,
+    productUploadErr,
     updateProduct
 } from "../controllers/productsController";
 
@@ -22,6 +25,8 @@ productsRouter.get('/c/:category/', getProducts);
 // POST
 // TODO: add admin authentication check for insert, update, delete
 productsRouter.post('/', insertProduct);
+//TODO: currently there needs to be products file under the backend to save files to need a way to create it automatically 
+productsRouter.post('/:id/upload',ProductUpload.single('product'),ProductUploadLogic).use(productUploadErr);
 
 // PUT
 productsRouter.put('/:id', updateProduct);
