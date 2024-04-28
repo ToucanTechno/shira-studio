@@ -2,6 +2,7 @@ import {Request, Response } from "express";
 import { Cart, ICart } from "../models/Cart";
 import {  Product } from "../models/Product";
 import mongoose, { isValidObjectId } from "mongoose";
+import {StatusCodes} from "http-status-codes";
 
 
 
@@ -74,6 +75,7 @@ function checkUpdateCartInputs(res: Response, cartId: any, prodId: any,amount: a
 export const updateCart = async (req: Request, res:Response) => {
     const cartId = req.params['id'];
     const prodId = req.body['productId'];
+    // TODO: improve name, amount doesn't indicate that it is an amount difference.
     let amountToChange = req.body['amount'];
     
     try {
@@ -103,7 +105,7 @@ export const updateCart = async (req: Request, res:Response) => {
                     res.status(200).send('Product removed from cart');
                 }
                 else if(amountToChange > product.stock){
-                    res.status(400).send('Requested amount above stock')
+                    res.status(StatusCodes.CONFLICT).send('Requested amount above stock')
                 }
                 else{
                     cart.products.set(prodId,{product:prodId,amount:amountToChange});

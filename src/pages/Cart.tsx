@@ -4,9 +4,9 @@ import {
     Image,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, TableCaption,
     Text, Card, Wrap, Spacer, FormControl, FormLabel, RadioGroup, Radio, FormHelperText, Stack, Input,
-    Tfoot, Button, CloseButton, useConst
+    Tfoot, Button, CloseButton, useConst, useToast
 } from "@chakra-ui/react";
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useMemo, useState} from "react";
 import axios, {AxiosInstance} from "axios";
 import {AuthContext} from "../services/AuthContext";
 import {ICartModel} from "../models/CartModel";
@@ -15,19 +15,56 @@ const Cart = () => {
     const [cart, setCart] = useState<ICartModel | null>(null);
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     const { guestData, setGuestData} = useContext(AuthContext)
+    const alertToast = useToast()
+
+    const totalPrice = useMemo(() => {
+        if (!cart) {
+            return 0;
+        }
+        return Object.keys(cart.products).map(cartKey => {
+            const item = cart.products[cartKey];
+            return item.product.price * item.amount;
+        }).reduce((sum, current) => sum + current, 0);
+    }, [cart]);
 
     useEffect(() => {
         if (guestData.cartID) {
             api.get(`/cart/${guestData.cartID}`).then(response => {
-                console.log(response.data)
                 setCart(response.data);
             }).catch(error => {
                 console.log("error:", error);
             })
         }
     }, [guestData]);
-    const handleItemCountChange = (inputName: string, strVal: string, val: number) => {
-        console.log(inputName, strVal, val);
+    const handleItemCountChange = (val: number, cartKey: string) => {
+        if (!cart) {
+            return;
+        }
+        if (val > cart.products[cartKey].product.stock) {
+            alertToast({
+                title: 'אין במלאי מעבר לכמות זו',
+                description: `מוצר ${cart.products[cartKey].product.name}`,
+                status: 'error',
+                duration: 80000,
+                isClosable: true,
+                position: 'top',
+                containerStyle: {
+                    textAlign: 'right'
+                }
+            });
+            return;
+        }
+        const amountToChange = val - cart.products[cartKey].amount;
+        console.log(cart.products[cartKey]);
+        api.put(`/cart/${guestData.cartID}`, {
+            productId: cartKey,
+            amount: amountToChange
+        }).then((res) => {
+            cart.products[cartKey].amount = val;
+            setCart({...cart, products: cart.products});
+            console.log(val, cartKey);
+            console.log(res)
+        }).catch(error => console.error(error));
     }
     return (
         <Flex direction='column' align='center' w={['100%','100%', '80%']} alignSelf='center'>
@@ -46,7 +83,6 @@ const Cart = () => {
                     <Tbody>
                         {cart && Object.keys(cart.products).map(cartKey => {
                             let item = cart.products[cartKey];
-                            console.log(cartKey, 'item', item);
                             return (
                                 <Tr key={item.product._id}>
                                     <Td><Image src='test.jpg' alt='test.jpg' /></Td>
@@ -56,12 +92,8 @@ const Cart = () => {
                                         {/* TODO: on blue ask user whether to remove item */}
                                         <NumberInput name='amount'
                                                      value={cart.products[cartKey].amount}
-                                                     onChange={(_, val) => {
-                                                         cart.products[cartKey].amount = val;
-                                                         setCart({...cart, products: cart.products});
-                                                     }}
+                                                     onChange={(_, val) => handleItemCountChange(val, cartKey)}
                                                      allowMouseWheel
-                                                     dir='ltr'
                                                      size='sm'
                                                      w={16}
                                                      min={0}
@@ -80,6 +112,7 @@ const Cart = () => {
                     </Tbody>
                 </Table>
             </TableContainer>
+            {/* TODO: move to another component */}
             <Wrap direction='row' w='100%'>
                 <Flex direction='column' w={['100%', '100%', '60%']}>
                     <Card m={2}>
@@ -156,12 +189,15 @@ const Cart = () => {
                             <Tbody>
                                 <Tr>
                                     <Td>מוצרים</Td>
-                                    <Td dir='ltr'>1000</Td>
+                                    <Td dir='ltr'>
+                                        {totalPrice}
+                                    </Td>
                                 </Tr>
-                                <Tr>
-                                    <Td>הנחה</Td>
-                                    <Td dir='ltr'>-200</Td>
-                                </Tr>
+                                {/* TODO: add discounts */}
+                                {/*<Tr>*/}
+                                {/*    <Td>הנחה</Td>*/}
+                                {/*    <Td dir='ltr'>-200</Td>*/}
+                                {/*</Tr>*/}
                                 <Tr>
                                     <Td>משלוח</Td>
                                     <Td dir='ltr'>100</Td>
@@ -170,7 +206,7 @@ const Cart = () => {
                             <Tfoot>
                                 <Tr>
                                     <Td><Text as='b'>סה"כ</Text></Td>
-                                    <Td dir='ltr'><Text as='b'>900</Text></Td>
+                                    <Td dir='ltr'><Text as='b'>{totalPrice + 100}</Text></Td>
                                 </Tr>
                             </Tfoot>
                         </Table>

@@ -63,6 +63,7 @@ export const productUploadErr = (err: Error, _req: Request, res: Response,_next:
 export const getProducts = async (req: Request, res: Response) => {
     console.log("get products", req.params, req.query['skip'], req.query['limit']);
     try {
+        // TODO: should replace with Range HTTP header
         const skip = Math.max(0, parseInt(req.query["skip"] as string) || 0);
         // Forbid limit=0 since it requests all entries
         const limit = Math.max(1, Math.min(parseInt(req.query["limit"] as string) || 10, 50));

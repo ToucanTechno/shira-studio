@@ -43,7 +43,6 @@ const AdminProductsEdit = () => {
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
-        price: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null)
     }
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
@@ -113,7 +112,7 @@ const AdminProductsEdit = () => {
             productID: productRefs.ID.current?.value,
             productName: productRefs.name.current?.value,
             categories: categoriesData.selected,
-            price: productRefs.price.current?.value,
+            price: price,
             image: uploadedImage,
             stock: stock,
             description: productRefs.description.current?.value
@@ -129,7 +128,7 @@ const AdminProductsEdit = () => {
             product_id: update.productID as string,
             name: update.productName as string,
             categories: update.categories.map(category => category.value),  // saves us category update request
-            price: parseInt(update.price as string),
+            price: update.price,
             image_src: update.image as string,
             description: update.description as string,
             stock: parseInt(update.stock.toString())
@@ -230,16 +229,15 @@ const AdminProductsEdit = () => {
 
                 <FormControl>
                 <FormLabel htmlFor="price">מחיר:</FormLabel>
-                    <NumberInput value={product ? price : 0}
+                    <NumberInput value={price}
                                  onChange={(_stringPrice, numberPrice) => setPrice(numberPrice)}
                                  min={0}
                                  max={99999}
                                  isRequired
                                  name='price'
-                                 dir='ltr'
                                  w='140px'
                                  allowMouseWheel>
-                        <NumberInputField ref={productRefs.price} />
+                        <NumberInputField />
                         <NumberInputStepper>
                             <NumberIncrementStepper />
                             <NumberDecrementStepper />
@@ -247,19 +245,19 @@ const AdminProductsEdit = () => {
                     </NumberInput>
                 </FormControl>
 
-                <FileUpload defaultImage={(product) ? product.image_src : ""}
-                            handleUpload={handleImageUpload}
-                            isRequired={!isEdit}
+                <FileUpload defaultImage={ (product) ? product.image_src : "" }
+                            handleUpload={ handleImageUpload }
+                            isRequired={ !isEdit }
                             name="picture">
                     העלאת תמונה
                 </FileUpload>
 
                 <FormControl>
                 <FormLabel htmlFor="stock">מלאי:</FormLabel>
-                    <NumberInput value={(product) ? stock : 1}
-                                 onChange={(_stringStock, numberStock) => setStock(numberStock)}
-                                 min={0}
-                                 max={999}
+                    <NumberInput value={ stock }
+                                 onChange={ (_stringStock, numberStock) => setStock(numberStock) }
+                                 min={ 0 }
+                                 max={ 999 }
                                  isRequired
                                  name='stock'
                                  dir='ltr'

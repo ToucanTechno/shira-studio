@@ -149,7 +149,6 @@ const Product = (props: any) => {
                                 </Popover>
                                 <NumberInput onChange={handleItemsCountChange}
                                              allowMouseWheel
-                                             dir='ltr'
                                              size='lg'
                                              maxW={20}
                                              value={itemsCount}
