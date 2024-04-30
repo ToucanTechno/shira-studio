@@ -1,5 +1,11 @@
+import {Box} from "@chakra-ui/react";
+
 const AdminUsers = () => {
-    return (<div></div>)
+    return (
+        <Box m={2}>
+            בבנייה
+        </Box>
+    )
 };
 
 export default AdminUsers;

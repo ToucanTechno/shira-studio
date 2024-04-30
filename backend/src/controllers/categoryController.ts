@@ -5,22 +5,27 @@ import mongoose, { ObjectId } from "mongoose";
 
 
 export const insertCategory = async (req: Request, res: Response) => {
-    const name:string = req.body['name'];
+    const name: string = req.body['name'];
+    const text: string = req.body['text'];
     const parent = req.body['parent'] ? req.body['parent'] : '' //'' for main parent category
     console.log(parent)
     if (name === undefined ) {
         res.status(400).send('missing category name');
         return    
     }
-    else if(await Category.findOne({name:name})) {
+    else if(await Category.findOne({ name: name })) {
         res.status(400).send('category already exist');
         return    
     }
-    else if(parent !== '' && !await Category.findOne({name:parent})){
+    else if(parent !== '' && !await Category.findOne({ name: parent })){
         res.status(400).send('no parent category');
         return
     }
-    const categoryObj = new Category({name: name, parent:parent});
+    const categoryObj = new Category({
+        name: name,
+        text: text,
+        parent:parent
+    });
     const result = await categoryObj.save();
     res.status(201).send({message: "category created successfully.", id:result._id});
 };

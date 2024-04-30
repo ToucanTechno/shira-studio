@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import { ICart, ProductOrder } from './Cart';
 
-export enum shipmentStep { //probably would need it in the front as well to know what the value means
+// TODO: when updating update schema until it's automatic
+export enum ShipmentStep { //probably would need it in the front as well to know what the value means
     Packaging,
     Shipped,
     Arrived
@@ -9,19 +10,24 @@ export enum shipmentStep { //probably would need it in the front as well to know
 
 export interface IOrder {
     name: string;
-    country: string
-    city: string
-    street: string
-    zipCode: number
-    comments: string
-    paymentType: string //maybe can change to enum of known payments
-    paymentReceipt: string
-    shipmentStep: shipmentStep //maybe add array of date when step changed for better tracking
-    trackingNumber: string
-    products: Map<string,ProductOrder>
-    cart: string | ICart
-    createdAt:Date
-    updatedAt:Date
+    phone: string;
+    country: string;
+    city: string;
+    street: string;
+    zipCode: number;
+    houseNumber: string;
+    entry: string;
+    apartment: string;
+    comments: string;
+
+    paymentType: string; //maybe can change to enum of known payments
+    paymentReceipt: string;
+    shipmentStep: ShipmentStep; //maybe add array of date when step changed for better tracking
+    trackingNumber: string;
+    products: Map<string,ProductOrder>;
+    cart: string | ICart;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const orderSchema = new mongoose.Schema({
@@ -52,7 +58,8 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     shipmentStep: {//packaged shipped and such
-        type:String
+        type: String,
+        enum: ['Packaging', 'Shipped', 'Arrived']  // TODO: make enum extract strings automatically
     },
     trackingNumber:{
         type:String //not sure how tracking number actually looks like maybe have letters and such

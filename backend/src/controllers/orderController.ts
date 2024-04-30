@@ -1,5 +1,5 @@
 import { Cart } from "../models/Cart";
-import { IOrder, Order, shipmentStep } from "../models/Order";
+import { IOrder, Order, ShipmentStep } from "../models/Order";
 import { Request, Response } from "express";
 
 
@@ -34,8 +34,10 @@ export const getOrders = async (req: Request, res: Response) => {
 //TODO: can try to add check to israel post for valid address
 export const insertOrder = async (req: Request, res: Response) => {
     const order: IOrder = req.body;
+    // TODO: change to cartId so it's clearer
     const cartId = req.body['cart'];
-    if (!order.name || !order.city || !order.street || !cartId || !order.paymentReceipt || !order.paymentType) {
+    // TODO: add paymentReceipt and paymentType when attaching to credit card service
+    if (!order.name || !order.city || !order.street || !cartId /*|| !order.paymentReceipt || !order.paymentType*/) {
         res.status(400).send('missing field');
         return;
     }
@@ -53,7 +55,7 @@ export const insertOrder = async (req: Request, res: Response) => {
         return;
     }
     order.products = cart.products;
-    order.shipmentStep = shipmentStep.Packaging;   
+    order.shipmentStep = ShipmentStep.Packaging;
     //should reset user cart somehow after order complete so can order new items
     const objOrder = new Order(order);
     const result = await objOrder.save();

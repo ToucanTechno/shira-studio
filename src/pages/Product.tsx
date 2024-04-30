@@ -114,12 +114,12 @@ const Product = (props: any) => {
             <Card>
                 <CardBody>
                     <Wrap direction='row'>
-                        <Flex w={['100%', '40%']} direction='column'>
+                        <Flex w={['100%', '45%']} direction='column'>
                             <Image h={[300, 180, 250, 360, 430]} bg='#00ee70' fit='contain' src={product.image_src} alt={product.description} />
-                            <Flex direction='row' mt={1}>
-                                <Image flexGrow='1' me={1} fit='contain' bg='#0080ff' h={[100, 70, 100, 140, 180]} src={product.image_src} alt={product.description} />
-                                <Image flexGrow='1' me={1} fit='contain' bg='#5080ff' h={[100, 70, 100, 140, 180]} src={product.image_src} alt={product.description} />
-                                <Image flexGrow='1' fit='contain' bg='#8080ff' h={[100, 70, 100, 140, 180]} src={product.image_src} alt={product.description} />
+                            <Flex direction='row' mt={1} justifyContent='stretch'>
+                                <Image flexGrow='1' me={1} fit='contain' bg='#0080ff' src={product.image_src} alt={product.description} />
+                                <Image flexGrow='1' me={1} fit='contain' bg='#5080ff'  src={product.image_src} alt={product.description} />
+                                <Image flexGrow='1' fit='contain' bg='#8080ff'  src={product.image_src} alt={product.description} />
                             </Flex>
                         </Flex>
                         <Flex direction='column'>
@@ -129,6 +129,8 @@ const Product = (props: any) => {
                             <Flex direction='row'>
                                 <Popover>
                                     <PopoverTrigger>
+                                        {/* TODO: make button disabled until popover is closed */}
+                                        {/* TODO: make sure stock minus cart value > 0 */}
                                         <Button isDisabled={isAddingToCart || product.stock === 0}
                                                 onClick={handleAddToCart}
                                                 size='lg'
@@ -139,10 +141,10 @@ const Product = (props: any) => {
                                         <PopoverContent>
                                             <PopoverArrow />
                                             <PopoverCloseButton />
-                                            <PopoverBody dir="ltr">
+                                            <PopoverBody>
                                                 { /* TODO: on hover color = black */ }
                                                 <Link href='/cart'><Icon boxSize={8} aria-label='Cart' as={BsCartCheckFill} color='gray' /></Link>
-                                                <Text>Products: {product.name} x {itemsCount} added successfully!</Text>
+                                                <Text>המוצר: {product.name} x {itemsCount} נוסף לעגלה בהצלחה!</Text>
                                             </PopoverBody>
                                         </PopoverContent>
                                     </Portal>
@@ -154,6 +156,7 @@ const Product = (props: any) => {
                                              value={itemsCount}
                                              min={0}
                                              max={product.stock}>
+                                    {/* TODO: max should me stock minus cart value */}
                                     <NumberInputField />
                                     <NumberInputStepper>
                                         <NumberIncrementStepper />

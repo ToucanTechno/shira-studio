@@ -5,11 +5,11 @@ import {
     Flex,
     FormControl,
     FormLabel,
-    Input, ScaleFade, useConst,
+    Input, useConst,
     useDisclosure
 } from "@chakra-ui/react";
 import {ICategory} from "../../../backend/src/models/Category";
-import React, {useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {Form} from "react-router-dom";
 import Select, {SingleValue} from "react-select";
 import axios, {AxiosInstance} from "axios";
@@ -25,21 +25,21 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
     const { isOpen, onToggle, onClose } = useDisclosure();
     const [name, setName] =
         useState<string | undefined>();
+    const [text, setText] =
+        useState<string | undefined>();
     const [parent, setParent] =
         useState<SelectOption | null>({value: '', label: '-'})
-    const categoryRefs = {
-        name: useRef<HTMLInputElement>(null),
-    }
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     // Close add category if starting to edit another category
     useEffect(() => {
-        if (isOpen && props.disabled == true) {
+        if (isOpen && props.disabled === true) {
             setParent({value: '', label: '-'});
             setName(undefined);
+            setText(undefined);
             onClose();
         }
-    }, [props.disabled]);
+    }, [isOpen, onClose, props.disabled]);
 
     const handleSelectParent = (el: SingleValue<SelectOption>) => {
         setParent(el)
@@ -48,7 +48,8 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
     const handleAddCategory = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         let update = {
-            name: categoryRefs.name.current?.value,
+            name: name,
+            text: text,
             parent: parent?.value
         };
         console.log("update: ", update);
@@ -72,7 +73,18 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                     <Form onSubmit={handleAddCategory}>
                         <Flex direction='row'>
                             <FormControl me={2}>
-                                <FormLabel htmlFor='categoryName'>שם הקטגוריה</FormLabel>
+                                <FormLabel htmlFor='categoryText'>שם הקטגוריה</FormLabel>
+                                <Input type='text'
+                                       bgColor='white'
+                                       name='categoryText'
+                                       required
+                                       value={text}
+                                onChange={(el: ChangeEvent<HTMLInputElement>) => {
+                                    console.log(el);
+                                    setText(el.target.value)}}/>
+                            </FormControl>
+                            <FormControl me={2}>
+                                <FormLabel htmlFor='categoryName'>שם הקטגוריה באנגלית</FormLabel>
                                 <Input type='text'
                                        bgColor='white'
                                        name='categoryName'

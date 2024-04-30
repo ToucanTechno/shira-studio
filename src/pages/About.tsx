@@ -3,7 +3,7 @@ import './About.css'
 import { BsFacebook, BsInstagram, BsFillEnvelopePaperFill, BsTrophy } from "react-icons/bs";
 import YoutubeEmbed from "../components/home/YoutubeEmbed";
 import Footer from "../components/common/Footer";
-import {Box, Button, Heading, Text} from "@chakra-ui/react";
+import {Box, Button, Center, Container, Heading, ListItem, Text, UnorderedList} from "@chakra-ui/react";
 
 const About = () => {
     const [isPublicationsDisplayed, setIsPublicationsDisplayed] = useState(false);
@@ -39,10 +39,10 @@ const About = () => {
                     </Box>
                 </Box>
             </Box>
-            <Box className="about-intro">
-                <Text>היצירה עבורי היא תשוקה הנובעת כמיי המעיין. &#10084;</Text>
-            </Box>
-            <Box className="about-content">
+            <Center>
+                <Heading as='h2' size='lg' mt={5}>היצירה עבורי היא תשוקה הנובעת כמיי המעיין. &#10084;</Heading>
+            </Center>
+            <Container maxW='container.xl' color='#888'>
                 <Heading as='h2' size='lg'>
                     אמנית בין תחומית
                 </Heading>
@@ -91,29 +91,29 @@ const About = () => {
                     <Heading as='h3' size='md'>
                         מלגות ופרסים
                     </Heading>
-                    <ul>
-                        <li>
+                    <UnorderedList>
+                        <ListItem>
                             1977-79 מילגות לימודים מתורמים לאקדמיה בצלאל
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1978 השתתפתי בתחרות תכשיט תעשייתי בזהב.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1978- פרס ראשון של האקדמיות לעיצוב, ועירית ירושלים,  עבור עיצוב מתנה לאישיות חשובה.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1979    פרס קרן תרבות אמריקה ישראל , מלגת לימודים לשנה, ופרסי עיצוב נוספים.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1984-מלגת לימודים באיטליה (משה"ח+משרד החוץ וממשלת איטליה).
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1980-1981   שנת התמחות במחקר ופיתוח בבצלאל בנושא מעבדת אנדודייז (צביעת אלומיניום) והדרכת סטודנטים. המשכתי להנחות  סטודנטים בעבודות גמר במהלך שנות השמונים.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1985-2017 הכשרות רבות בתחומי פדגוגיה  כולל חינוך, טכנולוגיה , תוכנות גראפיות ותקשוב, אמנות  ועוד.
-                        </li>
-                    </ul>
+                        </ListItem>
+                    </UnorderedList>
                     <Heading as='h3' size='md'>
                         עבודה
                     </Heading>
@@ -141,103 +141,103 @@ const About = () => {
                     <Heading as='h3' size='md'>
                         תערוכות ופרסומים כצורפת:
                     </Heading>
-                    <ul>
-                        <li>
+                    <UnorderedList>
+                        <ListItem>
                             1978 תערוכות של סטודנטים מבצלאל Schmuckmuseum Pforzhim
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Deusches Goldschmiedehaus Hanau
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Electrum Gallery, London
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Bloomingdale's, New York and Philadelphia, USA
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Hilton hotel , Jerusalem' Israel
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1979, 1981 1979, Exaplla Gallery, Munich, Germany
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1979 תערוכה קבוצתית בנושא יודאיקה בבית הכנסת הגדול היכל שלמה בירושלים
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1981 תערוכה קבוצתית בגלריה הוראס ריכטר יפו תל אביב.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982 תערוכה קבוצתית בתיאטרון ירושלים.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982 השתתפות בתערוכה קבוצתית Multi-media non-precious jewllery 1982 JEWELLRY REDEFINED
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982 תערוכה קבוצתית ביפן Modern Israel Jewelry Exhibition Adventure
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1983 1981, 1982, השתתפות בתערוכה נודדת של בוגרי בצלאל , באירופה בהולנד Zonnehof Muzeum
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1983 בוגרי בצלאל באנטורפן- בלגיה Museum Vleeshuis
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             ביפן, טוקיו- באולם התצוגות של לחברת "מיקומוטו"
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             בקנדה, טורנטו Koffler Crnter of the Arts
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             בארה"ב, ממפיס National Ornamental Metal Museum
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             בארה"ב Brandeis University, Rose Museum
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Magnus Museum, Berkley
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982 הצגתי במוזיאון Schmuckmuseum Pforzheim בתערוכה
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             Schmuck 82 Tendenzen?
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1979-1984 עבודותיי פורסמו בקטלוגים של בצלאל.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982-84 הצגת תכשיטים ומכירה באספקט גלרי ואלקטרום גלרי בלונדון
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1984 הצגתי ביריד חוצות היוצר תכשיטים מטיטניום ומאלומניום עם ציפויי אנודייז.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             198201986 הצגתי מזוזות ועבודות בגלריות בפלורידה ארה"ב.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1990 International Pearl Design Contest Japan Pearl Promotion Society , Tokyo
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1982-1992 הצגת תכשיטים ומזוזות ומכירה בבית אות המוצר ירושלים, בגלריה אלף בתל אביב
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1993- הצגת תכשיטים ומכירה כמחווה לתכשיטי מצרים העיקה בחנות מוזיאון ישראל.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1996 הצגת עבודות בגלריית המורים באגף הנוער מוזיאון ישראל.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1997 נבחרתי לעצב ולבצע מתנות לתורם לאורט רחובות מקס שיין מארה"ב ולמנכ"ל אורט ישראל שפרש לגמלאות מר ישראל גורלניק.
-                        </li>
-                        <li>
+                        </ListItem>
+                        <ListItem>
                             1988 עצבתי קיר זיכרון לחללי אורט רחובות (עץ ומתכת).
-                        </li>
-                    </ul>
+                        </ListItem>
+                    </UnorderedList>
                 </Box>
-            </Box>
-            <Box className="about-video">
-                <YoutubeEmbed className="video-container" embedID="9hs-1K53ezA" customBorder={true}/>
-            </Box>
+                <Box className="about-video">
+                    <YoutubeEmbed className="video-container" embedID="9hs-1K53ezA" customBorder={true}/>
+                </Box>
+            </Container>
             <Footer />
         </Box>
     );
