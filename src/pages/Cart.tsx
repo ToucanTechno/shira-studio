@@ -11,6 +11,7 @@ import {AuthContext} from "../services/AuthContext";
 import {ICartModel} from "../models/CartModel";
 import CartOrder from "./CartOrder";
 import {BsCartDash} from "react-icons/bs";
+import {useBlocker} from "react-router-dom";
 
 const Cart = () => {
     const [cart, setCart] = useState<ICartModel | null>(null);
@@ -21,6 +22,17 @@ const Cart = () => {
         isClosable: true,
         position: 'top'
     })
+    let leaveCartBlocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+            (cart !== null && cart.lock && currentLocation.pathname !== nextLocation.pathname)
+    )
+
+    useEffect(() => {
+        if (leaveCartBlocker.state === "blocked") {
+            console.log("unblocking");
+            leaveCartBlocker.proceed();
+        }
+    }, [leaveCartBlocker]);
 
     const totalPrice = useMemo(() => {
         if (!cart) {

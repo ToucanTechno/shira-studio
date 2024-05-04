@@ -63,6 +63,8 @@ const CartOrder = (props: CartOrderProps) => {
             return;
         }
         console.log(ev);
+        // TODO: lock cart if unlocked
+        // TODO: test added / removed amounts when cart is locked
         api.post('/orders', {
             cart: props.cartID,
             name: `${firstName} ${lastName}`,
@@ -77,6 +79,8 @@ const CartOrder = (props: CartOrderProps) => {
             comments: 'TODO'
         }).then(res => {
             console.log(res.data);
+            // TODO: delete cart if still exists and create a new one in context
+            // TODO: leave page and make sure cart unlocks on block event
         }).catch(error => console.error(error));
     };
 
