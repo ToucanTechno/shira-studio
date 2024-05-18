@@ -1,12 +1,19 @@
-import React, { createContext, useState, ReactNode } from "react";
+import React, {createContext, useState, ReactNode, useCallback} from "react";
 import "core-js/stable/atob";
 import {v4 as uuidv4} from "uuid";
+import {useConst} from "@chakra-ui/react";
+import axios, {AxiosInstance} from "axios";
 
-interface CurrentUserContextType {
+export interface GuestDataType {
+    guestID: string | null;
+    cartID: string | null;
+}
+interface AuthContextType {
+    api: AxiosInstance;
     authTokens: string | null;
     setAuthTokens: React.Dispatch<React.SetStateAction<string | null>>;
-    guestData: {guestID: string | null, cartID: string | null};
-    setGuestData: React.Dispatch<React.SetStateAction<{guestID: string | null, cartID: string | null}>>;
+    guestData: GuestDataType;
+    setGuestData: React.Dispatch<React.SetStateAction<GuestDataType>>
     callLogout: () => void;
 }
 
@@ -14,12 +21,11 @@ interface Props {
     children: ReactNode;
 }
 
-export const AuthContext = createContext<CurrentUserContextType>(
-    {} as CurrentUserContextType
-);
+export const AuthContext = createContext<AuthContextType>( {} as AuthContextType );
 
 export const AuthProvider = (props: Props) => {
     // console.log("Starting AuthProvider...")
+    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     let [authTokens, setAuthTokens] = useState<string | null>(() => {
             let tokenInfo = localStorage.getItem("authTokens");
             // console.log("Getting tokenInfo from localStorage, setting initial authTokens in context", tokenInfo);
@@ -29,7 +35,7 @@ export const AuthProvider = (props: Props) => {
         }
     );
     let [guestData, setGuestData] =
-            useState<{guestID: string | null, cartID: string | null}>(() => {
+            useState<GuestDataType>(() => {
         let storedGuestID = localStorage.getItem("guestID");
         let storedCartID = localStorage.getItem("cartID");
         // console.log("stored guest ID", storedGuestID);
@@ -38,16 +44,18 @@ export const AuthProvider = (props: Props) => {
             // console.log("new guest ID", storedGuestID);
             localStorage.setItem("guestID", storedGuestID as string);
         }
-        return {guestID: storedGuestID, cartID: storedCartID};
+        return { guestID: storedGuestID, cartID: storedCartID };
     });
 
-    function callLogout() {
+    const callLogout = useCallback(() => {
         localStorage.removeItem("authTokens");
+        // TODO: remove cart details and regenerate guest ID
         setAuthTokens(null);
-    }
+    }, []);
 
     return (
         <AuthContext.Provider value={{
+            api,
             authTokens,
             setAuthTokens,
             guestData,

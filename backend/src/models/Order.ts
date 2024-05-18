@@ -3,9 +3,9 @@ import { ICart, ProductOrder } from './Cart';
 
 // TODO: when updating update schema until it's automatic
 export enum ShipmentStep { //probably would need it in the front as well to know what the value means
-    Packaging,
-    Shipped,
-    Arrived
+    Packaging = 'Packaging',
+    Shipped = 'Shipped',
+    Arrived = 'Arrived'
 }
 
 export interface IOrder {
@@ -49,13 +49,15 @@ const orderSchema = new mongoose.Schema({
     comments: {
         type: String
     },
+    // TODO: make paymentType required
     paymentType: {
         type:String,
-        required: true
+        //required: true
     },
+    // TODO: make paymentReceipt required
     paymentReceipt: {
         type:String,
-        required: true
+        //required: true
     },
     shipmentStep: {//packaged shipped and such
         type: String,

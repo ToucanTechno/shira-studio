@@ -41,7 +41,7 @@ export const getCartSummary = async (req: Request, res: Response) => {
 
 export const insertCart = async (req: Request, res: Response) => {
     //TODO: make sure to rate limit so no dddos
-    const cartObj = new Cart({products: new Map()});
+    const cartObj = new Cart({products: new Map(), lock: false});
     if (req.body["userId"]){
         if(await Cart.findOne({userId:req.body["userId"]}).exec() !== null){
             res.status(400).send({message: "cart already exist for user"});
@@ -50,7 +50,7 @@ export const insertCart = async (req: Request, res: Response) => {
         cartObj.userId = req.body["userId"];
     }
     const result = await cartObj.save();
-    res.status(201).send({message: "carte created successfully.", id:result._id});
+    res.status(201).send({message: "carte created successfully.", id:result._id, lock: false});
 };
 
 function checkUpdateCartInputs(res: Response, cartId: any, prodId: any,amount: any){

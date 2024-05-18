@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {
     Breadcrumb, BreadcrumbItem, BreadcrumbLink,
     Card, CardBody,
@@ -8,24 +8,24 @@ import {
     Text,
     Button,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
-    useConst,
     PopoverTrigger, Popover,
     Portal,
     PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Link, Icon
 } from "@chakra-ui/react";
-import axios, {AxiosInstance} from "axios";
 import {useParams} from "react-router-dom";
 import {IProduct} from "../models/Product";
 import {AuthContext} from "../services/AuthContext";
 import {BsCartCheckFill} from "react-icons/bs";
+import {CartContext} from "../services/CartContext";
 
 const Product = (props: any) => {
     const [product, setProduct] = useState({} as IProduct);
     const [itemsCount, setItemsCount] = useState(1);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const params = useParams();
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    const { guestData, setGuestData} = useContext(AuthContext)
+    // TODO: move all API calls to request context
+    const { guestData, api } = useContext(AuthContext)
+    const { tryCreateCart, wrapUnlockLock } = useContext(CartContext)
 
     useEffect(() => {
         api.get(`/products/${params.product}`).then((response: any) => {
@@ -53,41 +53,32 @@ const Product = (props: any) => {
         setItemsCount(itemsCount);
     };
 
-    const handleAddToCart = async (event: any) => {
+    const handleAddToCart = useCallback(async (event: any) => {
         let cartID = localStorage.getItem("cartID");
         setIsAddingToCart(true);
         // TODO: set userId in request to avoid creating double cart
-        if (cartID === null) {
-            await api.post(`/cart`,
-                {})
-                .then(response => {
-                    console.log('Done creating cart', response)
-                    cartID = response.data['id'];
-                    localStorage.setItem("cartID", cartID as string);
-                    setGuestData({guestID: guestData.guestID, cartID: cartID});
-                })
-                .catch(error => {
-                    // Handle any errors
-                    console.error(error);
-                });
+        try {
+            await tryCreateCart();
+        } catch(error) {
+            console.error("Failed adding to cart:", error);
+            return;
         }
 
-        if (cartID === null) {
-            console.log('exiting');
-            return
-        }
+        console.log("Unlocking cart if locked");
         console.log("Adding product", params.product, itemsCount);
-        api.put(`/cart/${cartID}`, {productId: params.product, amount: itemsCount})
-            .then(response => {
-                console.log(response);
-                /* TODO: update stock */
-                //setItemsCount(product.stock - itemsCount)
-                setIsAddingToCart(false);
-            })
-            .catch(error => {
-                console.log(error);
-            })
-    }
+        await wrapUnlockLock(async () => {
+            return api.put(`/cart/${cartID}`, {productId: params.product, amount: itemsCount})
+                .then(response => {
+                    console.log(response);
+                    /* TODO: update stock */
+                    //setItemsCount(product.stock - itemsCount)
+                    setIsAddingToCart(false);
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+        });
+    }, [api, itemsCount, params.product, tryCreateCart, wrapUnlockLock]);
 
     return (
         <Flex m={4} direction='column'>

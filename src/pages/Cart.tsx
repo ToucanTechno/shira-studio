@@ -3,36 +3,25 @@ import {
     Table, TableContainer, Tbody, Td, Tr, Th, Thead,
     Image,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
-    CloseButton, useConst, useToast, Center, Icon
+    CloseButton, useToast, Center, Icon
 } from "@chakra-ui/react";
 import React, {useCallback, useContext, useEffect, useMemo, useState} from "react";
-import axios, {AxiosInstance} from "axios";
 import {AuthContext} from "../services/AuthContext";
 import {ICartModel} from "../models/CartModel";
 import CartOrder from "./CartOrder";
 import {BsCartDash} from "react-icons/bs";
-import {useBlocker} from "react-router-dom";
+import {CartContext} from "../services/CartContext";
 
 const Cart = () => {
     const [cart, setCart] = useState<ICartModel | null>(null);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    const { guestData} = useContext(AuthContext)
+    const { api, guestData } = useContext(AuthContext);
+    const { tryLockCart } = useContext(CartContext);
     const alertToast = useToast({
         status: 'error',
         isClosable: true,
         position: 'top'
-    })
-    let leaveCartBlocker = useBlocker(
-        ({ currentLocation, nextLocation }) =>
-            (cart !== null && cart.lock && currentLocation.pathname !== nextLocation.pathname)
-    )
-
-    useEffect(() => {
-        if (leaveCartBlocker.state === "blocked") {
-            console.log("unblocking");
-            leaveCartBlocker.proceed();
-        }
-    }, [leaveCartBlocker]);
+    });
+    const [isInLockProcess, setIsInLockProcess] = useState(false);
 
     const totalPrice = useMemo(() => {
         if (!cart) {
@@ -54,9 +43,20 @@ const Cart = () => {
         }
     }, [api, guestData]);
 
-    const handleItemCountChange = useCallback((val: number, productKey: string) => {
+    const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
         if (!cart) {
+            console.error('No cart to change items count')
             return;
+        }
+        // TODO: How does stock work in that case?
+        if (cart.lock) {
+            setIsInLockProcess(true);
+            try {
+                await tryLockCart(cart.lock, false);
+            } catch (error) {
+                console.error(error);
+                return;
+            }
         }
         if (val > cart.products[productKey].product.stock) {
             alertToast({
@@ -72,17 +72,26 @@ const Cart = () => {
         api.put(`/cart/${guestData.cartID}`, {
             productId: productKey,
             amount: amountToChange
-        }).then((res) => {
+        }).then(async (res) => {
             if (val === 0) {
                 delete cart.products[productKey]
             } else {
                 cart.products[productKey].amount = val;
             }
+            if (isInLockProcess) {
+                try {
+                    await tryLockCart(false, true);
+                } catch (error) {
+                    console.error(error);
+                    return;
+                }
+                setIsInLockProcess(false);
+            }
             setCart({...cart, products: cart.products});
             console.log(val, productKey);
             console.log(res)
         }).catch(error => console.error(error));
-    }, [alertToast, api, cart, guestData.cartID]);
+    }, [alertToast, api, cart, guestData.cartID, tryLockCart, isInLockProcess]);
 
     const handleClose = useCallback((productKey: string) => {
         console.log('Closing', productKey);
@@ -93,9 +102,8 @@ const Cart = () => {
         return (
             <Center>
                     <Heading as='h2'>עגלת הקניות ריקה<Icon ms={3} boxSize='.7em' as={BsCartDash}/></Heading>
-
             </Center>
-        )
+        );
     }
     return (
         <Flex direction='column' align='center' w={['100%', '100%', '80%']} alignSelf='center'>
@@ -130,7 +138,8 @@ const Cart = () => {
                                                      size='sm'
                                                      w={16}
                                                      min={0}
-                                                     max={99}>
+                                                     max={99}
+                                                     isDisabled={isInLockProcess}>
                                             <NumberInputField/>
                                             <NumberInputStepper>
                                                 <NumberIncrementStepper/>
@@ -151,7 +160,7 @@ const Cart = () => {
                 </Table>
             </TableContainer>
             {/* TODO: move to another component */}
-            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID}/>
+            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart}/>
         </Flex>
     );
 };

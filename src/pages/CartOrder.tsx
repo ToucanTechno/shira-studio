@@ -1,23 +1,22 @@
 import {
-    Button,
-    Card, Center, Collapse, Fade,
-    Flex,
-    FormControl,
-    FormHelperText,
-    FormLabel,
-    Heading, Input,
-    Radio,
-    RadioGroup, Spacer,
-    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useConst, useDisclosure,
+    Button, Card, Center, Collapse, Fade,
+    Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Radio, RadioGroup, Spacer,
+    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure,
     Wrap
 } from "@chakra-ui/react";
-import React, {ChangeEvent, FormEvent, useMemo, useRef, useState} from "react";
-import {Form} from "react-router-dom";
-import axios, {AxiosInstance} from "axios";
+import React, {
+    ChangeEvent, Dispatch, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState
+} from "react";
+import {Form, useBlocker} from "react-router-dom";
+import {AuthContext} from "../services/AuthContext";
+import {ICartModel} from "../models/CartModel";
+import {CartContext} from "../services/CartContext";
 
 interface CartOrderProps {
     totalPrice: number;
     cartID: string | null;
+    cart: ICartModel | null;
+    setCart: Dispatch<ICartModel | null>;
 }
 
 const CartOrder = (props: CartOrderProps) => {
@@ -40,12 +39,29 @@ const CartOrder = (props: CartOrderProps) => {
     const [houseNumber, setHouseNumber] = useState<string>('');
     const [entry, setEntry] = useState<string>('');
     const [apartment, setApartment] = useState<string>('');
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const { api } = useContext(AuthContext)
+    const { tryLockCart } = useContext(CartContext);
     const formRefs = {
         email: useRef<HTMLInputElement>(null),
         phone: useRef<HTMLInputElement>(null),
         postCode: useRef<HTMLInputElement>(null)
     }
+    let blocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+            props.cartID !== null && props.cart !== null && currentLocation.pathname !== nextLocation.pathname
+    );
+
+    useEffect(() => {
+        // TODO: && blocker.location.pathname !== 'checkout'
+        console.log('blocked:', blocker);
+        if (blocker.state === 'blocked') {
+            tryLockCart((props.cart as ICartModel).lock, false).then(() => {
+                if (blocker.state === 'blocked') {
+                    blocker.proceed();
+                }
+            }).catch((error) => console.error(error));
+        }
+    }, [blocker, tryLockCart, props.cart])
 
     const createOrder = (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault();
@@ -78,17 +94,30 @@ const CartOrder = (props: CartOrderProps) => {
             apartment: apartment,
             comments: 'TODO'
         }).then(res => {
-            console.log(res.data);
-            // TODO: delete cart if still exists and create a new one in context
-            // TODO: leave page and make sure cart unlocks on block event
+            console.log(`Order ID: ${res.data}`);
         }).catch(error => console.error(error));
     };
+
+    const handleOrderProceed = useCallback(async () => {
+        if (props.cart === null) {
+            // TODO: try create cart?
+            console.error('null cart');
+            return;
+        }
+        onClose();
+        try {
+            await tryLockCart(props.cart.lock, true);
+        } catch(error) {
+            console.error(error);
+            return;
+        }
+    }, [onClose, tryLockCart, props.cart])
 
     return (
         <>
             <Collapse in={isOpen} animateOpacity>
                 <Center>
-                    <Button onClick={onClose} colorScheme='yellow' mt={2}>לביצוע ההזמנה</Button>
+                    <Button onClick={handleOrderProceed} colorScheme='yellow' mt={2}>לביצוע ההזמנה</Button>
                 </Center>
             </Collapse>
             <Fade in={!isOpen}>

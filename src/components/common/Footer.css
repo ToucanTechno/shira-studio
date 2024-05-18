@@ -1,10 +1,3 @@
-.footer-container {
-    width: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 .scroll-up-icon > * {
     font-size: 2vw;
     cursor: pointer;
