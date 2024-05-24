@@ -19,7 +19,7 @@ interface ProductData {
 }
 
 const AdminProducts = () => {
-    let [params, setParams] = useSearchParams();  // TODO: add setPage
+    let [params] = useSearchParams();  // TODO: add setPage
     const productsPerPage = 10;
     const navigate = useNavigate();
     let [products, setProducts] =

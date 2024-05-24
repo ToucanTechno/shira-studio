@@ -52,6 +52,7 @@ export const insertCart = async (req: Request, res: Response) => {
     //TODO: have interval to remove unactive carts
     const cartObj = new Cart({products: new Map(), lock: false});
     const userId = req.body["userId"]
+    console.log(`Try creating new cart with ${req.body['userId']}`);
     if (userId){
         const err = await RequestValidator.validate(
             [{name:'userId',validationFuncs:[isInvalidObjId.bind(null,userId),isDocNotFoundById.bind(null,userId,User),

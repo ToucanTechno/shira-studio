@@ -11,7 +11,6 @@ import axios, {AxiosInstance, AxiosResponse} from "axios";
 
 const TopNavbar = () => {
     const [navbar, setNavbar] = useState<ItemType[]>([]);
-    const navigate = useNavigate();
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
@@ -48,7 +47,7 @@ const TopNavbar = () => {
             console.error(error);
         });
 
-    }, []);
+    }, [api]);
 
     return (
         <Box backgroundColor='black'>

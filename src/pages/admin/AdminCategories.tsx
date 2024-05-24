@@ -20,7 +20,7 @@ const AdminCategories = () => {
     let [categories, setCategories] = useState<ICategory[]>([]);
     let [dirty, setDirty] = useState(false);
     let [editID, setEditID] = useState<string | null>(null);
-    let [editedName, setEditedName] = useState<string | undefined>();
+    let [editedName] = useState<string | undefined>();
     let [editedParent, setEditedParent] = useState<SelectOption | null>(null);
     const navigate = useNavigate();
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));

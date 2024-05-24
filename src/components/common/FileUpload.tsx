@@ -6,7 +6,7 @@ import {
     InputLeftElement,
     FormErrorMessage,
     Icon,
-    Button, Image
+    Image
 } from "@chakra-ui/react";
 import { FiFile } from "react-icons/fi";
 import React, {useRef, useState} from "react";
@@ -71,7 +71,7 @@ export const FileUpload = ({ name,
                     onClick={handleBrowseFile}
                     // onChange={(e) => {}}
                     readOnly={true}
-                    value={formState.file && formState.file.name || ''}
+                    value={(formState.file && formState.file.name) || ''}
                     w='400px'
                 />
             </InputGroup>

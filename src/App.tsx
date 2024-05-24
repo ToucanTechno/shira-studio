@@ -29,7 +29,7 @@ const App = () => {
                 </Box>
             </CartWrapper>
         </AuthProvider>
-    );
-};
+    )
+}
 
 export default App;

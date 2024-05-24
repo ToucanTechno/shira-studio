@@ -12,7 +12,32 @@ const PanelLogin = (props: any) => {
     const { authTokens, setAuthTokens} = useContext(AuthContext)
     const navigate = useNavigate()
 
-    const onLogin = () => {
+    // Call the server API to check if the given email ID already exists
+    const initiateLogin = useCallback((processLoginResult: (accountData: any) => void) => {
+        fetch('http://127.0.0.1:3001/api/auth/sign-in?admin=1', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        })
+            .then(async (res): Promise<[number, {}]> => [res.status, await res.json()])
+            .then((loginResult: [number, {}]) => {
+                processLoginResult(loginResult);
+            })
+    }, [email, password]);
+
+    // Log in a user using email and password
+    const logIn = useCallback((accountData: {message: string, token: string}) => {
+        // TODO: should we store accountData.email too?
+        const token = JSON.stringify(accountData.token);
+        localStorage.setItem('authTokens', token);
+        // console.log("navigate", localStorage.getItem("authTokens"));
+        setAuthTokens(token);
+        navigate('/control-panel/');
+    }, [navigate, setAuthTokens]);
+
+    const onLogin = useCallback(() => {
         // Set initial error values to empty
         setEmailError('');
         setPasswordError('');
@@ -46,13 +71,13 @@ const PanelLogin = (props: any) => {
 
             logIn(loginData);
         })
-    }
+    }, [email, password, initiateLogin, logIn]);
 
     const handleUserKeyPress = useCallback((event: any) => {
         if (event.key === 'Enter') {
             onLogin();
         }
-    }, [email, password, onLogin]);
+    }, [onLogin]);
 
     useEffect(() => {
         window.addEventListener('keydown', handleUserKeyPress);
@@ -60,31 +85,6 @@ const PanelLogin = (props: any) => {
             window.removeEventListener('keydown', handleUserKeyPress);
         };
     }, [handleUserKeyPress]);
-
-    // Call the server API to check if the given email ID already exists
-    const initiateLogin = (processLoginResult: (accountData: any) => void) => {
-        fetch('http://127.0.0.1:3001/api/auth/sign-in?admin=1', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        })
-            .then(async (res): Promise<[number, {}]> => [res.status, await res.json()])
-            .then((loginResult: [number, {}]) => {
-                processLoginResult(loginResult);
-            })
-    }
-
-// Log in a user using email and password
-    const logIn = (accountData: {message: string, token: string}) => {
-        // TODO: should we store accountData.email too?
-        const token = JSON.stringify(accountData.token);
-        localStorage.setItem("authTokens", token);
-        // console.log("navigate", localStorage.getItem("authTokens"));
-        setAuthTokens(token);
-        navigate('/control-panel/');
-    }
 
     useEffect(() => {
         if (authTokens) {

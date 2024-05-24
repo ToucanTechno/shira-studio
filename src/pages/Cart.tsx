@@ -35,13 +35,14 @@ const Cart = () => {
 
     useEffect(() => {
         if (guestData.cartID) {
+            console.log('Reloading cart...')
             api.get(`/cart/${guestData.cartID}`).then(response => {
                 setCart(response.data);
             }).catch(error => {
                 console.log("error:", error);
             })
         }
-    }, [api, guestData]);
+    }, []);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
         if (!cart) {
@@ -159,7 +160,6 @@ const Cart = () => {
                     </Tbody>
                 </Table>
             </TableContainer>
-            {/* TODO: move to another component */}
             <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart}/>
         </Flex>
     );
