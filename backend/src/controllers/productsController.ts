@@ -2,8 +2,11 @@ import {NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { Product, IProductDB } from "../models/Product";
 import { Category } from "../models/Category";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose, {  ObjectId } from "mongoose";
 import multer from "multer"
+import { Error ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorInvalidObjectId, ErrorWrongFileType } from "../utils/error";
+
+
 
 //how to send multiple files for multer to look at
 //https://stackoverflow.com/questions/39350040/uploading-multiple-files-with-multer
@@ -14,19 +17,22 @@ const storage = multer.diskStorage({
         cb(null, process.cwd() + '/products')//TODO:when on actual server use better path
     },
     filename: function (_req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + '.jpg')
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileName = file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1];//filtering to image so extension is at [1]
+        cb(null, fileName)
     }, 
 });
-const fileFilter = function(_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) {
+const fileFilter = async function(req: Request, file: Express.Multer.File, cb: any) {
     const fileType = file.mimetype.split('/');
-    if (fileType[0] !== 'image' ) {
-        cb(new Error('only images are allowed'));
-        //cb(null,false);
+    const productId = req.params['id']!;
+    if(fileType[0] !== 'image'  || (fileType[1] !== 'jpeg' && fileType[1] !== 'jpg' && fileType[1] !== 'png')) {
+        cb(new ErrorWrongFileType('image',['jpeg','jpg','png']));
     }
-    else if(fileType[1] !== 'jpeg' && fileType[1] !== 'jpg' && fileType[1] !== 'png') {
-        cb(new Error('only send file of type jpeg/jpg/png'));
-        //cb(null,false);
+    else if(!mongoose.isValidObjectId(productId)){
+        cb(new ErrorInvalidObjectId(productId));
+    }
+    else if(!await Product.findById(productId)){
+        cb(new ErrorDocNotFound(Product.modelName,productId));
     }
     else{
         cb(null,true);
@@ -38,26 +44,19 @@ export const ProductUpload = multer({ storage: storage, fileFilter: fileFilter})
 //think what to do about if we change picture do we delete the changed picture? currently it only replace the link to the image
 export const ProductUploadLogic = async (req:Request,res:Response) =>{
     const productId = req.params['id'];
-    if(!productId){//TODO: probably need to move this error checks to fileFilter so the upload wont be saved if wrong product info is sent
-        res.status(400).send('missing product id');
-        return;
-    }
-    const product = await Product.findById(productId);
-    if(!product){
-        res.status(400).send('no product with given id');
-        return;
-    }
-    if(!req.file?.filename){//this could not happen check how to explain that to compiler
-        res.status(400).send('no file name??');
-        return;
-    }
-    product.image_src = req.file.filename;
+    const product = (await Product.findById(productId))!;    
+    product.image_src = req.file!.filename;
     await product.save();
     res.status(200).send('upload completed');
 }
-
-export const productUploadErr = (err: Error, _req: Request, res: Response,_next:NextFunction) => {
-    res.status(400).send(err.message)
+//TODO: err:any should be of type Error that we created or error that is thrown from multer
+export const productUploadErr = (err: any, _req: Request, res: Response,_next:NextFunction) => {
+    if (err instanceof Error){
+        err.send(res);
+    }
+    else {
+        res.status(400).send(err.message);
+    }
 }
 
 export const getProducts = async (req: Request, res: Response) => {
@@ -80,21 +79,17 @@ export const getProducts = async (req: Request, res: Response) => {
 };
 
 export const getSingleProduct = async (req: Request, res: Response) => {
-    const id = req.params['id'];
-    console.log("get single product", req.params);
-    try {
-        if (!id) {
-            throw new Error("Missing product ID");
-        }
-        const product = await Product.findById(id).populate('categories');
-        if (!product) {
-            res.status(404).send({ message: `Unable to find matching product with id: ${req.params['id']}` });
-            return;
-        }
-        res.status(200).send(product);
-    } catch (error: any) {
-        res.status(400).send(error.message);
+    const id = req.params['id']!;//! tells compiler that it cant be undefined cant call this function if id is undefined
+    if (!mongoose.isValidObjectId(id)) {
+        new ErrorInvalidObjectId(id).send(res);
+        return;
     }
+    const product = await Product.findById(id).populate('categories');
+    if (!product) {
+        new ErrorDocNotFound(Product.modelName,id).send(res);
+        return;
+    }
+    res.status(200).send(product);
 };
 
 export const insertProduct = async (req: Request, res: Response) => {
@@ -125,50 +120,53 @@ export const insertProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
     // This function assumes admin authorization so the interface is not strict.
-    try {
-        if (!req.params['id']) {
-            throw new Error("Invalid product ID");
-        }
-        const id = req.params['id'];
-        // TODO: add validations to req.body
-        const result = await Product.updateOne({'_id': id}, req.body);//TODO: add check for categories change
-
-        if (result && result.modifiedCount === 1) {
-            res.status(200).send(`Successfully updated product with id ${id}`)
-        } else {
-            res.status(304).send(`Product with id: ${id} not updated`);
-        }
-    } catch (error: any) {
-        console.error(error.message);
-        res.status(400).send(error.message);
+    const id = req.params['id']!;
+    if(!mongoose.isValidObjectId(id)){
+        new ErrorInvalidObjectId(id).send(res);
+        return;
+    }
+    if(!Product.findById(id)){
+        new ErrorDocNotFound(Product.name,id).send(res);
+        return;
+    }
+    if(req.body['categories']){
+        new Error('use the /:id/categories put request to change categories of product',400).send(res);
+        return;
+    }
+    // TODO: add validations to req.body not sure how to properly validate need to iterate over all vars and check if exist in Product
+    //there is no way to check how many fields been updated so on validation to check existence of fields
+    const result = await Product.updateOne({'_id': id}, req.body);
+    if (result  && result.modifiedCount === 1) { //the modifiedcount is to make sure because i cant think of a way to test update fail
+        res.status(200).send(`Successfully updated product with id ${id}`)
+    } else {
+        new ErrorDocNotUpdated(id,req.body).send(res);
     }
 };
 
 export const deleteProduct = async (req: Request, res: Response) => {
-    try {
-        if (!req.params['id']) {
-            throw new Error("Invalid product ID");
-        }
-        const id = req.params['id'];
-        const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
-        // TODO: make sure there are no orders with this product
-        // TODO: delete it from all categories that have this product
+    const id = req.params['id']!;
+    if(!mongoose.isValidObjectId(id)){
+        new ErrorInvalidObjectId(id).send(res);
+        return;
+    }
+    if(!Product.findById(id)){
+        new ErrorDocNotFound(Product.name,id).send(res);
+        return;
+    }
+    const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
+    // TODO: make sure there are no orders with this product
+    // TODO: delete it from all categories that have this product
 
-        if (result && result.deletedCount === 1) {
-            res.status(202).send(`Successfully removed product with id ${id}`);
-        } else if (!result) {
-            res.status(400).send(`Failed to remove product with id ${id}`);
-        } else {
-            res.status(404).send(`Product with id ${id} does not exist`);
-        }
-    } catch (error: any) {
-        console.error(error.message);
-        res.status(400).send(error.message);
+    if (result && result.deletedCount === 1) {//the modified count is to make sure same as above in updateProduct 
+        res.status(202).send(`Successfully removed product with id ${id}`);
+    } else if (!result) {
+        new ErrorDocNotDeleted(id).send(res);
     }
 };
 
 
-async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>, productObj: mongoose.Document<unknown, {}, IProductDB> & IProductDB ){
+async function changeCategoriesOfProductLogic(actionType:string, categories:Array<ObjectId>, 
+                                              productObj: mongoose.Document<any,any,IProductDB> & IProductDB ){
     const promiseArr = []
     if(actionType === 'add'){
         for (const elm of categories){
@@ -195,9 +193,7 @@ async function changeProdMulLogic(actionType:string, categories:Array<ObjectId>,
     Promise.all(promiseArr);
 }
 
-// TODO (CR): called changeProd but better name would be changeCategoriesOfProduct
-// was surprised to find this changes both products and categories. Maybe find a better name?
-export const changeProdMul = async (req:Request, res:Response) => {
+export const changeCategoriesOfProduct = async (req:Request, res:Response) => {
     const categories:Array<any> = req.body['names'];
     const productId = req.params['id'];
     const actionType = req.body['action'];
@@ -230,7 +226,8 @@ export const changeProdMul = async (req:Request, res:Response) => {
                 res.status(400).send('could not find category with name: ' + categories);
                 return;
             }
-            await changeProdMulLogic(actionType,categories,prodObj)
+            console.log("here4", prodObj);
+            await changeCategoriesOfProductLogic(actionType,categories,prodObj)
             res.status(200).send('change successful')
         }
     }

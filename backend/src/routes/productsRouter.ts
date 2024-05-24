@@ -2,7 +2,7 @@ import express from "express";
 import {
     ProductUpload,
     ProductUploadLogic,
-    changeProdMul,
+    changeCategoriesOfProduct,
     deleteProduct,
     getProducts,
     getSingleProduct,
@@ -20,6 +20,7 @@ productsRouter.use(express.json());
 productsRouter.get('/:id', getSingleProduct);
 // TODO: get product position (for now only by ID)
 productsRouter.get('/', getProducts);
+//TODO filter by category and subcategory can use default as give all and if have value filter by that value
 productsRouter.get('/c/:category/:subcategory/', getProducts);
 productsRouter.get('/c/:category/', getProducts);
 
@@ -31,7 +32,7 @@ productsRouter.post('/:id/upload',ProductUpload.single('product'),ProductUploadL
 
 // PUT
 productsRouter.put('/:id', updateProduct);
-productsRouter.put("/:id/categories", changeProdMul);
+productsRouter.put("/:id/categories", changeCategoriesOfProduct);
 
 // DELETE
 productsRouter.delete('/:id', deleteProduct);

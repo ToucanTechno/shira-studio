@@ -69,7 +69,6 @@ async function changeCatMulLogic(actionType:string, products:Array<ObjectId>, ca
     }
     else {
         for(const elm of products){
-            // TODO (CR): not very efficient to use indexOf each time. Use 'for ( .. in .. )' that returns the key instead.
             const productIndex = categoryObj.products.indexOf(elm)
             if(productIndex !== -1){//ignore if wanted to delete product that not in the category 
                 categoryObj?.products.splice(productIndex,1);
