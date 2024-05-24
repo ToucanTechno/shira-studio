@@ -52,7 +52,7 @@ const Cart = () => {
         if (cart.lock) {
             setIsInLockProcess(true);
             try {
-                await tryLockCart(cart.lock, false);
+                await tryLockCart(false);
             } catch (error) {
                 console.error(error);
                 return;
@@ -80,7 +80,7 @@ const Cart = () => {
             }
             if (isInLockProcess) {
                 try {
-                    await tryLockCart(false, true);
+                    await tryLockCart(true);
                 } catch (error) {
                     console.error(error);
                     return;
