@@ -8,15 +8,14 @@ import Category from "./pages/Category";
 import ProductCategory from "./pages/ProductCategory";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
-import {AuthContext, AuthProvider} from "./services/AuthContext";
-import {Box} from "@chakra-ui/react";
-import {CartProvider} from "./services/CartContext";
+import { AuthProvider } from "./services/AuthContext";
+import { Box } from "@chakra-ui/react";
+import CartWrapper from "./utils/CartWrapper";
 
 const App = () => {
-    const { api, guestData, setGuestData } = useContext(AuthContext)
     return (
         <AuthProvider>
-            <CartProvider api={api} guestData={guestData} setGuestData={setGuestData}>
+            <CartWrapper>
                 <Box className="App">
                     <TopNavbar/>
                     <Routes>
@@ -28,7 +27,7 @@ const App = () => {
                         <Route path="/cart" element={<Cart/>}/>
                     </Routes>
                 </Box>
-            </CartProvider>
+            </CartWrapper>
         </AuthProvider>
     );
 };

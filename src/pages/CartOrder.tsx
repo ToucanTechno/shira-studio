@@ -55,7 +55,7 @@ const CartOrder = (props: CartOrderProps) => {
         // TODO: && blocker.location.pathname !== 'checkout'
         console.log('blocked:', blocker);
         if (blocker.state === 'blocked') {
-            tryLockCart((props.cart as ICartModel).lock, false).then(() => {
+            tryLockCart(false).then(() => {
                 if (blocker.state === 'blocked') {
                     blocker.proceed();
                 }
@@ -106,7 +106,7 @@ const CartOrder = (props: CartOrderProps) => {
         }
         onClose();
         try {
-            await tryLockCart(props.cart.lock, true);
+            await tryLockCart(true);
         } catch(error) {
             console.error(error);
             return;

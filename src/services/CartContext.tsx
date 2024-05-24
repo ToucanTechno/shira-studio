@@ -11,7 +11,7 @@ interface Props {
 
 interface CartContextType {
     tryCreateCart: () => Promise<void>; // reject type is "any"
-    tryLockCart: (currentLockState: boolean, lockAction: boolean) => Promise<void>; // reject type is "any"
+    tryLockCart: (lockAction: boolean) => Promise<void>; // reject type is "any"
     wrapUnlockLock: <Args extends any[], Return>(
         operation: (...operationParameters: Args) => Return, ...parameters: Args )
         => Promise<Return | undefined>;
@@ -51,6 +51,10 @@ export const CartProvider = (props: Props) => {
      * reminds us to check if cart is already locked/unlocked.
      */
     const tryLockCart = useCallback(async (lockAction: boolean) => {
+        if (!props.guestData) {
+            await Promise.reject('No guest data');
+            return;
+        }
         if (props.guestData.cartID === null) {
             await Promise.reject(`No cart to ${(lockAction) ? '' : 'un'}lock`);
             return;
@@ -61,6 +65,7 @@ export const CartProvider = (props: Props) => {
             Promise.resolve(true);
             return;
         }).catch((error) => {
+            // TODO: change when error handling updates
             if (error.response.data === "cart already locked") {
                 console.log("Trying to lock cart, but cart is already locked");
                 Promise.resolve(false);
@@ -86,6 +91,7 @@ export const CartProvider = (props: Props) => {
             console.log(`cart unlock result:`, res);
             return res;
         }).catch((error) => {
+            // TODO: change when error handling updates
             if (error.response.data === "cart already unlocked") {
                 console.log("cart already unlocked");
                 return;
@@ -108,7 +114,7 @@ export const CartProvider = (props: Props) => {
             });
         }
         return opResult;
-    }, [props.api, props.guestData.cartID]);
+    }, [props.api, props.guestData]);
 
     return (
         <CartContext.Provider value={{
