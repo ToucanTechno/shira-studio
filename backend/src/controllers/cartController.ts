@@ -42,6 +42,7 @@ export const getCartSummary = async (req: Request, res: Response) => {
 export const insertCart = async (req: Request, res: Response) => {
     //TODO: make sure to rate limit so no dddos
     const cartObj = new Cart({products: new Map(), lock: false});
+    console.log(`Try creating new cart with ${req.body['userId']}`);
     if (req.body["userId"]){
         if(await Cart.findOne({userId:req.body["userId"]}).exec() !== null){
             res.status(400).send({message: "cart already exist for user"});

@@ -27,7 +27,7 @@ export const AuthProvider = (props: Props) => {
     // console.log("Starting AuthProvider...")
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     let [authTokens, setAuthTokens] = useState<string | null>(() => {
-            let tokenInfo = localStorage.getItem("authTokens");
+            let tokenInfo = localStorage.getItem('authTokens');
             // console.log("Getting tokenInfo from localStorage, setting initial authTokens in context", tokenInfo);
             return tokenInfo
                 ? JSON.parse(tokenInfo || "")
@@ -36,19 +36,19 @@ export const AuthProvider = (props: Props) => {
     );
     let [guestData, setGuestData] =
             useState<GuestDataType>(() => {
-        let storedGuestID = localStorage.getItem("guestID");
-        let storedCartID = localStorage.getItem("cartID");
+        let storedGuestID = localStorage.getItem('guestID');
+        let storedCartID = localStorage.getItem('cartID');
         // console.log("stored guest ID", storedGuestID);
         if (storedGuestID === null) {
             storedGuestID = uuidv4();
             // console.log("new guest ID", storedGuestID);
-            localStorage.setItem("guestID", storedGuestID as string);
+            localStorage.setItem('guestID', storedGuestID as string);
         }
         return { guestID: storedGuestID, cartID: storedCartID };
     });
 
     const callLogout = useCallback(() => {
-        localStorage.removeItem("authTokens");
+        localStorage.removeItem('authTokens');
         // TODO: remove cart details and regenerate guest ID
         setAuthTokens(null);
     }, []);

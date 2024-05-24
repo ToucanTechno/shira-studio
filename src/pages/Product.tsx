@@ -54,27 +54,33 @@ const Product = (props: any) => {
     };
 
     const handleAddToCart = useCallback(async (event: any) => {
-        let cartID = localStorage.getItem("cartID");
+        let cartID = localStorage.getItem('cartID');
         setIsAddingToCart(true);
         // TODO: set userId in request to avoid creating double cart
         try {
-            await tryCreateCart();
+            console.log('Try creating cart...');
+            const newCartID = await tryCreateCart();
+            if (newCartID !== null) {
+                cartID = newCartID;
+            }
         } catch(error) {
-            console.error("Failed adding to cart:", error);
+            console.error("Failed creating cart while adding:", error);
             return;
         }
 
         console.log("Unlocking cart if locked");
         console.log("Adding product", params.product, itemsCount);
-        await wrapUnlockLock(async () => {
+        await wrapUnlockLock(cartID, async () => {
             return api.put(`/cart/${cartID}`, {productId: params.product, amount: itemsCount})
                 .then(response => {
+                    console.log(`op guestData: ${guestData.cartID}`)
                     console.log(response);
                     /* TODO: update stock */
                     //setItemsCount(product.stock - itemsCount)
                     setIsAddingToCart(false);
                 })
                 .catch(error => {
+                    console.log(`op error guestData: ${guestData.cartID}`)
                     console.log(error);
                 })
         });

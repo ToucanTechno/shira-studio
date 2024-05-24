@@ -6,14 +6,15 @@ interface Props {
     children: ReactNode;
     api: AxiosInstance;
     guestData: GuestDataType;
-    setGuestData: React.Dispatch<React.SetStateAction<GuestDataType>>
+    setGuestData: React.Dispatch<React.SetStateAction<GuestDataType> >;
 }
 
 interface CartContextType {
-    tryCreateCart: () => Promise<void>; // reject type is "any"
     tryLockCart: (lockAction: boolean) => Promise<void>; // reject type is "any"
+    tryCreateCart: () => Promise<string | null>; // reject type is "any"
+    removeCart: () => void;
     wrapUnlockLock: <Args extends any[], Return>(
-        operation: (...operationParameters: Args) => Return, ...parameters: Args )
+        cartID: string | null, operation: (...operationParameters: Args) => Return, ...parameters: Args )
         => Promise<Return | undefined>;
 }
 export const CartContext = createContext<CartContextType>( {} as CartContextType );
@@ -21,45 +22,53 @@ export const CartContext = createContext<CartContextType>( {} as CartContextType
 export const CartProvider = (props: Props) => {
     // TODO: separate to child CartProvider object
     const guestData = props.guestData;
+    console.log(`re-rendering cart provider with cart: ${guestData.cartID}`);
     const setGuestData = props.setGuestData;
     const api = props.api;
     const tryCreateCart = useCallback(async () => {
         if (guestData.cartID === null) {
-            await api.post(`/cart`,
-                {})
+            return await api.post(`/cart`,
+                {userId: null}) // Don't pass userId for guest carts
                 .then(response => {
                     console.log('Done creating cart', response)
                     const createdCartID = response.data['id'];
                     if (createdCartID === null) {
-                        Promise.reject("Failed creating cart ID");
-                        return;
+                        throw(Error("Failed creating cart ID"));
                     }
-                    localStorage.setItem("cartID", createdCartID as string);
+                    localStorage.setItem('cartID', createdCartID as string);
+                    console.log(`setting new cart: ${createdCartID}`);
                     setGuestData({ guestID: guestData.guestID, cartID: createdCartID });
-                    Promise.resolve();
+                    return (createdCartID as string);
                 })
                 .catch(error => {
                     // Handle any errors
                     console.error(`tryCreateCart error: ${error}`);
-                    Promise.reject(error);
+                    throw(error);
                 });
+        } else {
+            return null;
         }
     }, [guestData, setGuestData, api]); // Will enter twice due to guestData, skips if-condition on second entry
+
+    const removeCart = useCallback(() => {
+        localStorage.removeItem('cartID');
+        setGuestData((guestData) => ({...guestData, cartID: null}));
+    }, [setGuestData]);
 
     /**
      * Lock action is true if we want to lock, false if we want to unlock. currentLockState comes from cart.lock,
      * reminds us to check if cart is already locked/unlocked.
      */
     const tryLockCart = useCallback(async (lockAction: boolean) => {
-        if (!props.guestData) {
+        if (!guestData) {
             await Promise.reject('No guest data');
             return;
         }
-        if (props.guestData.cartID === null) {
+        if (guestData.cartID === null) {
             await Promise.reject(`No cart to ${(lockAction) ? '' : 'un'}lock`);
             return;
         }
-        props.api.put(`cart/${props.guestData.cartID}/lock`, {lock: lockAction}).then((res) => {
+        api.put(`cart/${guestData.cartID}/lock`, {lock: lockAction}).then((res) => {
             console.log(`cart ${(lockAction) ? '' : 'un'}lock result:`, res);
             // TODO: how to trigger cart reload in all use cases?
             Promise.resolve(true);
@@ -75,19 +84,18 @@ export const CartProvider = (props: Props) => {
             console.log('resolve or reject tryLockCart?')
             Promise.reject(error);
         });
-    }, [props.guestData, props.api]);
+    }, [guestData, api]);
 
     /* Unlocks cart, does action, then locks cart. */
     const wrapUnlockLock = useCallback(async <Args extends any[], Return>(
-        operation: (...operationParameters: Args) => Return,
+        cartID: string | null, operation: (...operationParameters: Args) => Return,
         ...parameters: Args
     ): Promise<Return | undefined> => {
-        console.log(`outer `);
-        if (props.guestData.cartID === null) {
-            await Promise.reject(`No cart to unlock`);
-            return;
+        console.log(`outer cartID: ${cartID}`);
+        if (cartID === null) {
+            throw(Error(`No cart to unlock`));
         }
-        const unlockResult = await props.api.put(`cart/${props.guestData.cartID}/lock`, {lock: false}).then(async (res) => {
+        const unlockResult = await api.put(`cart/${cartID}/lock`, {lock: false}).then(async (res) => {
             console.log(`cart unlock result:`, res);
             return res;
         }).catch((error) => {
@@ -97,30 +105,31 @@ export const CartProvider = (props: Props) => {
                 return;
             }
             console.error(error);
-            Promise.reject(error);
+            throw(error);
         });
         console.log("unlock result:", unlockResult);
         const opResult = operation(...parameters);
 
         // Was locked before, so we need to re-lock the cart
         if (unlockResult !== undefined) {
-            await props.api.put(`cart/${props.guestData.cartID}/lock`,
+            await api.put(`cart/${cartID}/lock`,
                 {lock: true}).then(async (res) => {
                 console.log(`cart lock result:`, res);
                 return;
             }).catch((error) => {
                 console.error(error);
-                Promise.reject(error);
+                throw(error);
             });
         }
         return opResult;
-    }, [props.api, props.guestData]);
+    }, [api, guestData]);
 
     return (
         <CartContext.Provider value={{
             tryCreateCart,
+            removeCart,
             tryLockCart,
-            wrapUnlockLock
+            wrapUnlockLock,
         }}>
             { props.children }
         </CartContext.Provider>

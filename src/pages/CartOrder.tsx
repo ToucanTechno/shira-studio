@@ -40,7 +40,7 @@ const CartOrder = (props: CartOrderProps) => {
     const [entry, setEntry] = useState<string>('');
     const [apartment, setApartment] = useState<string>('');
     const { api } = useContext(AuthContext)
-    const { tryLockCart } = useContext(CartContext);
+    const { tryLockCart, removeCart } = useContext(CartContext);
     const formRefs = {
         email: useRef<HTMLInputElement>(null),
         phone: useRef<HTMLInputElement>(null),
@@ -53,13 +53,16 @@ const CartOrder = (props: CartOrderProps) => {
 
     useEffect(() => {
         // TODO: && blocker.location.pathname !== 'checkout'
-        console.log('blocked:', blocker);
         if (blocker.state === 'blocked') {
+            console.log(`page exit is blocked: ${blocker} trying to unlock...`);
             tryLockCart(false).then(() => {
                 if (blocker.state === 'blocked') {
+                    console.log('unlock successful');
                     blocker.proceed();
+                } else {
+                    console.error('unblocked unexpectedly without proceeding.');
                 }
-            }).catch((error) => console.error(error));
+            }).catch((error) => console.error(`Try unlock cart failed: ${error}`));
         }
     }, [blocker, tryLockCart, props.cart])
 
@@ -95,6 +98,7 @@ const CartOrder = (props: CartOrderProps) => {
             comments: 'TODO'
         }).then(res => {
             console.log(`Order ID: ${res.data}`);
+            removeCart();
         }).catch(error => console.error(error));
     };
 

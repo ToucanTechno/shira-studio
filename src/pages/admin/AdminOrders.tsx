@@ -21,12 +21,12 @@ const AdminOrders = () => {
     const [searchPhrase, setSearchPhrase] = useState('');
     const [typeFilter, setTypeFilter] =
         useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
-    const [orders, setOrders] = useState<IOrder[]>([]);
+    const [orders] = useState<IOrder[]>([]);
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
         api.get('/orders');
-    }, []);
+    }, [api]);
 
     const handleSelectTypeFilter = (el: SingleValue<SelectOption>) => {
         setTypeFilter(el)
