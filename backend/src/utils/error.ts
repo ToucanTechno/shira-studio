@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ErrorType } from "./ErrorType";
 import { StatusCodes } from "http-status-codes";
-export class Error {
+export class ResponseError {
     status: number = StatusCodes.BAD_REQUEST;
     message: string = 'Unknown error';
     errorCode: ErrorType = ErrorType.DEFAULT_ERROR;
@@ -17,50 +17,60 @@ export class Error {
 
 }
 
-export class ErrorMissingFields extends Error {
-    missingFields:Array<String> = [];//intended for the programer if want to automate it in some way
+//how to pass the multiple parm info that correlate to each error
+export class MultError extends ResponseError{
+    errors: Array<ResponseError>
+    constructor(errors:Array<ResponseError>){
+        const message:string = 'Multiple errors'
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.MUL_ERROR)
+        this.errors = errors
+    }
+}
 
+export class ErrorMissingField extends ResponseError {
+    fieldName = ''
     constructor(fieldName: string){
         const message = `Missing the params ${fieldName}`;
-        super(message,StatusCodes.BAD_REQUEST,ErrorType.MISSING_FIELDS);
-        this.missingFields.push(fieldName);
-    }
-
-    addField(fieldName: string){
-        this.message += `, ${fieldName}`;
-        this.missingFields.push(fieldName);
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.MISSING_FIELD);
+        this.fieldName = fieldName
     }
 }
 
-export class ErrorInvalidObjectId extends Error{
-    constructor(id:string){
-        const message = `the id: ${id} is not a valid objectId`;
+export class ErrorInvalidObjectId extends ResponseError{
+    fieldName = ''
+    id:string
+    constructor(id:string, fieldName:string){
+        const message = `${fieldName}: ${id} is not a valid objectId`;
         super(message,StatusCodes.BAD_REQUEST,ErrorType.INVALID_OBJECT_ID);
+        this.id = id
+        this.fieldName = fieldName
     }
 }
 
-export class ErrorInvalidType extends Error {
+export class ErrorInvalidType extends ResponseError {
     constructor(paramName: string, parmType: string, expectedType:string){
         const message = `param: ${paramName} is of type ${parmType} but expected to be of type ${expectedType}`;
         super(message,StatusCodes.BAD_REQUEST,ErrorType.INVALID_TYPE);
     }
 }
 
-export class ErrorDocNotFound extends Error {
-    constructor(docType:string, id:string) {
-        const message = `Couldn\'t find document type: ${docType} with id: ${id}`;
+export class ErrorDocNotFound extends ResponseError {
+    key
+    constructor(docType:string, key:string) {
+        const message = `Couldn\'t find document type: ${docType} with key: ${key}`;
         super(message,StatusCodes.BAD_REQUEST,ErrorType.DOC_NOT_FOUND);
+        this.key = key
     }
 }
 
-export class ErrorWrongFileType extends Error {
+export class ErrorWrongFileType extends ResponseError {
     constructor(allowedFileType:string,allowedExtensions:string[]) {
         const message = `file should be of type ${allowedFileType} and extension of file should be one of ${allowedExtensions}`;
         super(message,StatusCodes.BAD_REQUEST,ErrorType.WRONG_FILE_TYPE);
     }
 }
 
-export class ErrorDocNotUpdated extends Error {
+export class ErrorDocNotUpdated extends ResponseError {
     fieldsToUpdate;
     constructor(docId:string, fieldsToUpdate:any) {
         const message = `could't update the document with id ${docId}`;
@@ -69,9 +79,18 @@ export class ErrorDocNotUpdated extends Error {
     }
 }
 
-export class ErrorDocNotDeleted extends Error {
+export class ErrorDocNotDeleted extends ResponseError {
     constructor(docId:string){
         const message = `couldn't delete document with id: ${docId}`;
         super(message,StatusCodes.BAD_REQUEST,ErrorType.DOC_NOT_DELETED);
+    }
+}
+
+export class ErrorUseDedicatedUpdate extends ResponseError {
+    fieldName:string
+    constructor(fieldName:string){
+        const message = `the field ${fieldName} should be updated in dedicated method`
+        super(message,StatusCodes.METHOD_NOT_ALLOWED,ErrorType.DEDICATED_UPDATE)
+        this.fieldName = fieldName
     }
 }
