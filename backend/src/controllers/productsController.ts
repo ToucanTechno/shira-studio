@@ -4,7 +4,9 @@ import { Product, IProductDB } from "../models/Product";
 import { Category } from "../models/Category";
 import mongoose, {  ObjectId } from "mongoose";
 import multer from "multer"
-import { Error ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorInvalidObjectId, ErrorWrongFileType } from "../utils/error";
+import { ResponseError ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorInvalidObjectId, ErrorWrongFileType, ErrorUseDedicatedUpdate } from "../utils/error";
+import { RequestValidator } from "../utils/validator";
+import { isDocNotFound, isInvalidObjId, isInvalidType, isMissingField } from "../utils/paramChecks";
 
 
 
@@ -29,7 +31,7 @@ const fileFilter = async function(req: Request, file: Express.Multer.File, cb: a
         cb(new ErrorWrongFileType('image',['jpeg','jpg','png']));
     }
     else if(!mongoose.isValidObjectId(productId)){
-        cb(new ErrorInvalidObjectId(productId));
+        cb(new ErrorInvalidObjectId(productId,'id'));
     }
     else if(!await Product.findById(productId)){
         cb(new ErrorDocNotFound(Product.modelName,productId));
@@ -51,7 +53,7 @@ export const ProductUploadLogic = async (req:Request,res:Response) =>{
 }
 //TODO: err:any should be of type Error that we created or error that is thrown from multer
 export const productUploadErr = (err: any, _req: Request, res: Response,_next:NextFunction) => {
-    if (err instanceof Error){
+    if (err instanceof ResponseError){
         err.send(res);
     }
     else {
@@ -80,18 +82,18 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const getSingleProduct = async (req: Request, res: Response) => {
     const id = req.params['id']!;//! tells compiler that it cant be undefined cant call this function if id is undefined
-    if (!mongoose.isValidObjectId(id)) {
-        new ErrorInvalidObjectId(id).send(res);
-        return;
+    const err = await RequestValidator.validate(
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+    )
+    if(err){
+        err.send(res)
+        return
     }
     const product = await Product.findById(id).populate('categories');
-    if (!product) {
-        new ErrorDocNotFound(Product.modelName,id).send(res);
-        return;
-    }
     res.status(200).send(product);
 };
 
+//TODO:make sure that the new product fields are validated currently it doesn't check fields
 export const insertProduct = async (req: Request, res: Response) => {
     const product: IProductDB = req.body;
     try {
@@ -121,22 +123,21 @@ export const insertProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
     // This function assumes admin authorization so the interface is not strict.
     const id = req.params['id']!;
-    if(!mongoose.isValidObjectId(id)){
-        new ErrorInvalidObjectId(id).send(res);
-        return;
-    }
-    if(!Product.findById(id)){
-        new ErrorDocNotFound(Product.name,id).send(res);
-        return;
+    const err = await RequestValidator.validate(
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+    )
+    if(err){
+        err.send(res)
+        return
     }
     if(req.body['categories']){
-        new Error('use the /:id/categories put request to change categories of product',400).send(res);
+        new ErrorUseDedicatedUpdate('categories').send(res);
         return;
     }
     // TODO: add validations to req.body not sure how to properly validate need to iterate over all vars and check if exist in Product
     //there is no way to check how many fields been updated so on validation to check existence of fields
     const result = await Product.updateOne({'_id': id}, req.body);
-    if (result  && result.modifiedCount === 1) { //the modifiedcount is to make sure because i cant think of a way to test update fail
+    if (result  && result.modifiedCount >= 1) { //the modifiedcount is to make sure because i cant think of a way to test update fail
         res.status(200).send(`Successfully updated product with id ${id}`)
     } else {
         new ErrorDocNotUpdated(id,req.body).send(res);
@@ -145,30 +146,29 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
     const id = req.params['id']!;
-    if(!mongoose.isValidObjectId(id)){
-        new ErrorInvalidObjectId(id).send(res);
-        return;
-    }
-    if(!Product.findById(id)){
-        new ErrorDocNotFound(Product.name,id).send(res);
-        return;
+    const err = await RequestValidator.validate(
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+    )
+    if(err){
+        err.send(res)
+        return
     }
     const result = await Product.deleteOne({ '_id': id }); //TODO: add check for categories change
     // TODO: make sure there are no orders with this product
     // TODO: delete it from all categories that have this product
 
     if (result && result.deletedCount === 1) {//the modified count is to make sure same as above in updateProduct 
-        res.status(202).send(`Successfully removed product with id ${id}`);
+        res.status(200).send(`Successfully removed product with id ${id}`);
     } else if (!result) {
         new ErrorDocNotDeleted(id).send(res);
     }
 };
 
 
-async function changeCategoriesOfProductLogic(actionType:string, categories:Array<ObjectId>, 
+async function changeCategoriesOfProductLogic(removeAction:boolean, categories:Array<ObjectId>, 
                                               productObj: mongoose.Document<any,any,IProductDB> & IProductDB ){
     const promiseArr = []
-    if(actionType === 'add'){
+    if(removeAction === false){
         for (const elm of categories){
             const category = await Category.findOne({name:elm});//this is the double call can be saved
             if(!productObj.categories.includes(category?.id)){//ignore if wanted to add category that already in the product 
@@ -193,42 +193,32 @@ async function changeCategoriesOfProductLogic(actionType:string, categories:Arra
     Promise.all(promiseArr);
 }
 
+
+//exist | correct type | filter | 
+
+//changes action from string type to be field removeAction and from type boolean 
 export const changeCategoriesOfProduct = async (req:Request, res:Response) => {
+    const productId = req.params['id']!;
     const categories:Array<any> = req.body['names'];
-    const productId = req.params['id'];
-    const actionType = req.body['action'];
-    console.log(`updating categories ${categories} of product ${productId}`)
-    if(!categories) {
-        console.log('missing categories')
-        res.status(400).send('missing category name');
+    const removeAction:boolean = req.body['removeAction'];
+    const err = await RequestValidator.validate(
+        [{name: 'id',validationFuncs: [isMissingField.bind(null,productId),isInvalidObjId.bind(null,productId),
+                                       isDocNotFound.bind(null,productId,Product)]},
+         {name: 'names',validationFuncs: [isMissingField.bind(null,categories)]},
+         {name: 'removeAction',validationFuncs: [isMissingField.bind(null,removeAction),isInvalidType.bind(null,removeAction,'boolean')]}
+        ]
+    )
+    if(err){
+        err.send(res)
+        return
     }
-    else if(!productId) {
-        console.log('missing productId')
-        res.status(400).send('missing product id');
-    }
-    else if (actionType !== 'add' && actionType !== 'del') {
-        console.log('missing action type')
-        res.status(400).send('missing action type send add/del');
-    }
-    else {
-        const invalidIds = []
-        for(const category of categories){
-            if(!await Category.findOne({name:category})){
-                invalidIds.push(category)
-            }
-        }
-        if(invalidIds.length > 0){
-            res.status(400).send('couldn\'t find categories with ids: ' + invalidIds);
-        }
-        else {
-            const prodObj = await Product.findById(productId)
-            if (!prodObj){
-                res.status(400).send('could not find category with name: ' + categories);
-                return;
-            }
-            console.log("here4", prodObj);
-            await changeCategoriesOfProductLogic(actionType,categories,prodObj)
-            res.status(200).send('change successful')
+    for(const category of categories){
+        if(!await Category.findOne({name:category})){
+            new ErrorDocNotFound(Category.modelName,category).send(res)
+            return
         }
     }
+    const prodObj = await Product.findById(productId)
+    await changeCategoriesOfProductLogic(removeAction,categories,prodObj!)
+    res.status(200).send('change successful')
 }
