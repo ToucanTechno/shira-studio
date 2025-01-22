@@ -9,4 +9,6 @@ export enum ErrorType {
     DOC_NOT_DELETED,
     MUL_ERROR,
     DEDICATED_UPDATE,
+    CART_USER_ALREADY_EXIST,
+    CART_LOCKED,
 }

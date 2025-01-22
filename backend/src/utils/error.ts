@@ -94,3 +94,22 @@ export class ErrorUseDedicatedUpdate extends ResponseError {
         this.fieldName = fieldName
     }
 }
+export class ErrorCartUserAlreadyExist extends ResponseError {
+    userId:string
+    cartId:string
+    constructor(userId:string, cartId:string){
+        const message = `the user with id: ${userId} already has cart with the id ${cartId}`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_USER_ALREADY_EXIST)
+        this.userId = userId
+        this.cartId = cartId
+    }
+}
+
+export class ErrorCartLocked extends ResponseError{
+    cartId:string
+    constructor(cartId:string){
+        const message = `the cart with id: ${cartId} is locked please unlock`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_LOCKED)
+        this.cartId = cartId
+    }
+}
