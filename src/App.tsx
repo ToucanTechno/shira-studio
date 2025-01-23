@@ -8,6 +8,7 @@ import Category from "./pages/Category";
 import ProductCategory from "./pages/ProductCategory";
 import Product from "./pages/Product";
 import Cart from "./pages/Cart";
+import Login from "./pages/Login";
 import { AuthProvider } from "./services/AuthContext";
 import { Box } from "@chakra-ui/react";
 import CartWrapper from "./utils/CartWrapper";
@@ -25,6 +26,7 @@ const App = () => {
                         <Route path="/categories/:category/:productCategory" element={<ProductCategory/>}/>
                         <Route path="/product/:product" element={<Product/>}/>
                         <Route path="/cart" element={<Cart/>}/>
+                        <Route path="/login" element={<Login/>}/>
                     </Routes>
                 </Box>
             </CartWrapper>

@@ -12,6 +12,7 @@ import './PanelApp.css';
 import AdminProductsEdit from "./AdminProductsEdit";
 import AdminProductsDelete from "./AdminProductsDelete";
 import TopAdminNavbar from "./TopAdminNavbar";
+import AdminCategoriesDelete from "./AdminCategoriesDelete";
 
 const PanelApp = () => {
     const { pathname } = useLocation();
@@ -24,6 +25,7 @@ const PanelApp = () => {
                 <Route element={<RequireAuth/>}>
                     <Route path="/" element={<AdminStatistics/>}/>
                     <Route path="/categories" element={<AdminCategories/>}/>
+                    <Route path="/categories/:id/delete" element={<AdminCategoriesDelete/>}/>
                     <Route path="/products" element={<AdminProducts/>}/>
                     <Route path="/products/add" element={<AdminProductsEdit/>}/>
                     <Route path="/products/:id/edit" element={<AdminProductsEdit/>}/>

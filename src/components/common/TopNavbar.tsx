@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import './TopNavbar.css';
-import { BsFacebook, BsInstagram, BsBasket3, BsFillPersonFill, BsGlobe2  } from "react-icons/bs";
+import { BsFacebook, BsInstagram, BsBasket3, BsFillPersonFill, BsGlobe2, BsHouseDoor  } from "react-icons/bs";
 import {ItemType} from "./MenuItem";
 import {Link, Icon, Flex, useConst, Box} from "@chakra-ui/react";
 import HoverMenuItem from "./HoverMenuItem";
@@ -53,6 +53,9 @@ const TopNavbar = () => {
         <Box backgroundColor='black'>
             <Box className="TopNavbar">
                 <Flex direction='row' align='center' gap={1}>
+                    <Tooltip label="Home" aria-label='Home Tooltip'>
+                        <Link href='/'><Icon boxSize={8} aria-label='Home' as={BsHouseDoor} color='white' /></Link>
+                    </Tooltip>
                     <Tooltip label="Choose Language" aria-label='Choose Language Tooltip'>
                         {/* TODO: make it dynamic, open a popup */}
                         <Link href='/language'><Icon boxSize={8} aria-label='Choose Language' as={BsGlobe2} color='white' /></Link>
