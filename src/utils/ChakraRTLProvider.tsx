@@ -5,7 +5,7 @@ export default function ChakraRTLProvider({ children }: any) {
     const direction = 'rtl';
 
     // 👇🏻 Here's the place we add direction to the theme
-    const theme = extendTheme({ direction })
+    const theme = extendTheme({ direction });
 
     return <ChakraProvider theme={theme}>{children}</ChakraProvider>
 }
