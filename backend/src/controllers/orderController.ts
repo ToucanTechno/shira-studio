@@ -27,7 +27,7 @@ export const getOrders = async (req: Request, res: Response) => {
     //TODO: when better error handling make sure skip and limit are of type number
     const skip = req.body['skip'] !== undefined ? req.body['skip'] : 0;
     const limit = req.body['limit'] !== undefined ? Math.min(req.body['limit'],50) : 10;
-    const [orders,count] = await Promise.all([Order.find().sort({createdAt : 'asc'}).skip(skip).limit(limit),Order.countDocuments()])
+    const [orders,count] = await Promise.all([Order.find().populate('products.$*.product').sort({createdAt : 'asc'}).skip(skip).limit(limit),Order.countDocuments()])
     res.status(200).send({orders:orders , total:count});
 };
 

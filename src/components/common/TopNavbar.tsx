@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from "react";
 import './TopNavbar.css';
-import { BsFacebook, BsInstagram, BsBasket3, BsBookmarks, BsFillPersonFill, BsGlobe2  } from "react-icons/bs";
+import { BsFacebook, BsInstagram, BsBasket3, BsFillPersonFill, BsGlobe2  } from "react-icons/bs";
 import {ItemType} from "./MenuItem";
-import {useNavigate} from "react-router-dom";
 import {Link, Icon, Flex, useConst, Box} from "@chakra-ui/react";
 import HoverMenuItem from "./HoverMenuItem";
 import axios, {AxiosInstance, AxiosResponse} from "axios";
+import { Tooltip } from '@chakra-ui/react'
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
@@ -53,10 +53,17 @@ const TopNavbar = () => {
         <Box backgroundColor='black'>
             <Box className="TopNavbar">
                 <Flex direction='row' align='center' gap={1}>
-                    <Icon boxSize={8} aria-label='Choose Language' as={BsGlobe2} color='white' />
-                    <Icon boxSize={8} aria-label='Login' as={BsFillPersonFill} color='white' />
+                    <Tooltip label="Choose Language" aria-label='Choose Language Tooltip'>
+                        {/* TODO: make it dynamic, open a popup */}
+                        <Link href='/language'><Icon boxSize={8} aria-label='Choose Language' as={BsGlobe2} color='white' /></Link>
+                    </Tooltip>
+                    <Tooltip label="Login" aria-label='Login Tooltip'>
+                        <Link href='/login'><Icon boxSize={8} aria-label='Login' as={BsFillPersonFill} color='white' /></Link>
+                    </Tooltip>
                     {/*<Icon aria-label='Wishlist' as={BsBookmarks} color='white' />*/}
-                    <Link href='/cart'><Icon boxSize={8} aria-label='Cart' as={BsBasket3} color='white' /></Link>
+                    <Tooltip label="Cart" aria-label='Cart Tooltip'>
+                        <Link href='/cart'><Icon boxSize={8} aria-label='Cart' as={BsBasket3} color='white' /></Link>
+                    </Tooltip>
                 </Flex>
                 <nav className="TopNavbarNav">
                     { navbar.map(item =>

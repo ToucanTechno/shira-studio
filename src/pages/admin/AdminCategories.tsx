@@ -11,7 +11,7 @@ import {
 import React, {FormEvent, useEffect, useState} from "react";
 import axios, {AxiosInstance} from "axios";
 import {ICategory} from "../../../backend/src/models/Category";
-import {Form, useNavigate} from "react-router-dom";
+import {Form, useNavigate} from "react-router";
 import AdminCategoriesAdd from "./AdminCategoriesAdd";
 import Select, {SingleValue} from "react-select";
 import {SelectOption} from "../../utils/ChakraTypes";
@@ -26,23 +26,24 @@ const AdminCategories = () => {
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
-        api.get('/categories')
-            .then(response => {
-                // Process the response data
+        (async () => {
+            try {
+                let response = await api.get('/categories');
                 setCategories(response.data);
-            })
-            .catch(error => {
-                // Handle any errors
+            } catch (error: any) {
                 console.error(error);
-            });
+            }
+        })();
     }, [api, dirty]);
 
-    const handleEditCategory = (el: FormEvent<HTMLFormElement>) => {
+    const handleEditCategory = async (el: FormEvent<HTMLFormElement>) => {
         console.log(el);
         // TODO: edit category when possible
-        // api.put(`/categories/${editID}`, {
-        //     a
-        // });
+        // try {
+        // api.put(`/categories/${editID}`, )
+        // } catch (error: any) {
+        //     console.error(error);
+        // }
     };
 
     return (<Flex flexDirection='column' alignItems='center'>

@@ -1,7 +1,7 @@
 import {MenuItem} from "@chakra-ui/react";
 import React from "react";
 import { ItemType } from "./MenuItem";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 
 interface MenuSubItemProps {
     parentItem: ItemType

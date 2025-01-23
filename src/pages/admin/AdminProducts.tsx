@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios, { AxiosInstance } from 'axios'
 import { IProduct } from "../../models/Product";
-import { Link as ReactRouterLink, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link as ReactRouterLink, useNavigate, useSearchParams } from 'react-router'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import {
     Box, Flex, Image, Button, Heading,
@@ -52,7 +52,7 @@ const AdminProducts = () => {
             <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} onClick={() => navigate('/control-panel/products/add')}>הוספת מוצר חדש</Button>
         </Box>
         <TableContainer w='100%'>
-            <Table colorScheme='gray' variant='striped'>
+            <Table colorScheme='gray' variant='striped' size='sm'>
                 <Thead>
                     <Tr>
                         <Th>תמונה</Th>
@@ -75,7 +75,7 @@ const AdminProducts = () => {
                                 <Td><Image boxSize='60px' src="necklace.jpg" alt="Gold Necklace"/></Td>
                                 {/* TODO: make link work */}
                                 <Td><ChakraLink as={ReactRouterLink} to={`/products/${item._id}`}>{item.name}</ChakraLink></Td>
-                                <Td>{item._id}</Td>
+                                <Td dir='ltr'>...{(item._id as string).slice(-6)}</Td>
                                 <Td color={(item.stock === 0) ? 'red.400' : 'green.400'}>{item.stock}</Td>
                                 <Td isNumeric>
                                     {new Intl.NumberFormat('he-il', {minimumFractionDigits: 2}).format(item.price)}

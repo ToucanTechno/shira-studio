@@ -11,6 +11,7 @@ import {ICartModel} from "../models/CartModel";
 import CartOrder from "./CartOrder";
 import {BsCartDash} from "react-icons/bs";
 import {CartContext} from "../services/CartContext";
+import {useNavigate} from "react-router";
 
 const Cart = () => {
     const [cart, setCart] = useState<ICartModel | null>(null);
@@ -22,6 +23,7 @@ const Cart = () => {
         position: 'top'
     });
     const [isInLockProcess, setIsInLockProcess] = useState(false);
+    const navigate = useNavigate();
 
     const totalPrice = useMemo(() => {
         if (!cart) {
@@ -42,57 +44,69 @@ const Cart = () => {
                 console.log("error:", error);
             })
         }
-    }, []);
+    }, [api, guestData.cartID]);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
         if (!cart) {
-            console.error('No cart to change items count')
-            return;
+            // Should never happen
+            return Promise.reject('No cart to change items count');
         }
-        // TODO: How does stock work in that case?
-        if (cart.lock) {
-            setIsInLockProcess(true);
-            try {
-                await tryLockCart(false);
-            } catch (error) {
-                console.error(error);
-                return;
+
+        // Try to unlock cart if it was previously locked
+        let wasPreviouslyLocked;
+        try {
+            // if lock state changed while unlocking, it means cart was previously locked
+            wasPreviouslyLocked = await tryLockCart(false);
+            if (wasPreviouslyLocked) {
+                setIsInLockProcess(true);
             }
+        } catch (error) {
+            return Promise.reject(error);
         }
+
+        // Alert about limited stock
         if (val > cart.products[productKey].product.stock) {
             alertToast({
-                title: 'אין במלאי מעבר לכמות זו',
+                title: 'מלאי מוגבל',
                 description: `מוצר: ${cart.products[productKey].product.name}`,
             });
             return;
         }
+
+        // Update product amount in DB
         const amountToChange = val - cart.products[productKey].amount;
         if (amountToChange === 0) {
             return;
         }
-        api.put(`/cart/${guestData.cartID}`, {
-            productId: productKey,
-            amount: amountToChange
-        }).then(async (res) => {
-            if (val === 0) {
-                delete cart.products[productKey]
-            } else {
-                cart.products[productKey].amount = val;
-            }
-            if (isInLockProcess) {
-                try {
-                    await tryLockCart(true);
-                } catch (error) {
-                    console.error(error);
-                    return;
-                }
+        console.log('amount to change', amountToChange)
+        try {
+            await api.put(`/cart/${guestData.cartID}`, {
+                productId: productKey,
+                amount: amountToChange
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+
+        // If we changed product number to 0, remove it from cart
+        if (val === 0) {
+            delete cart.products[productKey]
+        } else {
+            cart.products[productKey].amount = val;
+        }
+
+        // Re-lock cart if needed
+        if (wasPreviouslyLocked) {
+            try {
+                await tryLockCart(true);
                 setIsInLockProcess(false);
+            } catch (error) {
+                return Promise.reject(error);
             }
-            setCart({...cart, products: cart.products});
-            console.log(val, productKey);
-            console.log(res)
-        }).catch(error => console.error(error));
-    }, [alertToast, api, cart, guestData.cartID, tryLockCart, isInLockProcess]);
+        }
+        setCart({...cart, products: cart.products});
+        console.log("Finished updating product:", productKey, val);
+    }, [alertToast, api, cart, guestData.cartID, tryLockCart]);
 
     const handleClose = useCallback((productKey: string) => {
         console.log('Closing', productKey);
@@ -160,7 +174,7 @@ const Cart = () => {
                     </Tbody>
                 </Table>
             </TableContainer>
-            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart}/>
+            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart} navigate={navigate}/>
         </Flex>
     );
 };

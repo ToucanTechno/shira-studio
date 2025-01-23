@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Link as ReactRouterLink, useParams} from 'react-router-dom'
+import {Link as ReactRouterLink, useParams} from 'react-router'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import CategorySampleImage from '../assets/images/categories/רקמה7-1.webp'
 import './Category.css'

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, RouterProvider} from "react-router";
 import PanelApp from "./pages/admin/PanelApp";
 import ChakraRTLProvider from "./utils/ChakraRTLProvider";
 import App from "./App";

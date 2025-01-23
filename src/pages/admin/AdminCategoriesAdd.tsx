@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import {ICategory} from "../../../backend/src/models/Category";
 import React, {ChangeEvent, useEffect, useState} from "react";
-import {Form} from "react-router-dom";
+import {Form} from "react-router";
 import Select, {SingleValue} from "react-select";
 import axios, {AxiosInstance} from "axios";
 import {SelectOption} from "../../utils/ChakraTypes";
@@ -24,9 +24,9 @@ interface CategoriesAddProps {
 const AdminCategoriesAdd = (props: CategoriesAddProps) => {
     const { isOpen, onToggle, onClose } = useDisclosure();
     const [name, setName] =
-        useState<string | undefined>();
+        useState<string>("");
     const [text, setText] =
-        useState<string | undefined>();
+        useState<string>("");
     const [parent, setParent] =
         useState<SelectOption | null>({value: '', label: '-'})
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
@@ -35,8 +35,8 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
     useEffect(() => {
         if (isOpen && props.disabled === true) {
             setParent({value: '', label: '-'});
-            setName(undefined);
-            setText(undefined);
+            setName("");
+            setText("");
             onClose();
         }
     }, [isOpen, onClose, props.disabled]);
@@ -79,9 +79,9 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                                        name='categoryText'
                                        required
                                        value={text}
-                                onChange={(el: ChangeEvent<HTMLInputElement>) => {
-                                    console.log(el);
-                                    setText(el.target.value)}}/>
+                                       onChange={(el: ChangeEvent<HTMLInputElement>) => {
+                                        console.log(el);
+                                        setText(el.target.value)}}/>
                             </FormControl>
                             <FormControl me={2}>
                                 <FormLabel htmlFor='categoryName'>שם הקטגוריה באנגלית</FormLabel>
@@ -89,7 +89,10 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                                        bgColor='white'
                                        name='categoryName'
                                        required
-                                       value={name}/>
+                                       value={name}
+                                       onChange={(el: ChangeEvent<HTMLInputElement>) => {
+                                        console.log(el);
+                                        setName(el.target.value)}}/>
                             </FormControl>
                             <FormControl me={5}>
                                 <FormLabel htmlFor='parent'>קטגוריית אב</FormLabel>

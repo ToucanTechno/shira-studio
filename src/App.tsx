@@ -1,7 +1,7 @@
-import React, {useContext} from 'react';
+import React from 'react';
 import './App.css';
 import Home from "./pages/Home";
-import {Route, Routes} from "react-router-dom";
+import {Route, Routes} from "react-router";
 import TopNavbar from "./components/common/TopNavbar";
 import About from "./pages/About";
 import Category from "./pages/Category";

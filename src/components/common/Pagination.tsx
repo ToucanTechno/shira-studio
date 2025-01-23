@@ -1,6 +1,6 @@
 import { Badge, Flex } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
-import { Link as ReactRouterLink } from "react-router-dom";
+import { Link as ReactRouterLink } from "react-router";
 import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import React from "react";
 

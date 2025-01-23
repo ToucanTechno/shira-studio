@@ -1,7 +1,7 @@
 import {Button, Menu, MenuButton, MenuList, useDisclosure} from "@chakra-ui/react";
 import React, {useRef} from "react";
 import { ItemType } from "./MenuItem";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 import MenuSubItem from "./MenuSubItem";
 
 interface HoverMenuItemProps {
