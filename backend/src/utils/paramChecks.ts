@@ -1,5 +1,14 @@
 import { isValidObjectId } from "mongoose"
-import { ResponseError,ErrorDocNotFound,ErrorInvalidObjectId,ErrorMissingField, ErrorInvalidType, ErrorCartUserAlreadyExist, ErrorCartLocked } from "./error"
+import {
+    ResponseError,
+    ErrorDocNotFound,
+    ErrorInvalidObjectId,
+    ErrorMissingField,
+    ErrorInvalidType,
+    ErrorCartUserAlreadyExist,
+    ErrorCartLocked,
+    ErrorCartUnlocked
+} from "./error"
 import { Cart } from "../models/Cart"
 
 
@@ -43,10 +52,17 @@ export const isCartUserAlreadyExist = async (userId:string,_name:string) => {
     return undefined
 }
 
-export const isCartLocked = async (cartId:string, _name:string) => {
+export const isCartLocked = async (cartId:string,expected:boolean, _name:string) => {
     const cart = await Cart.findById(cartId)
-    if(cart?.lock){
-        return new ErrorCartLocked(cartId)
+    if(expected){
+        if(!cart?.lock){
+            return new ErrorCartUnlocked(cartId)
+        }
+    }
+    else{
+        if(cart?.lock){
+            return new ErrorCartLocked(cartId)
+        }
     }
     return undefined
 }

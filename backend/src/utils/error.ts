@@ -1,6 +1,7 @@
-import { Response } from "express";
-import { ErrorType } from "./ErrorType";
-import { StatusCodes } from "http-status-codes";
+import {Response} from "express";
+import {ErrorType} from "./ErrorType";
+import {StatusCodes} from "http-status-codes";
+
 export class ResponseError {
     status: number = StatusCodes.BAD_REQUEST;
     message: string = 'Unknown error';
@@ -108,8 +109,30 @@ export class ErrorCartUserAlreadyExist extends ResponseError {
 export class ErrorCartLocked extends ResponseError{
     cartId:string
     constructor(cartId:string){
-        const message = `the cart with id: ${cartId} is locked please unlock`
+        const message = `the cart with id: ${cartId} is locked`
         super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_LOCKED)
         this.cartId = cartId
+    }
+}
+
+export class ErrorCartUnlocked extends ResponseError {
+    cartId:string
+    constructor(cartId:string) {
+        const message = `the cart with id: ${cartId} is unlocked `
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_UNLOCKED)
+        this.cartId = cartId
+    }
+}
+
+export class ErrorAmountAboveStock extends ResponseError {
+    amountInStock:number
+    requestedAmount:number
+    productId:string
+    constructor(productId:string, amountInStock:number, requestedAmount:number) {
+        const message = `product with id: ${productId} the requested amount is: ${requestedAmount} but only has ${amountInStock} in stock`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.AMOUNT_ABOVE_STOCK)
+        this.amountInStock = amountInStock
+        this.requestedAmount = requestedAmount
+        this.productId = productId
     }
 }
