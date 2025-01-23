@@ -1,4 +1,4 @@
-import {Form, useNavigate, useParams} from "react-router-dom";
+import {Form, useNavigate, useParams} from "react-router";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
 import axios, {AxiosInstance} from "axios";

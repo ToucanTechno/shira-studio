@@ -10,22 +10,86 @@ import {
     Tbody, Td, Th, Thead, Tr, useConst
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons"
-import Select, {SingleValue} from "react-select";
-import {Form} from "react-router-dom";
-import {ChangeEvent, useEffect, useState} from "react";
-import {SelectOption} from "../../utils/ChakraTypes";
-import {IOrder} from "../../../backend/src/models/Order";
-import axios, {AxiosInstance} from "axios";
+import Select, { SingleValue } from "react-select";
+import { Form } from "react-router";
+import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from "react";
+import { SelectOption } from "../../utils/ChakraTypes";
+import axios, { AxiosInstance } from "axios";
+import { ColumnDef, createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+
+export interface TOrder {
+    id: number;
+    customerName: string;
+    orderTotal: number;
+    status: string;
+    paymentMethod: string;
+    deliveryMethod: string;
+    action: string;
+}
 
 const AdminOrders = () => {
     const [searchPhrase, setSearchPhrase] = useState('');
     const [typeFilter, setTypeFilter] =
         useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
-    const [orders] = useState<IOrder[]>([]);
+    const [ordersData, setOrdersData] = useState<TOrder[]>([]);
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    let columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
+    const ordersTable = useReactTable({data: ordersData, columns: columns.current, getCoreRowModel: getCoreRowModel()});
 
     useEffect(() => {
-        api.get('/orders');
+        const columnHelper = createColumnHelper<TOrder>()
+        columns.current = [
+            columnHelper.accessor('id', {
+                cell: info => info.getValue(),
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('customerName', {
+                cell: info => <i>{info.getValue()}</i>,
+                header: () => <span>Customer Name</span>,
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('orderTotal', {
+                header: () => 'Order Total',
+                cell: info => info.renderValue(),
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('status', {
+                header: () => <span>Order Status</span>,
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('paymentMethod', {
+                header: 'Payment Method',
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('deliveryMethod', {
+                header: 'Delivery Method',
+                footer: info => info.column.id,
+            }),
+            columnHelper.accessor('action', {
+                header: 'Action',
+                footer: info => info.column.id,
+            }),
+        ];
+        (async () => {
+            try {
+                const dbOrders = await api.get('/orders');
+                console.log(dbOrders);
+                let orders: TOrder[] = [];
+                for (const order of dbOrders.data.orders) {
+                    orders.push({
+                        id: order._id,
+                        customerName: order.name,
+                        orderTotal: 0,
+                        status: order.shipmentStep,
+                        paymentMethod: 'unknown',
+                        deliveryMethod: order.shipmentMethod,
+                        action: ''})
+                }
+                setOrdersData(orders);
+            } catch (error: any) {
+                console.error(error);
+            }
+        })();
     }, [api]);
 
     const handleSelectTypeFilter = (el: SingleValue<SelectOption>) => {
@@ -82,16 +146,15 @@ const AdminOrders = () => {
                         </Tr>
                     </Thead>
                     <Tbody>
-                        { orders.length > 0 && orders.map((item: IOrder) => {
-                            console.log(item)
+                        { ordersData.length > 0 && ordersData.map((item: TOrder) => {
                             return (
-                            <Tr>
-                                <Td>1001</Td>
-                                <Td>John Doe</Td>
-                                <Td>$250</Td>
-                                <Td className="status-pending">Pending</Td>
-                                <Td>Paid</Td>
-                                <Td>Shipping</Td>
+                            <Tr key={item.id}>
+                                <Td>{item.id}</Td>
+                                <Td>{item.customerName}</Td>
+                                <Td>${item.orderTotal}</Td>
+                                <Td className="status-pending">{item.status}</Td>
+                                <Td>{item.paymentMethod}</Td>
+                                <Td>{item.deliveryMethod}</Td>
                                 <Td>
                                     <Button me={2}>צפייה בהזמנה</Button>
                                     <Button>סימון כנשלח</Button>

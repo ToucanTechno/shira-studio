@@ -28,6 +28,7 @@ export interface IOrder {
     cart: string | ICart;
     createdAt: Date;
     updatedAt: Date;
+    _id?: string;
 }
 
 const orderSchema = new mongoose.Schema({

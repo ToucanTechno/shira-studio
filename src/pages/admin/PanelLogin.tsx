@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 import "./PanelLogin.css"
 import {AuthContext} from "../../services/AuthContext";
 

@@ -6,13 +6,12 @@ import {
     Heading,
     Image,
     Text,
-    Button,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
     PopoverTrigger, Popover,
     Portal,
     PopoverContent, PopoverArrow, PopoverCloseButton, PopoverBody, Link, Icon
 } from "@chakra-ui/react";
-import {useParams} from "react-router-dom";
+import {useParams} from "react-router";
 import {IProduct} from "../models/Product";
 import {AuthContext} from "../services/AuthContext";
 import {BsCartCheckFill} from "react-icons/bs";
@@ -20,12 +19,12 @@ import {CartContext} from "../services/CartContext";
 
 const Product = (props: any) => {
     const [product, setProduct] = useState({} as IProduct);
-    const [itemsCount, setItemsCount] = useState(1);
+    const [itemsCount, setItemsCount] = useState(0);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const params = useParams();
     // TODO: move all API calls to request context
     const { guestData, api } = useContext(AuthContext)
-    const { tryCreateCart, wrapUnlockLock } = useContext(CartContext)
+    const { tryCreateCart, wrapUnlockLock, getProductCount } = useContext(CartContext)
 
     useEffect(() => {
         api.get(`/products/${params.product}`).then((response: any) => {
@@ -41,19 +40,14 @@ const Product = (props: any) => {
         );
         console.log(guestData.cartID);
         if (guestData.cartID) {
-            api.get(`/cart/${guestData.cartID}`).then(response => {
-                console.log(response);
-            }).catch(error => {
-                console.log("error:", error);
-            })
+            getProductCount(params.product).then((productCount) => {
+                setItemsCount(productCount);
+            });
         }
-    }, [params.product, guestData.cartID, api]);
+    }, [params.product, guestData.cartID, api, getProductCount]);
 
-    const handleItemsCountChange = (_: string, itemsCount: number) => {
-        setItemsCount(itemsCount);
-    };
-
-    const handleAddToCart = useCallback(async (event: any) => {
+    const handleItemsCountChange = useCallback(async (_: string, newItemsCount: number) => {
+        console.log("ItemsCount: ", itemsCount);
         let cartID = localStorage.getItem('cartID');
         setIsAddingToCart(true);
         // TODO: set userId in request to avoid creating double cart
@@ -61,6 +55,7 @@ const Product = (props: any) => {
             console.log('Try creating cart...');
             const newCartID = await tryCreateCart();
             if (newCartID !== null) {
+                console.log("Created a new cart in the process of adding to cart:", newCartID);
                 cartID = newCartID;
             }
         } catch(error) {
@@ -68,23 +63,28 @@ const Product = (props: any) => {
             return;
         }
 
-        console.log("Unlocking cart if locked");
-        console.log("Adding product", params.product, itemsCount);
-        await wrapUnlockLock(cartID, async () => {
-            return api.put(`/cart/${cartID}`, {productId: params.product, amount: itemsCount})
-                .then(response => {
-                    console.log(`op guestData: ${guestData.cartID}`)
-                    console.log(response);
-                    /* TODO: update stock */
-                    //setItemsCount(product.stock - itemsCount)
-                    setIsAddingToCart(false);
-                })
-                .catch(error => {
-                    console.log(`op error guestData: ${guestData.cartID}`)
-                    console.log(error);
-                })
-        });
-    }, [api, itemsCount, params.product, tryCreateCart, wrapUnlockLock]);
+        try {
+            await wrapUnlockLock(cartID, async () => {
+                const amountToChange = newItemsCount - itemsCount;
+                console.log('new items', newItemsCount, 'items', itemsCount, 'amounttochange', amountToChange);
+                if (amountToChange !== 0) {
+                    return api.put(`/cart/${cartID}`, {productId: params.product, amount: amountToChange})
+                        .then(response => {
+                            console.log(`op guestData: ${guestData.cartID}`)
+                            console.log(response);
+                            setItemsCount(newItemsCount);
+                            setIsAddingToCart(false);
+                        })
+                        .catch(error => {
+                            console.log(`op error guestData: ${guestData.cartID}`)
+                            console.log(error);
+                        })
+                }
+            });
+        } catch(error) {
+            console.error("Error in wrapUnlockLock: ", error);
+        }
+    }, [api, itemsCount, params.product, tryCreateCart, wrapUnlockLock, guestData.cartID]);
 
     return (
         <Flex m={4} direction='column'>
@@ -123,16 +123,23 @@ const Product = (props: any) => {
                             <Heading as='h2' size='lg' noOfLines={1}>{product.name}</Heading>
                             <Text fontSize='md'>{product.price}₪</Text>
                             <Text flexGrow='1' fontSize='md'>{product.description}</Text>
-                            <Flex direction='row'>
+                            <Flex direction='row' alignItems='center'>
+                                <Heading as='h3' size='md'>עדכון מוצרים בעגלה:&nbsp;</Heading>
                                 <Popover>
                                     <PopoverTrigger>
-                                        {/* TODO: make button disabled until popover is closed */}
-                                        {/* TODO: make sure stock minus cart value > 0 */}
-                                        <Button isDisabled={isAddingToCart || product.stock === 0}
-                                                onClick={handleAddToCart}
-                                                size='lg'
-                                                me={2}
-                                                colorScheme='blue'>הוסף לסל</Button>
+                                        <NumberInput onChange={handleItemsCountChange}
+                                                     allowMouseWheel
+                                                     size='lg'
+                                                     maxW={20}
+                                                     value={itemsCount}
+                                                     min={0}
+                                                     max={product.stock}>
+                                            <NumberInputField />
+                                            <NumberInputStepper>
+                                                <NumberIncrementStepper />
+                                                <NumberDecrementStepper />
+                                            </NumberInputStepper>
+                                        </NumberInput>
                                     </PopoverTrigger>
                                     <Portal>
                                         <PopoverContent>
@@ -146,20 +153,6 @@ const Product = (props: any) => {
                                         </PopoverContent>
                                     </Portal>
                                 </Popover>
-                                <NumberInput onChange={handleItemsCountChange}
-                                             allowMouseWheel
-                                             size='lg'
-                                             maxW={20}
-                                             value={itemsCount}
-                                             min={0}
-                                             max={product.stock}>
-                                    {/* TODO: max should me stock minus cart value */}
-                                    <NumberInputField />
-                                    <NumberInputStepper>
-                                        <NumberIncrementStepper />
-                                        <NumberDecrementStepper />
-                                    </NumberInputStepper>
-                                </NumberInput>
                             </Flex>
                         </Flex>
                     </Wrap>

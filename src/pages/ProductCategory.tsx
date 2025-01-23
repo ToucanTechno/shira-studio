@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Link} from "react-router-dom";
+import {Link} from "react-router";
 import {useInfiniteScroll} from "../utils/useInfiniteScroll";
 import {Loader} from "../components/infinite_scroll/Loader";
 

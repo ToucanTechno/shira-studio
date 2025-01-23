@@ -1,22 +1,23 @@
 import {
     Button, Card, Center, Collapse, Fade,
     Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Radio, RadioGroup, Spacer,
-    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure,
+    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure, useRadioGroup,
     Wrap
 } from "@chakra-ui/react";
 import React, {
     ChangeEvent, Dispatch, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react";
-import {Form, useBlocker} from "react-router-dom";
-import {AuthContext} from "../services/AuthContext";
-import {ICartModel} from "../models/CartModel";
-import {CartContext} from "../services/CartContext";
+import { Form, NavigateFunction, useBlocker } from "react-router";
+import { AuthContext } from "../services/AuthContext";
+import { ICartModel } from "../models/CartModel";
+import { CartContext } from "../services/CartContext";
 
 interface CartOrderProps {
     totalPrice: number;
     cartID: string | null;
     cart: ICartModel | null;
     setCart: Dispatch<ICartModel | null>;
+    navigate: NavigateFunction;
 }
 
 const CartOrder = (props: CartOrderProps) => {
@@ -39,6 +40,8 @@ const CartOrder = (props: CartOrderProps) => {
     const [houseNumber, setHouseNumber] = useState<string>('');
     const [entry, setEntry] = useState<string>('');
     const [apartment, setApartment] = useState<string>('');
+    const [shipmentMethod, setShipmentMethod] = useState<string>('signed_mail');
+
     const { api } = useContext(AuthContext)
     const { tryLockCart, removeCart } = useContext(CartContext);
     const formRefs = {
@@ -46,11 +49,13 @@ const CartOrder = (props: CartOrderProps) => {
         phone: useRef<HTMLInputElement>(null),
         postCode: useRef<HTMLInputElement>(null)
     }
+    // If there's a cart ID and a cart, on each page transition, block the transition
     let blocker = useBlocker(
         ({ currentLocation, nextLocation }) =>
             props.cartID !== null && props.cart !== null && currentLocation.pathname !== nextLocation.pathname
     );
 
+    // On every blocker change and cart change, if blocker is now blocked, try to unlock cart.
     useEffect(() => {
         // TODO: && blocker.location.pathname !== 'checkout'
         if (blocker.state === 'blocked') {
@@ -60,6 +65,7 @@ const CartOrder = (props: CartOrderProps) => {
                     console.log('unlock successful');
                     blocker.proceed();
                 } else {
+                    // Should never happen!
                     console.error('unblocked unexpectedly without proceeding.');
                 }
             }).catch((error) => console.error(`Try unlock cart failed: ${error}`));
@@ -95,11 +101,13 @@ const CartOrder = (props: CartOrderProps) => {
             houseNumber: houseNumber,
             entry: entry,
             apartment: apartment,
+            shipmentMethod: shipmentMethod,
             comments: 'TODO'
         }).then(res => {
             console.log(`Order ID: ${res.data}`);
             removeCart();
         }).catch(error => console.error(error));
+        props.navigate('/');
     };
 
     const handleOrderProceed = useCallback(async () => {
@@ -133,7 +141,8 @@ const CartOrder = (props: CartOrderProps) => {
                                     <FormLabel as='legend' fontSize='xl' p={1}>
                                         שיטת משלוח
                                     </FormLabel>
-                                    <RadioGroup>
+                                    <RadioGroup defaultValue={shipmentMethod}
+                                                onChange={(value: string) => {setShipmentMethod(value)}}>
                                         <Stack direction={['column', 'column', 'row']} spacing='8px'>
                                             <Radio value='signed_mail'>דואר רשום</Radio>
                                             <Radio value='collection_point'>נקודת איסוף</Radio>
