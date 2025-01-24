@@ -1,0 +1,174 @@
+
+###
+GET http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Accept: application/json
+//add 2 to product 710 in cart
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": 2
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+//remove 2 from product 710 in cart
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": -2
+}
+
+###
+//invlid cart id
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": 2
+}
+
+###
+//error cart id not in db
+PUT http://localhost:3001/api/cart/65c64d5db36e9cdeb9d9e710
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": 2
+}
+
+###
+//error cart is locked
+PUT http://localhost:3001/api/cart/661444704657205f766a5308
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": 2
+}
+
+###
+//error missing product id
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "amount": 2
+}
+
+###
+//error invalid productId
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e71",
+  "amount": 2
+}
+
+###
+//error productId not in db
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "productId": "66144372d461d9127d640c0a",
+  "amount": 2
+}
+
+###
+//error missing amount
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710"
+}
+
+###
+//error amount is not a number
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
+Content-Type: application/json
+
+{
+  "productId": "65c64d5db36e9cdeb9d9e710",
+  "amount": "231"
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a/lock
+//lock the cart
+Content-Type: application/json
+
+{
+  "lock": true
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a/lock
+//unlock the cart
+Content-Type: application/json
+
+{
+  "lock": false
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0/lock
+//lock request invalid cart id
+Content-Type: application/json
+
+{
+  "lock": true
+}
+
+###
+PUT http://localhost:3001/api/cart/65c64d5db36e9cdeb9d9e710/lock
+//lock request cart id not in db
+Content-Type: application/json
+
+{
+  "lock": true
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a/lock
+//lock request lock field missing
+Content-Type: application/json
+
+{
+  "locked": true
+}
+
+###
+PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a/lock
+//lock request lock field not boolean
+Content-Type: application/json
+
+{
+  "lock": "1234"
+}
+
+###
+PUT http://localhost:3001/api/cart/661444704657205f766a5308/lock
+//lock request one product is out of stock
+Content-Type: application/json
+
+{
+  "lock": true
+}
+
+###
+PUT http://localhost:3001/api/cart/661444704657205f766a5308/lock
+//lock request unlock on unlocked cart
+Content-Type: application/json
+
+{
+  "lock": false
+}
