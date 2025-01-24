@@ -7,7 +7,7 @@ import {
     ErrorInvalidType,
     ErrorCartUserAlreadyExist,
     ErrorCartLocked,
-    ErrorCartUnlocked
+    ErrorCartUnlocked, ErrorAlreadyInDb
 } from "./error"
 import { Cart } from "../models/Cart"
 
@@ -18,7 +18,8 @@ export const isMissingField = (field:any,name:string): ResponseError | undefined
     }
     return new ErrorMissingField(name)
 }
-
+//TODO:needs better way to check for valid objectID
+//     if giving pure number like 6 its return true even though it throws cast error when trying to find doc with id 6
 export const isInvalidObjId = (objectId:string,name:string): ResponseError | undefined => {
     if(isValidObjectId(objectId)){
         return undefined
@@ -37,11 +38,27 @@ export const isInvalidType = (field:any, expectedType:string,name:string): Respo
 //export const isInvalidType = (param:a)
 
 //how to change model to be of type mongoose.Model<T> type had problems with passing Product
-export const isDocNotFound = async (objectId:string,model:any,_name:string) : Promise<ResponseError | undefined> =>{
+export const isDocNotFoundById = async (objectId:string, model:any, _name:string) : Promise<ResponseError | undefined> =>{
     if(await model.findById(objectId)){
         return undefined
     }
     return new ErrorDocNotFound(model.modelName,objectId);
+}
+
+export const isDocNotFoundByParam = async (paramName:string,
+                                           paramValue:any, model:any, _name:string):Promise<ResponseError | undefined> =>{
+    if(await model.findOne({[paramName]:paramValue})){
+        return undefined
+    }
+    return new ErrorDocNotFound(model.modelName,paramValue);
+}
+
+export const isDocAlreadyInDb = async (paramName:string,
+                                       paramValue:string, model:any, _name:string):Promise<ResponseError | undefined> =>{
+    if(await model.findOne({[paramName]:paramValue})){
+        return new ErrorAlreadyInDb(model.modelName,paramValue);
+    }
+    return undefined
 }
 
 export const isCartUserAlreadyExist = async (userId:string,_name:string) => {

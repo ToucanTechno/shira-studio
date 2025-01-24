@@ -6,7 +6,7 @@ import { RequestValidator } from "../utils/validator";
 import {
     isCartLocked,
     isCartUserAlreadyExist,
-    isDocNotFound,
+    isDocNotFoundById,
     isInvalidObjId,
     isInvalidType,
     isMissingField
@@ -19,7 +19,7 @@ import {ErrorAmountAboveStock, ResponseError} from "../utils/error";
 export const getCart = async (req:Request,res:Response) => {
     const cartId = req.params['id']!;
     const err = await RequestValidator.validate(
-        [{name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),isDocNotFound.bind(null,cartId,Cart)]}]
+        [{name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),isDocNotFoundById.bind(null,cartId,Cart)]}]
     )
     if(err){
         err.send(res)
@@ -37,7 +37,7 @@ export const getCart = async (req:Request,res:Response) => {
 export const getCartSummary = async (req: Request, res: Response) => {
     const cartId = req.params['id']!;
     const err = await RequestValidator.validate(
-        [{name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),isDocNotFound.bind(null,cartId,Cart)]}]
+        [{name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),isDocNotFoundById.bind(null,cartId,Cart)]}]
     )
     if(err){
         err.send(res)
@@ -54,7 +54,7 @@ export const insertCart = async (req: Request, res: Response) => {
     const userId = req.body["userId"]
     if (userId){
         const err = await RequestValidator.validate(
-            [{name:'userId',validationFuncs:[isInvalidObjId.bind(null,userId),isDocNotFound.bind(null,userId,User),
+            [{name:'userId',validationFuncs:[isInvalidObjId.bind(null,userId),isDocNotFoundById.bind(null,userId,User),
                                              isCartUserAlreadyExist.bind(null,userId)]
             }]
         )
@@ -74,9 +74,9 @@ export const updateCart = async (req: Request, res:Response) => {
     let amountToChange = req.body['amount']
     const err = await RequestValidator.validate(
         [{name: 'id', validationFuncs: [isMissingField.bind(null,cartId), isInvalidObjId.bind(null,cartId),
-                                        isDocNotFound.bind(null,cartId,Cart), isCartLocked.bind(null, cartId,false)]},
+                                        isDocNotFoundById.bind(null,cartId,Cart), isCartLocked.bind(null, cartId,false)]},
          {name: 'productId', validationFuncs: [isMissingField.bind(null,prodId), isInvalidObjId.bind(null,prodId), 
-                                               isDocNotFound.bind(null,prodId,Product)]},
+                                               isDocNotFoundById.bind(null,prodId,Product)]},
          {name: 'amount', validationFuncs: [isMissingField.bind(null,amountToChange),isInvalidType.bind(null,amountToChange,'number')]}
         ]
     )
@@ -137,7 +137,7 @@ export const cartLockAction = async(req: Request, res: Response) => {
     const err = await RequestValidator.validate(
         [
             {name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),
-                                        isDocNotFound.bind(null,cartId,Cart)]},
+                                        isDocNotFoundById.bind(null,cartId,Cart)]},
             {name:'lock', validationFuncs: [isMissingField.bind(null,lock),isInvalidType.bind(null,lock,'boolean')]}
         ]
     )

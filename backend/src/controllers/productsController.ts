@@ -6,7 +6,7 @@ import mongoose, {  ObjectId } from "mongoose";
 import multer from "multer"
 import { ResponseError ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorInvalidObjectId, ErrorWrongFileType, ErrorUseDedicatedUpdate } from "../utils/error";
 import { RequestValidator } from "../utils/validator";
-import { isDocNotFound, isInvalidObjId, isInvalidType, isMissingField } from "../utils/paramChecks";
+import { isDocNotFoundById, isInvalidObjId, isInvalidType, isMissingField } from "../utils/paramChecks";
 
 
 
@@ -83,7 +83,7 @@ export const getProducts = async (req: Request, res: Response) => {
 export const getSingleProduct = async (req: Request, res: Response) => {
     const id = req.params['id']!;//! tells compiler that it cant be undefined cant call this function if id is undefined
     const err = await RequestValidator.validate(
-        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFoundById.bind(null,id,Product)]}]
     )
     if(err){
         err.send(res)
@@ -124,7 +124,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     // This function assumes admin authorization so the interface is not strict.
     const id = req.params['id']!;
     const err = await RequestValidator.validate(
-        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFoundById.bind(null,id,Product)]}]
     )
     if(err){
         err.send(res)
@@ -147,7 +147,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 export const deleteProduct = async (req: Request, res: Response) => {
     const id = req.params['id']!;
     const err = await RequestValidator.validate(
-        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFound.bind(null,id,Product)]}]
+        [{name:'id',validationFuncs:[isMissingField.bind(null,id),isInvalidObjId.bind(null,id),isDocNotFoundById.bind(null,id,Product)]}]
     )
     if(err){
         err.send(res)
@@ -203,7 +203,7 @@ export const changeCategoriesOfProduct = async (req:Request, res:Response) => {
     const removeAction:boolean = req.body['removeAction'];
     const err = await RequestValidator.validate(
         [{name: 'id',validationFuncs: [isMissingField.bind(null,productId),isInvalidObjId.bind(null,productId),
-                                       isDocNotFound.bind(null,productId,Product)]},
+                                       isDocNotFoundById.bind(null,productId,Product)]},
          {name: 'names',validationFuncs: [isMissingField.bind(null,categories)]},
          {name: 'removeAction',validationFuncs: [isMissingField.bind(null,removeAction),isInvalidType.bind(null,removeAction,'boolean')]}
         ]

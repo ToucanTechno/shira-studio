@@ -64,6 +64,16 @@ export class ErrorDocNotFound extends ResponseError {
     }
 }
 
+export class ErrorAlreadyInDb extends ResponseError {
+    key:string
+
+    constructor(docType:string, key:string) {
+        const message = `document from type: ${docType} with key: ${key} already exist in db`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.DOC_ALREADY_EXISTS)
+        this.key = key
+    }
+}
+
 export class ErrorWrongFileType extends ResponseError {
     constructor(allowedFileType:string,allowedExtensions:string[]) {
         const message = `file should be of type ${allowedFileType} and extension of file should be one of ${allowedExtensions}`;

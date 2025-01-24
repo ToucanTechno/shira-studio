@@ -1,0 +1,183 @@
+###
+GET http://localhost:3001/api/categories/
+//get all categories
+
+###
+GET http://localhost:3001/api/categories/parent/gold
+//get all categories with parent gold
+
+###
+GET http://localhost:3001/api/categories/parent/None
+//get all categories with no parent
+
+###
+GET http://localhost:3001/api/categories/parent/123
+//get all categories with parent gold
+
+###
+POST http://localhost:3001/api/categories/
+//add category
+Content-Type: application/json
+
+{
+  "name": "test",
+  "text": "some new category disc",
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category without name
+Content-Type: application/json
+
+{
+  "text": "some new produc disc",
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category with wrong type
+Content-Type: application/json
+
+{
+  "name": 1234,
+  "text": "some new produc disc",
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category that already exist
+Content-Type: application/json
+
+{
+  "name": "earing",
+  "text": "some new produc disc",
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category without text
+Content-Type: application/json
+
+{
+  "name": "testdoc",
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category with wrong type for text
+Content-Type: application/json
+
+{
+  "name": "testdoc",
+  "text": 1234,
+  "parent": "ring"
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category with wrong type for parent
+Content-Type: application/json
+
+{
+  "name": "testdoc",
+  "text": "test description",
+  "parent": 123
+
+}
+
+###
+POST http://localhost:3001/api/categories/
+//try add category with parent category that not in db
+Content-Type: application/json
+
+{
+  "name": "testdoc",
+  "text": "test description",
+  "parent": "painting"
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neckless
+//add products to neckless category
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","6606ec47c9a310f4b71d4b2b"],
+  "addAction": true
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neckless
+//remove products from neckless category
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","6606ec47c9a310f4b71d4b2b"],
+  "addAction": false
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neck
+//try category that doesnt exist
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","6606ec47c9a310f4b71d4b2b"],
+  "addAction": true
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neckless
+//try category without products to change
+Content-Type: application/json
+
+{
+  "addAction": true
+}
+
+###
+PUT http://localhost:3001/api/categories/neckless
+//try category that products with invalid id
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","65c64d5db36e9cdeb9d9e71"],
+  "addAction": true
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neckless
+//try category doesnt have addAction
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","6606ec47c9a310f4b71d4b2b"]
+
+}
+
+###
+PUT http://localhost:3001/api/categories/neck
+//try category that add action from wrong type
+Content-Type: application/json
+
+{
+  "products": ["65c64d5db36e9cdeb9d9e710","6606ec47c9a310f4b71d4b2b"],
+  "addAction": 123
+
+}

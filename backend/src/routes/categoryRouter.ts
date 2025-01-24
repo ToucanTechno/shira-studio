@@ -1,5 +1,5 @@
 import express from "express";
-import { changeCatMul, getAllCategories, getCategoryByParent, insertCategory } from "../controllers/categoryController";
+import { changeProducts, getAllCategories, getCategoryByParent, insertCategory } from "../controllers/categoryController";
 
 export const categoryRoutes = express.Router();
 
@@ -12,5 +12,5 @@ categoryRoutes.post('/', insertCategory);
 
 // TODO: missing regular put query getting a category id/name and editing the name and parent of it.
 
-categoryRoutes.put("/:name", changeCatMul);
+categoryRoutes.put("/:name", changeProducts);
 
