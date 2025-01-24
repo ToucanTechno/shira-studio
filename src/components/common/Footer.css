@@ -2,29 +2,3 @@
     font-size: 2vw;
     cursor: pointer;
 }
-
-.footer-business-card-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    column-gap: 4vw;
-    width: 80%;
-}
-
-.footer-business-card-row .ImagePortrait {
-    width: 12vw;
-    margin: 0 5vw;
-    border-radius: 6vw;
-}
-
-.footer-business-card-row h2 {
-    color: #cea525;
-    font-size: 2vw;
-    text-align: center;
-    padding: 0;
-    margin: 1vw 0;
-}
-
-.footer-business-card-row .business-card {
-    width: 25vw;
-}

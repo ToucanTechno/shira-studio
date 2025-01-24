@@ -10,15 +10,15 @@ class Footer extends Component {
         return (
             <Flex direction='column' alignItems='center'>
                 <Box mb={2}>
-                    <Heading as='h3' size='md' _hover={{cursor: 'pointer'}} onClick={() => {
+                    <Heading as='h3' size='sm' _hover={{cursor: 'pointer'}} onClick={() => {
                         window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
                     }}>חזרו למעלה <Icon as={BsArrow90DegUp}/></Heading>
                 </Box>
-                <Box className="footer-business-card-row">
-                    <Image className="ImagePortrait" alt="Shira's portrait" src={ShiraPhoto}/>
-                    <Heading as='h2'>שירה שוחט לירם<br/>מעצבת תכשיטים ואמנית</Heading>
-                    <Image className="business-card" alt="Shira Business Card" src={ShiraBusinessCard}/>
-                </Box>
+                <Flex columnGap={2} width='100%' alignItems='center'>
+                    <Image w='15vw' alt="Shira's portrait" src={ShiraPhoto}/>
+                    <Heading flexGrow='1' as='h2' size={['sm', 'md', 'md', 'lg']} color='#cea525' textAlign='center' m={3}>שירה שוחט לירם<br/>מעצבת תכשיטים ואמנית</Heading>
+                    <Image w='30vw' alt="Shira Business Card" src={ShiraBusinessCard}/>
+                </Flex>
             </Flex>
         )
     }

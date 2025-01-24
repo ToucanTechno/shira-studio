@@ -6,11 +6,13 @@ import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import { Link as ReactRouterLink } from 'react-router'
 import { Link as ChakraLink } from '@chakra-ui/react'
 
-const Login = (props: any) => {
+const Register = (props: any) => {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [repeatPassword, setRepeatPassword] = useState('');
+    const [repeatPasswordError, setRepeatPasswordError] = useState('');
     const [loading, setLoading] = useState<boolean>(false);
     const [isFormValid, setIsFormValid] = useState(false);
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
@@ -27,7 +29,15 @@ const Login = (props: any) => {
         setIsFormValid(!emailError && !passwordError && email !== '' && password !== '');
     }, [emailError, passwordError, email, password])
 
-    const handleLogin = useCallback(async () => {
+    useEffect(() => {
+        if (repeatPassword !== '' && password !== repeatPassword) {
+            setRepeatPasswordError("Passwords don't match");
+        } else {
+            setRepeatPasswordError('');
+        }
+    }, [password, repeatPassword])
+
+    const handleRegister = useCallback(async () => {
         if (email === '' || password === '') {
             return;
         }
@@ -36,31 +46,27 @@ const Login = (props: any) => {
             return;
         }
         setLoading(true);
-        // if (props.user !== null) {
-        //     console.error('already logged in');
-        //     return;
-        // }
-        const response = await api.post('auth/sign-in/', { email, password }).catch(err => {
-            if (err && err.response && err.response.data && err.response.data.message === 'Email invalid.') {
-                setPasswordError('User does not exist.');
-            } else {
-                setPasswordError('Unknown error.')
-                console.error(err);
-            }
+        const response = await api.post('auth/',
+            { user_name: email, email, password, role: 'user' }).catch(err => {
+            setRepeatPasswordError('Unknown error.')
+            console.error(err);
             setLoading(false);
         });
 
         console.log(response);
-        if (response && response.data && response.data.message == 'Password valid.') {
-            const token = response.data.token;
-            // TODO: save token to local storage and change login state in UI
+        if (response && response.data && response.data.message === 'User registered successfully.') {
+            // TODO: Login with this user and redirect to last page (or home if no last page was set)
         }
         setLoading(false);
-    }, [api, email, password, emailError, passwordError])
+    }, [api, email, password, emailError, passwordError]);
+
+    const handleRepeatPasswordChange = useCallback((e: any) => {
+        setRepeatPassword(e.target.value);
+    }, [setRepeatPassword]);
 
     return (
         <Box className="login-container">
-            <Heading as="h2">Login</Heading>
+            <Heading as="h2">Register</Heading>
             <Form>
                 <FormControl isRequired isInvalid={email !== '' && emailError !== ''}>
                     <FormLabel>Email</FormLabel>
@@ -88,19 +94,32 @@ const Login = (props: any) => {
                     <FormErrorMessage>{passwordError}</FormErrorMessage>
                 </FormControl>
 
-                <Button tabIndex={0}
-                        w='full'
+                <FormControl isRequired isInvalid={repeatPassword !== '' && repeatPasswordError !== ''}>
+                    <FormLabel>Repeat Password</FormLabel>
+                    <Input
+                        type="password"
+                        id="repeat_password"
+                        name="repeat_password"
+                        value={repeatPassword}
+                        onChange={handleRepeatPasswordChange}
+                        placeholder="Please repeat your password"
+                    />
+                    <FormErrorMessage>{repeatPasswordError}</FormErrorMessage>
+                </FormControl>
+                <Button w='full'
                         isLoading={loading}
                         my={3}
-                        onClick={handleLogin}
-                        isDisabled={!isFormValid}>Login</Button>
+                        onClick={handleRegister}
+                        tabIndex={0}
+                        isDisabled={!isFormValid}>Register</Button>
                 <ChakraLink as={ReactRouterLink}
                             color='blue.400'
                             fontSize='md'
-                            to='/register'>Register</ChakraLink>
+                            tabIndex={0}
+                            to='/login'>Login</ChakraLink>
             </Form>
         </Box>
     );
 }
 
-export default Login;
+export default Register;

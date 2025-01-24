@@ -11,6 +11,7 @@ import { Form, NavigateFunction, useBlocker } from "react-router";
 import { AuthContext } from "../services/AuthContext";
 import { ICartModel } from "../models/CartModel";
 import { CartContext } from "../services/CartContext";
+import {isEmailValidUI, isPhoneValidUI, isPostCodeValidUI} from "../utils/Validation";
 
 interface CartOrderProps {
     totalPrice: number;
@@ -24,19 +25,15 @@ const CartOrder = (props: CartOrderProps) => {
     // TODO: need to save isOpen and the form details (encrypted in some way) in local storage
     const { isOpen, onClose} = useDisclosure({ defaultIsOpen: true })
     const [email, setEmail] = useState<string>('');
-    const isEmailValid = useMemo(() =>
-        (email === '' || email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/) !== null), [email])
+    const isEmailValid = useMemo(() => isEmailValidUI(email), [email])
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
     const [phone, setPhone] = useState<string>('');
-    const isPhoneValid = useMemo(() =>
-        (phone === '' || phone.replace(/-/g, '').match(/^(\+|00)?[0-9]{8,15}$/) !== null),
-        [phone])
+    const isPhoneValid = useMemo(() => isPhoneValidUI(phone), [phone])
     const [city, setCity] = useState<string>('');
     const [street, setStreet] = useState<string>('');
     const [postCode, setPostCode] = useState<string>('');
-    const isPostCodeValid = useMemo(() =>
-        (postCode === '' || postCode.match(/^[0-9]{5}([0-9]{2})?$/) !== null), [postCode])
+    const isPostCodeValid = useMemo(() => isPostCodeValidUI(postCode), [postCode])
     const [houseNumber, setHouseNumber] = useState<string>('');
     const [entry, setEntry] = useState<string>('');
     const [apartment, setApartment] = useState<string>('');
