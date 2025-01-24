@@ -28,7 +28,7 @@ const HoverMenuItem = (props: HoverMenuItemProps) => {
     return (
         <Menu offset={[0, 0]} isOpen={isOpen}>
             <MenuButton as={Button}
-                        size='lg'
+                        size={['sm', 'sm', 'md', 'lg']}
                         variant='ghost'
                         border='0'
                         color='white'
