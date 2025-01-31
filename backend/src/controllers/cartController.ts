@@ -26,10 +26,12 @@ export const getCart = async (req:Request,res:Response) => {
         return
     }
     let cart = (await Cart.findById(cartId).populate('products.$*.product'))
-    cart?.products.forEach((prod) => {
-        delete (prod.product as any)._doc.__v
-        delete (prod as any)._doc._id
-    });
+    if (cart !== null && cart.products !== null) {
+        cart.products.forEach((prod) => {
+            delete (prod.product as any)._doc.__v
+            delete (prod as any)._doc._id
+        });
+    }
     delete (cart as any)._doc.__v
     res.status(200).send(cart)
 }

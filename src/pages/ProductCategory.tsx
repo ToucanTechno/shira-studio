@@ -1,7 +1,9 @@
-import React, {useState} from "react";
-import {Link} from "react-router";
+import React, {useEffect, useState} from "react";
+import {Link as ReactRouterLink} from "react-router";
+import {Link as ChakraLink} from "@chakra-ui/react";
 import {useInfiniteScroll} from "../utils/useInfiniteScroll";
 import {Loader} from "../components/infinite_scroll/Loader";
+import {Box, Button, Flex, Heading, Image} from "@chakra-ui/react";
 
 interface ProductCategoryInfo {
     category_name: string;
@@ -21,6 +23,7 @@ export const ProductCategory = () => {
     const {
         isLoading,
         loadMoreCallback,
+        getInitialProducts,
         hasDynamicProducts,
         dynamicProducts,
         isLastPage
@@ -28,28 +31,33 @@ export const ProductCategory = () => {
     /* TODO: use productsPerPage */
     const productsPerPage = 10;
 
+    useEffect(() => {
+        getInitialProducts();
+    }, []);
+
     return (
-        <div className="container">
-            <h2>{productCategoryInfo.text}</h2>
-            <div className="gallery">
+        <Box className="container">
+            <Heading as='h2'>{productCategoryInfo.text}</Heading>
+            <Box className="gallery">
                 {dynamicProducts.map((product) => (
-                    <div className="gallery-item" key={product.name}>
-                        <Link to={"/product/" + product._id}>
-                            <img src={product.image_src} alt={product.name}/>
+                    <Flex m={0} p={0} direction='column' justifyContent='flex-start' alignItems='center' width={['26vw', '26vw', '19vw']} mb={2} key={product.name}>
+                        <ChakraLink sx={{width: 'inherit'}} as={ReactRouterLink} to={"/product/" + product._id}>
+                            <Image objectFit='contain' w='100%' src={product.image_src} alt={product.name} />
                             {product.description}
-                        </Link>
-                        <div className="price">{/* TODO: format price precision */ product.price}</div>
-                        <button className="cart-button">הוסף לסל</button>
-                    </div>
+                        </ChakraLink>
+                        <Box className="price">{/* TODO: format price precision */ product.price}</Box>
+                        <Button className="cart-button">הוסף לסל</Button>
+                    </Flex>
                 ))}
 
+                { /* This gets a ref to the loader element to which we load content */ }
                 <Loader
                     isLoading={isLoading}
                     isLastPage={isLastPage}
                     loadMoreCallback={loadMoreCallback}
                 />
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 }
 export default ProductCategory;
