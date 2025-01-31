@@ -2,23 +2,10 @@
     width: 85vw; /* Not % since vw includes scrollbar */
     display: flex;
     flex-direction: row;
-    column-gap: 5vw;
+    column-gap: 3vw;
     justify-content: flex-start;
     align-items: flex-start;
     flex-wrap: wrap;
-}
-
-.gallery-item {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    width: 25vw;
-    margin-bottom: 2vw;
-}
-
-.gallery-item img {
-    width: inherit;
 }
 
 .gallery-item a {
