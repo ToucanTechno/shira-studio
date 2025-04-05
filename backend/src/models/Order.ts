@@ -34,6 +34,9 @@ const orderSchema = new mongoose.Schema({
     name: {
         type: String,
     },
+    phone: {
+        type: String,
+    },
     country: {
         type: String
     },
@@ -45,6 +48,15 @@ const orderSchema = new mongoose.Schema({
     },
     zipCode: {
         type:Number
+    },
+    houseNumber: {
+        type: String,
+    },
+    entry: {
+        type: String
+    },
+    apartment: {
+        type: String
     },
     comments: {
         type: String

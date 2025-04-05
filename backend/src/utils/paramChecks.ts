@@ -7,9 +7,10 @@ import {
     ErrorInvalidType,
     ErrorCartUserAlreadyExist,
     ErrorCartLocked,
-    ErrorCartUnlocked, ErrorAlreadyInDb
+    ErrorCartUnlocked, ErrorAlreadyInDb, ErrorCartAlreadyHaveOrdered, ErrorCartMissingProducts
 } from "./error"
 import { Cart } from "../models/Cart"
+import { Order} from "../models/Order";
 
 
 export const isMissingField = (field:any,name:string): ResponseError | undefined => {
@@ -80,6 +81,22 @@ export const isCartLocked = async (cartId:string,expected:boolean, _name:string)
         if(cart?.lock){
             return new ErrorCartLocked(cartId)
         }
+    }
+    return undefined
+}
+
+export const isCartHaveOrder = async (cartId:string) => {
+    const order = (await Order.find({ cart: cartId }))
+    if (order.length) {
+        return new ErrorCartAlreadyHaveOrdered(cartId,order[0]?.id)
+    }
+    return undefined
+}
+
+export const isCartHaveProducts = async (cartId:string) => {
+    const cart = await Cart.findById(cartId)
+    if(cart?.products.size === 0){
+        return new ErrorCartMissingProducts(cartId)
     }
     return undefined
 }

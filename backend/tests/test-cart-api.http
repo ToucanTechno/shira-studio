@@ -5,6 +5,10 @@ Accept: application/json
 //add 2 to product 710 in cart
 
 ###
+POST http://localhost:3001/api/cart
+
+
+###
 PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
 Content-Type: application/json
 

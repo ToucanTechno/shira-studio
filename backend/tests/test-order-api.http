@@ -1,0 +1,326 @@
+###
+GET http://localhost:3001/api/orders/66237b0994dff176222cb269
+//get an order
+
+
+###
+GET http://localhost:3001/api/orders/
+//get all orders with skip and limit
+Content-Type: application/json
+
+{
+  "skip": 1,
+  "limit": 20
+}
+###
+GET http://localhost:3001/api/orders/
+//get an order with skip not type of number should use defualt value for it
+Content-Type: application/json
+
+{
+  "skip": "fdhsjkl",
+  "limit": 1
+
+}
+
+
+###
+GET http://localhost:3001/api/orders/
+//get an order with limit with type not number should use defulat value for it
+Content-Type: application/json
+
+{
+  "limit": "dsa"
+
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order
+Content-Type: application/json
+
+{
+  "cart": "675326a1ee38e29559b400b5",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order
+Content-Type: application/json
+
+{
+  "cart": "675326a1ee38e29559b400b5",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order with no cart
+Content-Type: application/json
+
+{
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order id not valid objectid
+Content-Type: application/json
+
+{
+  "cart": "675326a1ee38e29559b400b",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order cart not in db
+Content-Type: application/json
+
+{
+  "cart": "66237b0994dff176222cb269",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order cart already has order
+Content-Type: application/json
+
+{
+  "cart": "661444704657205f766a5308",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order cart missing products
+Content-Type: application/json
+
+{
+  "cart": "67aa049f4ae0e0d8e7138125",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order cart unlocked
+Content-Type: application/json
+
+{
+  "cart": "67aa063ce6015553421517bc",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order missing name
+Content-Type: application/json
+
+{
+  "cart": "67aa09c0e6015553421517d3",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order name is wrong type
+Content-Type: application/json
+
+{
+  "cart": "67aa09c0e6015553421517d3",
+  "name": 54930,
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": "בורוכוב",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order missing city param
+Content-Type: application/json
+
+{
+    "cart": "67aa09c0e6015553421517d3",
+    "name": "some one",
+    "phone": "0265843125",
+    "country": "ישראל",
+    "street": "בורוכוב",
+    "zipCode": "1234",
+    "houseNumber": "06473621",
+    "entry": "א",
+    "apartment": 4,
+    "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order city of wrong type
+Content-Type: application/json
+
+{
+    "cart": "67aa09c0e6015553421517d3",
+    "name": "some one",
+    "phone": "0265843125",
+    "country": "ישראל",
+    "city": 1234,
+    "street": "בורוכוב",
+    "zipCode": "1234",
+    "houseNumber": "06473621",
+    "entry": "א",
+    "apartment": 4,
+    "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order missing param street
+Content-Type: application/json
+
+{
+  "cart": "67aa09c0e6015553421517d3",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+POST http://localhost:3001/api/orders/
+//insert new order street is wrong type
+Content-Type: application/json
+
+{
+  "cart": "67aa09c0e6015553421517d3",
+  "name": "some one",
+  "phone": "0265843125",
+  "country": "ישראל",
+  "city": "ירושלים",
+  "street": 4324,
+  "zipCode": "1234",
+  "houseNumber": "06473621",
+  "entry": "א",
+  "apartment": 4,
+  "comments": "something"
+}
+
+###
+PUT http://localhost:3001/api/orders/66237b0994dff176222cb269
+//change name of orderee
+Content-Type: application/json
+
+{
+  "name": "שירה"
+}
+
+
+###
+PUT http://localhost:3001/api/orders/66237b0994dff176222cb26
+//invalid orderid
+Content-Type: application/json
+
+{
+  "name": "מישהו"
+}
+
+###
+PUT http://localhost:3001/api/orders/66144372d461d9127d640c0a
+//order id not in db
+Content-Type: application/json
+
+{
+  "name": "מישהו"
+}

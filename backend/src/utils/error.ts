@@ -146,3 +146,23 @@ export class ErrorAmountAboveStock extends ResponseError {
         this.productId = productId
     }
 }
+
+export class ErrorCartAlreadyHaveOrdered extends ResponseError {
+    cartId:string
+    orderId:string
+    constructor(cartId:string, orderId:string) {
+        const message = `cart with id: ${cartId} already have order which is ${orderId}`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_ALREADY_HAS_ORDER)
+        this.orderId = orderId
+        this.cartId = cartId
+    }
+}
+
+export class ErrorCartMissingProducts extends ResponseError {
+    cartId:string
+    constructor(cartId:string) {
+        const message = `cart with id: ${cartId} is missing products`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_MISSING_PRODUCTS)
+        this.cartId = cartId
+    }
+}
