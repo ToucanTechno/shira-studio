@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { RequestValidator } from "../utils/validator";
 import {
     isCartLocked,
-    isCartUserAlreadyExist,
+    isValueAlreadyInUse,
     isDocNotFoundById,
     isInvalidObjId,
     isInvalidType,
@@ -55,7 +55,7 @@ export const insertCart = async (req: Request, res: Response) => {
     if (userId){
         const err = await RequestValidator.validate(
             [{name:'userId',validationFuncs:[isInvalidObjId.bind(null,userId),isDocNotFoundById.bind(null,userId,User),
-                                             isCartUserAlreadyExist.bind(null,userId)]
+                                             isValueAlreadyInUse.bind(null,"userId",userId,Cart)]
             }]
         )
         if(err){
@@ -65,7 +65,7 @@ export const insertCart = async (req: Request, res: Response) => {
         cartObj.userId = userId
     }
     const result = await cartObj.save();
-    res.status(201).send({message: "carte created successfully.", id:result._id, lock: false});
+    res.status(200).send({message: "carte created successfully.", id:result._id, lock: false});
 };
 
 export const updateCart = async (req: Request, res:Response) => {

@@ -5,7 +5,7 @@ import {
     ErrorInvalidObjectId,
     ErrorMissingField,
     ErrorInvalidType,
-    ErrorCartUserAlreadyExist,
+    ErrorValueAlreadyInUse,
     ErrorCartLocked,
     ErrorCartUnlocked, ErrorAlreadyInDb, ErrorCartAlreadyHaveOrdered, ErrorCartMissingProducts
 } from "./error"
@@ -62,10 +62,10 @@ export const isDocAlreadyInDb = async (paramName:string,
     return undefined
 }
 
-export const isCartUserAlreadyExist = async (userId:string,_name:string) => {
-    const cart = await Cart.findOne({userId:userId}).exec() //check if need exec
-    if( cart !== null){
-        return new ErrorCartUserAlreadyExist(userId,cart.id)
+export const isValueAlreadyInUse = async (field:string,value:any,model:any, _name:string) => {
+    const data = await model.findOne({[field]:value}).exec() //check if need exec
+    if( data !== null){
+        return new ErrorValueAlreadyInUse(field, value, model)
     }
     return undefined
 }

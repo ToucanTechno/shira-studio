@@ -5,8 +5,47 @@ Accept: application/json
 //add 2 to product 710 in cart
 
 ###
+# Create a cart without userId (basic case)
 POST http://localhost:3001/api/cart
+Content-Type: application/json
 
+{}
+
+###
+# Create a cart with a valid userId
+POST http://localhost:3001/api/cart
+Content-Type: application/json
+
+{
+  "userId": "684d931f3189b4be27c93477"
+}
+
+###
+# Error case: Invalid userId format
+POST http://localhost:3001/api/cart
+Content-Type: application/json
+
+{
+  "userId": "invalid-user-id"
+}
+
+###
+# Error case: UserId not found in the database
+POST http://localhost:3001/api/cart
+Content-Type: application/json
+
+{
+  "userId": "66144372d461d9127d640c0a"
+}
+
+###
+# Error case: UserId already in use
+POST http://localhost:3001/api/cart
+Content-Type: application/json
+
+{
+  "userId": "65be5e9a58493e7df0db0992"
+}
 
 ###
 PUT http://localhost:3001/api/cart/66144372d461d9127d640c0a
