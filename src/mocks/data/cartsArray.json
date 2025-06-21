@@ -1,0 +1,86 @@
+[
+  {
+    "_id": "66144372d461d9127d640c0a",
+    "products": {
+      "6606ec47c9a310f4b71d4b2b": {
+        "product": "6606ec47c9a310f4b71d4b2b",
+        "amount": 2,
+        "_id": "6622e9910c06619efc406a3d"
+      },
+      "65c64d5db36e9cdeb9d9e710": {
+        "product": "65c64d5db36e9cdeb9d9e710",
+        "amount": 4,
+        "_id": "6792adeaec338f3bdb4312e5"
+      }
+    },
+    "lock": false,
+    "createdAt": "2024-04-08T19:20:18.476Z",
+    "updatedAt": "2025-01-23T22:27:51.605Z",
+    "__v": 0
+  },
+  {
+    "_id": "661444704657205f766a5308",
+    "products": {
+      "65c64d5db36e9cdeb9d9e710": {
+        "product": "65c64d5db36e9cdeb9d9e710",
+        "amount": 50,
+        "_id": "6792aaa23411cc75d1b67f56"
+      }
+    },
+    "lock": true,
+    "createdAt": "2024-04-08T19:24:32.396Z",
+    "updatedAt": "2025-01-23T20:46:26.012Z",
+    "__v": 0
+  },
+  {
+    "_id": "675326a1ee38e29559b400b5",
+    "products": {
+      "65c64d5db36e9cdeb9d9e710": {
+        "product": "65c64d5db36e9cdeb9d9e710",
+        "amount": 2,
+        "_id": "67a9fdac1ccd4bc2df7690ab"
+      }
+    },
+    "lock": true,
+    "userId": "65be5e9a58493e7df0db0992",
+    "createdAt": "2024-12-06T16:30:25.413Z",
+    "updatedAt": "2025-02-10T13:23:10.229Z",
+    "__v": 0
+  },
+  {
+    "_id": "67aa049f4ae0e0d8e7138125",
+    "products": {},
+    "lock": false,
+    "createdAt": "2025-02-10T13:52:31.142Z",
+    "updatedAt": "2025-02-10T13:52:31.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "67aa063ce6015553421517bc",
+    "products": {
+      "65c64d5db36e9cdeb9d9e710": {
+        "product": "65c64d5db36e9cdeb9d9e710",
+        "amount": 2,
+        "_id": "67aa0648e6015553421517c3"
+      }
+    },
+    "lock": false,
+    "createdAt": "2025-02-10T13:59:24.338Z",
+    "updatedAt": "2025-02-10T13:59:36.529Z",
+    "__v": 0
+  },
+  {
+    "_id": "67aa09c0e6015553421517d3",
+    "products": {
+      "65c64d5db36e9cdeb9d9e710": {
+        "product": "65c64d5db36e9cdeb9d9e710",
+        "amount": 2,
+        "_id": "67aa09c8e6015553421517da"
+      }
+    },
+    "lock": true,
+    "createdAt": "2025-02-10T14:14:24.917Z",
+    "updatedAt": "2025-02-10T14:14:32.176Z",
+    "__v": 0
+  }
+]
