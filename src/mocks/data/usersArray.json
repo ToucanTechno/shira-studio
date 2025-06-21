@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "65be5e9a58493e7df0db0992",
+    "user_name": "shaked",
+    "email": "test@mail.com",
+    "password": "$2b$10$Lzkhi9bNLBtL/Fl8tfuHROlRD3NRWzoa36yBB38eEO2tn1Wh/dmLS",
+    "role": "user",
+    "__v": 0
+  }
+]
