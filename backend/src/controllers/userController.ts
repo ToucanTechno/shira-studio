@@ -74,9 +74,20 @@ export const login = async(req: Request, res: Response) => {
             const token = jwt.sign({ id: user._id, role: user.role },
                 process.env["SECRET"],
                 { expiresIn: '7d', subject: 'TODO' });
-            if (req.query["admin"] && user.role !== 'admin') {
-                res.status(401).send({message: "Unauthorized"});
-                return;
+            // Check if this is an admin endpoint request (by URL path)
+            if (req.path.includes('/admin/')) {
+                console.log('Admin login attempt:', { 
+                    email: user.email,
+                    userRole: user.role, 
+                    requestedAdminAccess: true,
+                    path: req.path
+                });
+                if (user.role !== 'admin') {
+                    console.log('Admin login rejected: User does not have admin role');
+                    res.status(401).send({message: "Unauthorized: Admin access required"});
+                    return;
+                }
+                console.log('Admin login successful');
             }
             res.status(200).send({ message: "Password valid.",
                                                token: token } );

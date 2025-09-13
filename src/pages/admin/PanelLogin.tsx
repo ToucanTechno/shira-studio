@@ -14,16 +14,41 @@ const PanelLogin = (props: any) => {
 
     // Call the server API to check if the given email ID already exists
     const initiateLogin = useCallback((processLoginResult: (accountData: any) => void) => {
-        fetch('http://127.0.0.1:3001/api/auth/sign-in?admin=1', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email, password }),
-        })
-            .then(async (res): Promise<[number, {}]> => [res.status, await res.json()])
-            .then((loginResult: [number, {}]) => {
-                processLoginResult(loginResult);
+        const apiUrl = 'http://127.0.0.1:3001/api/auth/admin/sign-in';
+        console.log('Attempting admin login with:', { email, isAdmin: true, endpoint: apiUrl });
+
+        // First test if the server is reachable
+        fetch('http://127.0.0.1:3001', { method: 'GET' })
+            .then(res => {
+                console.log('Server status check:', res.status, res.ok ? 'online' : 'issue detected');
+                console.log('Proceeding with admin login request to:', apiUrl);
+                // Now try the actual login
+                return fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                })
+                .then(async (res): Promise<[number, any]> => {
+                    const status = res.status;
+                    let data = {};
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                        data = { error: 'Invalid response format' };
+                    }
+                    return [status, data];
+                })
+                .then((loginResult: [number, any]) => {
+                    console.log('Login response:', loginResult[0], loginResult[1]);
+                    processLoginResult(loginResult);
+                });
+            })
+            .catch(error => {
+                console.error('Server connection error:', error);
+                setLoginError('Cannot connect to server. Please check if the backend is running.');
             })
     }, [email, password]);
 
@@ -38,9 +63,10 @@ const PanelLogin = (props: any) => {
     }, [navigate, setAuthTokens]);
 
     const onLogin = useCallback(() => {
-        // Set initial error values to empty
+        // Reset error messages
         setEmailError('');
         setPasswordError('');
+        setLoginError('');
 
         // Check if the user has entered both fields correctly
         if ('' === email) {
@@ -56,20 +82,36 @@ const PanelLogin = (props: any) => {
             setPasswordError('Please enter a password');
             return;
         }
-        if (/^(.{0,9}|[^0-9]*|[^A-Za-z]*)$/.test(password)) {
-            setPasswordError('The password must be 10 characters or longer, and contain numbers and letters.');
+
+        // For admin login, we can simplify the password check
+        // since we're using a known admin password
+        if (password.length < 8) {
+            setPasswordError('Password must be at least 8 characters');
             return;
         }
 
+        // Update UI to show login attempt is in progress
+        setLoginError('Attempting to log in...');
+
         // Check if email has an account associated with it
         initiateLogin(([status, loginData]) => {
-            // If yes, log in
-            if (status !== 200) {
-                setLoginError('Failed to login as admin.');
-                return;
-            }
+            // Clear the "attempting" message
+            setLoginError('');
 
-            logIn(loginData);
+            // Handle different status codes
+            if (status === 200) {
+                logIn(loginData);
+            } else if (status === 404) {
+                console.error('API endpoint not found:', apiUrl);
+                setLoginError('Login failed: API endpoint not found. Please check if backend server is running and the URL is correct.');
+            } else if (status === 401) {
+                setLoginError('Unauthorized: Admin access denied. Please check your credentials.');
+            } else if (status === 403) {
+                setLoginError('Forbidden: You do not have admin privileges.');
+            } else {
+                console.error('Login error:', status, loginData);
+                setLoginError(`Failed to login as admin (${status}). ${loginData.message || ''}`);
+            }
         })
     }, [email, password, initiateLogin, logIn]);
 

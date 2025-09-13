@@ -13,6 +13,7 @@ import { AuthProvider } from "./services/AuthContext";
 import { Box } from "@chakra-ui/react";
 import CartWrapper from "./utils/CartWrapper";
 import Register from "./pages/Register";
+import Profile from "./pages/Profile";
 
 const App = () => {
     return (
@@ -29,6 +30,7 @@ const App = () => {
                         <Route path="/cart" element={<Cart/>}/>
                         <Route path="/login" element={<Login/>}/>
                         <Route path="/register" element={<Register/>}/>
+                        <Route path="/profile" element={<Profile/>}/>
                     </Routes>
                 </Box>
             </CartWrapper>

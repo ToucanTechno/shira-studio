@@ -1,4 +1,4 @@
-import {ICategory} from "../../backend/src/models/Category"
+import {ICategory} from "../../backend/src/models/Category.js"
 import mongoose from 'mongoose';
 export interface IProduct {
     product_id: string;

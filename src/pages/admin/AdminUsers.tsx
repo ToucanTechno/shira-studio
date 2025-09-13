@@ -1,9 +1,9 @@
-import {Box} from "@chakra-ui/react";
+import { Box, Heading } from "@chakra-ui/react";
 
 const AdminUsers = () => {
     return (
         <Box m={2}>
-            בבנייה
+            <Heading size="md" mb={4}>User Management</Heading>
         </Box>
     )
 };
