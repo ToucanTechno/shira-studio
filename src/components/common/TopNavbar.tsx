@@ -18,10 +18,10 @@ const TopNavbar = () => {
                'home': {'name': 'home', 'link': '/', 'text': 'Home'},
                'about': {'name': 'about', 'link': '/about', 'text': 'About'},
         };
-        let promises: Promise<void | AxiosResponse<any, any>>[] = [];
+        const promises: Promise<void | AxiosResponse<any, any>>[] = [];
         api.get(`/categories/parent/root`).then((response: any) => {
-            let topCategories = response.data;
-            for (let category of topCategories) {
+            const topCategories = response.data;
+            for (const category of topCategories) {
                 navbarSkeleton[category.name] = {
                     name: category.name,
                     link: `/categories/${category.name}`,

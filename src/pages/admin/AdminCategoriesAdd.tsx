@@ -8,7 +8,7 @@ import {
     Input, useConst,
     useDisclosure
 } from "@chakra-ui/react";
-import {ICategory} from "../../../backend/src/models/Category";
+import {ICategory} from "../../../backend/src/models/Category.js";
 import React, {ChangeEvent, useEffect, useState} from "react";
 import {Form} from "react-router";
 import Select, {SingleValue} from "react-select";

@@ -1,18 +1,12 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import usersData from './data/usersArray.json';
 import cartsData from './data/cartsArray.json';
 
 export const handlers = [
-    rest.get('/api/carts', (req, res, ctx) => {
-        return res(
-            ctx.status(200),
-            ctx.json(cartsData)
-        );
+    http.get('/api/carts', () => {
+        return HttpResponse.json(cartsData, { status: 200 });
     }),
-    rest.get('/api/users', (req, res, ctx) => {
-        return res(
-            ctx.status(200),
-            ctx.json(usersData)
-        );
+    http.get('/api/users', () => {
+        return HttpResponse.json(usersData, { status: 200 });
     })
 ];
