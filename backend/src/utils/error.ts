@@ -105,14 +105,16 @@ export class ErrorUseDedicatedUpdate extends ResponseError {
         this.fieldName = fieldName
     }
 }
-export class ErrorCartUserAlreadyExist extends ResponseError {
-    userId:string
-    cartId:string
-    constructor(userId:string, cartId:string){
-        const message = `the user with id: ${userId} already has cart with the id ${cartId}`
-        super(message,StatusCodes.BAD_REQUEST,ErrorType.CART_USER_ALREADY_EXIST)
-        this.userId = userId
-        this.cartId = cartId
+export class ErrorValueAlreadyInUse extends ResponseError {
+    field:string
+    value:any
+    modelName:string
+    constructor(field:string, value:any,model:any){
+        const message = `in document ${model.modelName} with field ${field} the value: ${value} already in use`
+        super(message,StatusCodes.BAD_REQUEST,ErrorType.VALUE_ALREADY_IN_USE)
+        this.field = field
+        this.value = value
+        this.modelName = model.modelName
     }
 }
 

@@ -2,23 +2,31 @@ import {Request, Response } from "express";
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import {User, IUser, IUserLogin} from "../models/User";
+import {RequestValidator} from "../utils/validator";
+import {isInvalidType, isMissingField, isValueAlreadyInUse} from "../utils/paramChecks";
+
 
 export const register = async(req: Request, res: Response) => {
-    const { user_name, email, password, role }: IUser = req.body;
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            res.status(400).send({message: "Failed validation", errors: errors.array()});
-            return
-        }
-        const userObj = new User({ user_name, email, password, role });
-
-        await userObj.save();
-        res.status(201).send({message: "User registered successfully."});
-    } catch(error) {
-        res.status(401).send({message: error});
-        return;
+    const { user_name, email, password, role }: IUser = req.body
+    //TODO:better checks for correct email and filter special chars so they couldn't be added to any of those field
+    //     change role type to be enum and make sure that only admins can add admin role
+    const err = await RequestValidator.validate(
+        [{name:'user_name',validationFuncs:[isMissingField.bind(null,user_name),isInvalidType.bind(null,user_name,'string'),
+                                            isValueAlreadyInUse.bind(null,"user_name",user_name,User)]},
+         {name:'email',validationFuncs:[isMissingField.bind(null,email),isInvalidType.bind(null,email,'string'),
+                                        isValueAlreadyInUse.bind(null,"email",email,User)]},
+         {name:'password',validationFuncs:[isMissingField.bind(null,password),isInvalidType.bind(null,password,'string')]},
+         {name:'role',validationFuncs:[isMissingField.bind(null,role),isInvalidType.bind(null,role,'string')]},
+        ]
+    )
+    if(err){
+        err.send(res)
+        return
     }
+    const userObj = new User({ user_name, email, password, role })
+
+    await userObj.save()
+    res.status(200).send({message: "User registered successfully."})
 }
 
 /**
@@ -33,6 +41,15 @@ export const register = async(req: Request, res: Response) => {
  */
 export const login = async(req: Request, res: Response) => {
     const { email, password }: IUserLogin = req.body;
+    const err = await RequestValidator.validate([
+        {name: 'email', validationFuncs: [isMissingField.bind(null, email),isInvalidType.bind(null, email, 'string')]},
+        {name: 'password', validationFuncs: [isMissingField.bind(null, password),isInvalidType.bind(null, password, 'string')]}
+    ])
+
+    if(err) {
+        err.send(res);
+        return;
+    }
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

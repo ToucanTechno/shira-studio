@@ -1,0 +1,145 @@
+###
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "matan",
+  "email": "hello@matan.li",
+  "password": "123456789a",
+  "role": "admin"
+}
+
+###
+# Successful registration with all required fields
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# === USER_NAME TESTS ===
+
+# Error case: Missing user_name
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# Error case: user_name value already in use
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# Error case: Invalid type for user_name (not a string)
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": 12345,
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "user"
+}
+###
+# === EMAIL TESTS ===
+
+# Error case: Missing email
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# Error case: Invalid type for email (not a string)
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": 12345,
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# Error case: Email already in use (duplicate email)
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "anotheruser",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+# === PASSWORD TESTS ===
+
+# Error case: Missing password
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "role": "user"
+}
+
+###
+# Error case: Invalid type for password (not a string)
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "password": 12345,
+  "role": "user"
+}
+
+###
+# === ROLE TESTS ===
+
+# Error case: Missing role
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+# Error case: Invalid type for role (not a string)
+POST http://localhost:3001/api/auth
+Content-Type: application/json
+
+{
+  "user_name": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": 12345
+}
