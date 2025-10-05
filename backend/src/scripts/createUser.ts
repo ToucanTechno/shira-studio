@@ -7,46 +7,16 @@ import process from 'process';
 dotenv.config();
 
 // Display usage instructions
-console.log('Usage: npx ts-node src/scripts/createUserDirectly.ts <username> <email> <password> [-f|--force]');
-console.log('  username     The display name for the user');
-console.log('  email        The email address for the user');
-console.log('  password     The password for the user');
+console.log('Usage: npx ts-node src/scripts/createUser.ts [-f|--force]');
 console.log('  -f, --force  Remove existing user if one exists with the same email');
-console.log('');
-console.log('Example: npx ts-node src/scripts/createUserDirectly.ts "John Doe" "john@example.com" "MyPassword123"');
 
-// Parse command line arguments
-const args = process.argv.slice(2);
-const forceFlag = args.includes('-f') || args.includes('--force');
-const filteredArgs = args.filter(arg => arg !== '-f' && arg !== '--force');
+// Check if force flag is present
+const forceFlag = process.argv.includes('-f') || process.argv.includes('--force');
 
-// Validate arguments
-if (filteredArgs.length < 3) {
-  console.error('Error: Missing required arguments');
-  console.log('Please provide username, email, and password');
-  process.exit(1);
-}
-
-const [userName, email, password] = filteredArgs;
-
-// Basic validation
-if (!userName || !email || !password) {
-  console.error('Error: All fields (username, email, password) are required');
-  process.exit(1);
-}
-
-// Simple email validation
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-if (!emailRegex.test(email)) {
-  console.error('Error: Please provide a valid email address');
-  process.exit(1);
-}
-
-// Password validation
-if (password.length < 6) {
-  console.error('Error: Password must be at least 6 characters long');
-  process.exit(1);
-}
+// Hardcoded user credentials
+const userName = "Test User";
+const email = "user@example.com";
+const password = "MyPassword123";
 
 // Connect to MongoDB
 let connectionString = process.env['DB_CONN_STRING'] || 'mongodb://localhost:27017/';

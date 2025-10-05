@@ -51,7 +51,7 @@ export const getAllCategories = async (_req:Request, res:Response) => {
     res.status(200).send(categories);
 }
 
-//to get the main parent category need to send None as name
+// In order to get the main parent category, it is needed to send root as name
 export const getCategoryByParent = async (req: Request, res: Response) => {
     let name = req.params['name'];
     const err = await RequestValidator.validate(
@@ -61,7 +61,7 @@ export const getCategoryByParent = async (req: Request, res: Response) => {
         err.send(res)
         return
     }
-    if(name === 'None')//this is the easiest way to search for all categories that don't have parent
+    if(name === 'root') // This is the easiest way to search for all categories that don't have parent
         name = '';
     const categories = (await Category.find({parent:name}).populate('products'))
         .map((category) => {
