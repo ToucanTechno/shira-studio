@@ -1,10 +1,10 @@
 'use client'
 
 import React, {useState} from 'react';
-import './About.css'
+import '@/pages/About.css'
 import { BsFacebook, BsInstagram, BsFillEnvelopePaperFill, BsTrophy } from "react-icons/bs";
-import YoutubeEmbed from "../components/home/YoutubeEmbed";
-import Footer from "../components/common/Footer";
+import YoutubeEmbed from "@/components/home/YoutubeEmbed";
+import Footer from "@/components/common/Footer";
 import {Box, Button, Center, Container, Heading, ListItem, Text, UnorderedList, Collapse} from "@chakra-ui/react";
 
 const About = () => {

@@ -1,5 +1,10 @@
+import { Suspense } from 'react'
 import OrderSummary from '@/pages/OrderSummary'
 
 export default function OrderSummaryPage() {
-    return <OrderSummary />
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <OrderSummary />
+        </Suspense>
+    )
 }

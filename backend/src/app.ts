@@ -1,4 +1,4 @@
-import express, { Express } from "express/index.js";
+import express, { Express } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -22,6 +22,10 @@ let connectionString = process.env["DB_CONN_STRING"] || "mongodb://localhost:270
 
 // Add database name if not already in the connection string
 if (process.env['DB_NAME']) {
+    // Ensure there's a forward slash before the database name
+    if (!connectionString.endsWith('/')) {
+        connectionString += '/';
+    }
     connectionString += process.env["DB_NAME"];
 }
 

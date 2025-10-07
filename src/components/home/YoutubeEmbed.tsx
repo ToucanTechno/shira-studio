@@ -1,5 +1,5 @@
 import React from "react";
-import './YoutubeEmbed.css'
+import '@/components/home/YoutubeEmbed.css'
 
 interface YoutubeProps {
     embedID: string;
