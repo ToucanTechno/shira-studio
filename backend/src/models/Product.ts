@@ -1,8 +1,18 @@
 import mongoose, { ObjectId } from 'mongoose';
-import {IProduct} from "../../../src/models/Product";
+
+export interface IProduct {
+    name: string;
+    categories: Array<mongoose.Schema.Types.ObjectId>;
+    price: number;
+    image_src: string;
+    date?: Date;
+    stock: number;
+    description?: string;
+    views?: number;
+}
 
 export interface IProductDB extends IProduct {
-    id?: ObjectId;
+    _id?: ObjectId;
 }
 
 const productSchema = new mongoose.Schema({

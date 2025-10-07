@@ -13,15 +13,15 @@ const TopAdminNavbar = () => {
         {'name': 'Orders', 'link': '/control-panel/orders', 'text': 'הזמנות'},
         {'name': 'Users', 'link': '/control-panel/users', 'text': 'משתמשים'},
     ];
-    let menuRefs:{[key: string] : React.RefObject<HTMLUListElement>} = {};
+    const menuRefs:{[key: string] : React.RefObject<HTMLUListElement | null>} = {};
 
     const { callLogout } = useContext(AuthContext);
 
-    for (let menuItem of navbar) {
+    for (const menuItem of navbar) {
         menuRefs[menuItem.name] = React.createRef();
         if (menuItem.submenu) {
             /* Only 1 level nesting currently supported */
-            for (let submenuItem of menuItem.submenu) {
+            for (const submenuItem of menuItem.submenu) {
                 menuRefs[submenuItem.name] = React.createRef();
             }
         }

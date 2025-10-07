@@ -1,10 +1,11 @@
 'use client'
 
+/* eslint-disable react-refresh/only-export-components */
 import React, {createContext, useState, ReactNode, useCallback, useEffect} from "react";
 import "core-js/stable/atob";
 import {v4 as uuidv4} from "uuid";
 import {useConst} from "@chakra-ui/react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import { logger } from "../utils/logger";
 
 export interface GuestDataType {
@@ -13,7 +14,7 @@ export interface GuestDataType {
 }
 
 interface AuthContextType {
-    api: AxiosInstance;
+    api: ReturnType<typeof axios.create>;
     authTokens: string | null;
     setAuthTokens: React.Dispatch<React.SetStateAction<string | null>>;
     guestData: GuestDataType;
@@ -29,7 +30,7 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export const AuthProvider = (props: Props) => {
     logger.component('AuthProvider', 'Initializing');
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     // Initialize state with localStorage values if available (client-side only)
     const [authTokens, setAuthTokens] = useState<string | null>(() => {
@@ -83,7 +84,7 @@ export const AuthProvider = (props: Props) => {
             logger.state('AuthProvider', 'guestData (hydration)', guestData, newGuestData);
             setGuestData(newGuestData);
         }
-    }, []); // Empty deps - only run once on mount
+    }, [guestData]); // Include guestData in deps to satisfy exhaustive-deps
 
     const callLogout = useCallback(() => {
         if (typeof window !== 'undefined') {

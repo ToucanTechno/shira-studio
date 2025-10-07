@@ -1,4 +1,5 @@
 
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, ReactNode, useCallback } from "react";
 import axios from "axios";
 import { GuestDataType } from "./AuthContext";

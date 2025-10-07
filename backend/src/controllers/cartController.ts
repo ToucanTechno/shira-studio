@@ -121,10 +121,10 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
             if (lock && cartItem.product.stock - cartItem.amount < 0){//this make sure we have enough in stock if locking
                 await session.abortTransaction() //TODO: check that this actually abort transaction and ends session
                 await session.endSession()
-                return new ErrorAmountAboveStock(cartItem.product._id!,cartItem.product.stock,cartItem.amount)
+                return new ErrorAmountAboveStock(cartItem.product._id!.toString(),cartItem.product.stock,cartItem.amount)
             }
             cartItem.product.stock = cartItem.product.stock + (lock ? -cartItem.amount : cartItem.amount)
-            await Product.findByIdAndUpdate(cartItem.product.id,{stock: cartItem.product.stock}).session(session)
+            await Product.findByIdAndUpdate(cartItem.product._id,{stock: cartItem.product.stock}).session(session)
         }
     }
     await cart.save()

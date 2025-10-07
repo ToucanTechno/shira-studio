@@ -18,8 +18,17 @@ import { SelectOption } from "../../utils/ChakraTypes";
 import axios from "axios";
 import { ColumnDef, createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
+interface OrderResponse {
+    orders: Array<{
+        _id: string;
+        name: string;
+        shipmentStep: string;
+        shipmentMethod: string;
+    }>;
+}
+
 export interface TOrder {
-    id: number;
+    id: string;
     customerName: string;
     orderTotal: number;
     status: string;
@@ -34,6 +43,7 @@ const AdminOrders = () => {
         useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
     const [ordersData, setOrdersData] = useState<TOrder[]>([]);
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
     const ordersTable = useReactTable({data: ordersData, columns: columns.current, getCoreRowModel: getCoreRowModel()});
 
@@ -73,10 +83,10 @@ const AdminOrders = () => {
         ];
         (async () => {
             try {
-                const dbOrders = await api.get('/orders');
+                const dbOrders = await api.get<OrderResponse>('/orders');
                 console.log(dbOrders);
                 let orders: TOrder[] = [];
-                for (const order of (dbOrders.data as any).orders) {
+                for (const order of dbOrders.data.orders) {
                     orders.push({
                         id: order._id,
                         customerName: order.name,
@@ -87,7 +97,7 @@ const AdminOrders = () => {
                         action: ''})
                 }
                 setOrdersData(orders);
-            } catch (error: any) {
+            } catch (error) {
                 console.error(error);
             }
         })();

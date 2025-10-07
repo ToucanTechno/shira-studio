@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
-import { IProduct } from '../../../src/models/Product';
 
 export interface ICategory {
     name: string;
     text: string;
     parent: string
-    products: Array<IProduct | mongoose.Schema.Types.ObjectId>
+    products: Array<mongoose.Schema.Types.ObjectId>
     _id?: string;
 }
 

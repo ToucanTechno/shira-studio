@@ -1,5 +1,5 @@
 import { useParams } from "next/navigation";
-import React, {Component, ComponentType} from "react";
+import React, {ComponentType} from "react";
 
 /**
  * Wraps a class component with URL params props.
