@@ -1,12 +1,12 @@
 
 import React, { createContext, ReactNode, useCallback } from "react";
-import { AxiosInstance } from "axios";
+import axios from "axios";
 import { GuestDataType } from "./AuthContext";
 import { logger } from "../utils/logger";
 
 interface Props {
     children: ReactNode;
-    api: AxiosInstance;
+    api: ReturnType<typeof axios.create>;
     guestData: GuestDataType;
     setGuestData: React.Dispatch<React.SetStateAction<GuestDataType> >;
 }
@@ -16,7 +16,7 @@ interface CartContextType {
     tryCreateCart: () => Promise<string | null>; // reject type is "any"
     getProductCount: (productID: string | undefined) => Promise<number>;
     removeCart: () => void;
-    wrapUnlockLock: <Args extends any[], Return>(
+    wrapUnlockLock: <Args extends unknown[], Return>(
         cartID: string | null, operation: (...operationParameters: Args) => Return, ...parameters: Args )
         => Promise<Return | boolean>;
 }
@@ -34,11 +34,11 @@ export const CartProvider = (props: Props) => {
     });
     const tryCreateCart = useCallback(async () => {
         if (guestData.cartID === null) {
-            return await api.post(`/cart`,
+            return await api.post<{ id: string | null }>(`/cart`,
                 {userId: null}) // Don't pass userId for guest carts
-                .then(response => {
+                .then((response) => {
                     logger.log('Done creating cart', response)
-                    const createdCartID = response.data['id'];
+                    const createdCartID = response.data.id;
                     if (createdCartID === null) {
                         throw(Error("Failed creating cart ID"));
                     }
@@ -47,7 +47,7 @@ export const CartProvider = (props: Props) => {
                     setGuestData({ guestID: guestData.guestID, cartID: createdCartID });
                     return (createdCartID as string);
                 })
-                .catch(error => {
+                .catch((error: unknown) => {
                     // Handle any errors
                     logger.error(`tryCreateCart error: ${error}`);
                     throw(error);
@@ -68,7 +68,7 @@ export const CartProvider = (props: Props) => {
             logger.error("Trying to get an undefined productID");
             return 0;
         }
-        const cartResult = await api.get(`/cart/${guestData.cartID}`);
+        const cartResult = await api.get<{ products: Record<string, { amount: number }> }>(`/cart/${guestData.cartID}`);
         if (productID in cartResult.data.products) {
             return cartResult.data.products[productID].amount;
         }
@@ -93,12 +93,13 @@ export const CartProvider = (props: Props) => {
             logger.log(`cart ${(lockAction) ? '' : 'un'}lock result:`, lockResult);
             // TODO: how to trigger cart reload in all use cases?
             return Promise.resolve(true);
-        } catch(error: any) {
+        } catch(error: unknown) {
             // TODO: change when error handling updates
-            if (error.response?.data === "cart already locked") {
+            const axiosError = error as { response?: { data?: string } };
+            if (axiosError.response?.data === "cart already locked") {
                 logger.log("Trying to lock cart, but cart is already locked");
                 return Promise.resolve(false);
-            } else if (error.response?.data === "cart already unlocked") {
+            } else if (axiosError.response?.data === "cart already unlocked") {
                 logger.log("Trying to unlock cart, but cart is already unlocked");
                 return Promise.resolve(false);
             }
@@ -109,7 +110,7 @@ export const CartProvider = (props: Props) => {
     }, [guestData, api]);
 
     /* Unlocks cart, does action, then locks cart. */
-    const wrapUnlockLock = useCallback(async <TArgs extends any[], TReturn>(
+    const wrapUnlockLock = useCallback(async <TArgs extends unknown[], TReturn>(
         cartID: string | null, operation: (...operationParameters: TArgs) => TReturn,
         ...parameters: TArgs
     ): Promise<TReturn | boolean> => {
@@ -129,14 +130,15 @@ export const CartProvider = (props: Props) => {
             const unlockResult = await api.put(`/cart/${cartID}/lock`, {lock: false});
             logger.log(`Cart unlock successful:`, unlockResult.data);
             wasLocked = true; // Cart was locked, so we unlocked it
-        } catch(error: any) {
+        } catch(error: unknown) {
             logger.log('Unlock failed, checking error...');
-            logger.log('Unlock error response:', error.response?.data);
+            const axiosError = error as { response?: { data?: { errorCode?: number; message?: string } } };
+            logger.log('Unlock error response:', axiosError.response?.data);
 
             // Check if the error is specifically about cart being already unlocked
-            if (error.response?.data &&
-                error.response.data.errorCode === 13 &&
-                error.response.data.message?.includes("is unlocked")) {
+            if (axiosError.response?.data &&
+                axiosError.response.data.errorCode === 13 &&
+                axiosError.response.data.message?.includes("is unlocked")) {
                 logger.log("Cart was already unlocked, proceeding with operation");
                 wasLocked = false; // Cart was already unlocked
             } else {
@@ -146,8 +148,8 @@ export const CartProvider = (props: Props) => {
         }
 
         logger.log("About to execute operation...");
-        let opResult;
-        let operationError;
+        let opResult: TReturn | undefined;
+        let operationError: unknown;
 
         // Execute the operation
         try {
@@ -164,7 +166,7 @@ export const CartProvider = (props: Props) => {
                 logger.log('Re-locking cart (was originally locked)...');
                 const lockResult = await api.put(`/cart/${cartID}/lock`, {lock: true});
                 logger.log(`Cart re-lock successful:`, lockResult.data);
-            } catch(error: any) {
+            } catch(error: unknown) {
                 logger.error('Failed to re-lock cart:', error);
                 // Don't throw here - we want to return the original operation result/error
             }
@@ -179,7 +181,7 @@ export const CartProvider = (props: Props) => {
             throw operationError;
         }
 
-        return opResult;
+        return opResult as TReturn;
     }, [api]);
 
     return (

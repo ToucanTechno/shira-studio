@@ -1,6 +1,7 @@
 import {ChakraProvider, extendTheme} from "@chakra-ui/react";
+import { ReactNode } from "react";
 
-export default function ChakraRTLProvider({ children }: any) {
+export default function ChakraRTLProvider({ children }: { children: ReactNode }) {
     // TODO: support english website
     const direction = 'rtl';
 

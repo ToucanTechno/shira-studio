@@ -3,13 +3,18 @@ import { redirect } from "next/navigation";
 import { AuthContext } from "../services/AuthContext";
 import {jwtDecode} from "jwt-decode";
 
+interface DecodedToken {
+    role?: string;
+    [key: string]: unknown;
+}
+
 const RequireAuth = ({ children }: { children: React.ReactNode }) => {
-    let { authTokens } = useContext(AuthContext);
+    const { authTokens } = useContext(AuthContext);
     /* TODO improve check */
     if (authTokens) {
         // console.log("Trying to decode:", authTokens)
-        const decodedUser: any = jwtDecode(authTokens || "")
-        if (decodedUser && decodedUser["role"] === "admin") {
+        const decodedUser = jwtDecode<DecodedToken>(authTokens || "")
+        if (decodedUser && decodedUser.role === "admin") {
             return <>{children}</>;
         }
     }
