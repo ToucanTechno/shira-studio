@@ -1,7 +1,7 @@
-import {Form, useNavigate, useParams} from "react-router";
+import { useRouter, useParams } from "next/navigation";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import Select, { MultiValue } from 'react-select';
 import {
     Button,
@@ -32,7 +32,7 @@ interface CategoriesData {
 
 const AdminProductsEdit = () => {
     const params = useParams();
-    const isEdit = ('id' in params);
+    const isEdit = params && ('id' in params);
     const [product, setProduct] =
         useState<IProduct | null>(null);
     const [categoriesData, setCategoriesData] =
@@ -45,13 +45,13 @@ const AdminProductsEdit = () => {
         name: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null)
     }
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    const navigate = useNavigate();
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const router = useRouter();
 
     const fetchProducts = useCallback(async () => {
         if (isEdit) {
             await api.get(`/products/${params['id']}`)
-                .then(response => {
+                .then((response: any) => {
                     let parsedCategories: SelectOption[] = [];
                     // Process the response data
                     let productSkeleton: IProduct = response.data;
@@ -77,7 +77,7 @@ const AdminProductsEdit = () => {
                     setProduct(productSkeleton);
                 });
         }
-        await api.get(`/categories`).then(response => {
+        await api.get(`/categories`).then((response: any) => {
             let categoriesSkeleton: {[key: string]: ICategory} = {} ;
             for (const category of response.data) {
                 categoriesSkeleton[category.name] = category;
@@ -159,7 +159,7 @@ const AdminProductsEdit = () => {
         } else {  // Adding product
             const updateURL = 'products/';
             let addedCategories = update.categories.map(el => el.name);
-            updatePromises.push(api.post(updateURL, updateEntry).then(res => {
+            updatePromises.push(api.post(updateURL, updateEntry).then((res: any) => {
                 const productID = res.data['id'];
                 api.put(`products/${productID}/categories`, {
                     names: Array.from(addedCategories),
@@ -173,7 +173,7 @@ const AdminProductsEdit = () => {
             }
             console.error(error);
         });
-        navigate('/control-panel/products');
+        router.push('/control-panel/products');
     }
 
     const handleSelectCategories = (el: MultiValue<SelectOption>) => {
@@ -190,7 +190,7 @@ const AdminProductsEdit = () => {
     return (
         <Flex direction='column' m={4}>
             <Heading as='h1' size='xl' mb={2}>{(isEdit) ? "עריכת מוצר" : "הוספת מוצר"}</Heading>
-            <Form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
                 {isEdit &&
                     <FormControl>
                         <FormLabel htmlFor="productID">מזהה מוצר</FormLabel>
@@ -282,7 +282,7 @@ const AdminProductsEdit = () => {
                 </FormControl>
 
                 <Button type="submit" mt={2}>{ isEdit ? "עריכת מוצר" : "הוספת מוצר" }</Button>
-            </Form>
+            </form>
         </Flex>
     )
 };

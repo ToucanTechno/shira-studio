@@ -11,10 +11,9 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons"
 import Select, { SingleValue } from "react-select";
-import { Form } from "react-router";
 import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from "react";
 import { SelectOption } from "../../utils/ChakraTypes";
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { ColumnDef, createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
 export interface TOrder {
@@ -32,7 +31,7 @@ const AdminOrders = () => {
     const [typeFilter, setTypeFilter] =
         useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
     const [ordersData, setOrdersData] = useState<TOrder[]>([]);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     let columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
     const ordersTable = useReactTable({data: ordersData, columns: columns.current, getCoreRowModel: getCoreRowModel()});
 
@@ -75,7 +74,7 @@ const AdminOrders = () => {
                 const dbOrders = await api.get('/orders');
                 console.log(dbOrders);
                 let orders: TOrder[] = [];
-                for (const order of dbOrders.data.orders) {
+                for (const order of (dbOrders.data as any).orders) {
                     orders.push({
                         id: order._id,
                         customerName: order.name,
@@ -105,7 +104,7 @@ const AdminOrders = () => {
         <Flex direction='column'>
             <Heading as='h1'>ניהול הזמנות</Heading>
             <Box w='300px'>
-            <Form onSubmit={handleSearch}>
+            <form onSubmit={handleSearch}>
                 <FormControl m={2}>
                     <Flex>
                         <Input type='text'
@@ -130,7 +129,7 @@ const AdminOrders = () => {
                                 {label: 'נשלח', value: 'shipped'},
                                 {label: 'הגיע ליעדו', value: 'delivered'}]} />
                 </FormControl>
-            </Form>
+            </form>
             </Box>
             <TableContainer>
                 <Table>

@@ -1,3 +1,4 @@
+'use client'
 import React, {useEffect, useState} from "react";
 import './TopNavbar.css';
 import { BsFacebook, BsInstagram, BsBasket3, BsFillPersonFill, BsGlobe2, BsHouseDoor  } from "react-icons/bs";

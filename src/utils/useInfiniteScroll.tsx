@@ -12,7 +12,7 @@ export interface UseInfiniteScroll {
     isLastPage: boolean;
 }
 
-export const useInfiniteScroll = (products: IProduct[]): UseInfiniteScroll => {
+export const useInfiniteScroll = (products: IProduct[], categoryName?: string): UseInfiniteScroll => {
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasDynamicProducts, setHasDynamicProducts] = useState(false);
@@ -24,7 +24,10 @@ export const useInfiniteScroll = (products: IProduct[]): UseInfiniteScroll => {
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     const getInitialProducts = useCallback(() => {
-        api.get(`products?skip=${10 * (page - 1)}&limit=10`).then((resp) => {
+        const url = categoryName
+            ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
+            : `products?skip=${10 * (page - 1)}&limit=10`;
+        api.get(url).then((resp: any) => {
             setPage(page + 1);
             const newProducts = resp?.data["products"];
             console.log(resp);
@@ -49,7 +52,10 @@ export const useInfiniteScroll = (products: IProduct[]): UseInfiniteScroll => {
                 // this timeout debounces the intersection events
                 loadMoreTimeoutRef.current = setTimeout(() => {
                     /* TODO: set limit to line width * 5. Save the amount loaded until now as skip value */
-                    api.get(`products?skip=${10 * (page - 1)}&limit=10`).then((resp) => {
+                    const url = categoryName
+                        ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
+                        : `products?skip=${10 * (page - 1)}&limit=10`;
+                    api.get(url).then((resp: any) => {
                         setPage(page + 1);
                         const newProducts = resp?.data["products"];
                         console.log(resp);

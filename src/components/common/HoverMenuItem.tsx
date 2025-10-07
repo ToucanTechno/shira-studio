@@ -1,7 +1,9 @@
+'use client'
+
 import {Button, Menu, MenuButton, MenuList, useDisclosure} from "@chakra-ui/react";
 import React, {useRef} from "react";
 import { ItemType } from "./MenuItem";
-import {useNavigate} from "react-router";
+import { useRouter } from "next/navigation";
 import MenuSubItem from "./MenuSubItem";
 
 interface HoverMenuItemProps {
@@ -10,13 +12,15 @@ interface HoverMenuItemProps {
 
 const HoverMenuItem = (props: HoverMenuItemProps) => {
     const timerRef = useRef(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const { isOpen, onOpen, onClose } = useDisclosure();
+
     const onCloseTimeout = () => {
         timerRef.current = window.setTimeout(() => {
             onClose();
         }, 150);
     }
+
     const onOpenClearTimeout = () => {
         if(timerRef.current !== 0) {
             clearTimeout(timerRef.current);
@@ -35,7 +39,7 @@ const HoverMenuItem = (props: HoverMenuItemProps) => {
                         borderRadius='0'
                         _hover={{ bg: '#333' }}
                         _active={{ bg: '#333' }}
-                        onClick={() => {onClose(); navigate(props.item.link)}}
+                        onClick={() => {onClose(); router.push(props.item.link)}}
                         onMouseEnter={onOpen}
                         onMouseLeave={onCloseTimeout}>
                 {props.item.text}

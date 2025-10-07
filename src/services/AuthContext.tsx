@@ -1,13 +1,17 @@
-import React, {createContext, useState, ReactNode, useCallback} from "react";
+'use client'
+
+import React, {createContext, useState, ReactNode, useCallback, useEffect} from "react";
 import "core-js/stable/atob";
 import {v4 as uuidv4} from "uuid";
 import {useConst} from "@chakra-ui/react";
 import axios, {AxiosInstance} from "axios";
+import { logger } from "../utils/logger";
 
 export interface GuestDataType {
     guestID: string | null;
     cartID: string | null;
 }
+
 interface AuthContextType {
     api: AxiosInstance;
     authTokens: string | null;
@@ -21,35 +25,71 @@ interface Props {
     children: ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextType>( {} as AuthContextType );
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = (props: Props) => {
-    // console.log("Starting AuthProvider...")
+    logger.component('AuthProvider', 'Initializing');
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    let [authTokens, setAuthTokens] = useState<string | null>(() => {
-            let tokenInfo = localStorage.getItem('authTokens');
-            // console.log("Getting tokenInfo from localStorage, setting initial authTokens in context", tokenInfo);
-            return tokenInfo
-                ? JSON.parse(tokenInfo || "")
-                : null;
+
+    // Initialize state with localStorage values if available (client-side only)
+    const [authTokens, setAuthTokens] = useState<string | null>(() => {
+        if (typeof window !== 'undefined') {
+            const tokenInfo = localStorage.getItem('authTokens');
+            logger.component('AuthProvider', 'Initial authTokens from localStorage', tokenInfo ? 'found' : 'not found');
+            return tokenInfo ? JSON.parse(tokenInfo) : null;
         }
-    );
-    let [guestData, setGuestData] =
-            useState<GuestDataType>(() => {
-        let storedGuestID = localStorage.getItem('guestID');
-        let storedCartID = localStorage.getItem('cartID');
-        // console.log("stored guest ID", storedGuestID);
-        if (storedGuestID === null) {
-            storedGuestID = uuidv4();
-            // console.log("new guest ID", storedGuestID);
-            localStorage.setItem('guestID', storedGuestID as string);
-        }
-        return { guestID: storedGuestID, cartID: storedCartID };
+        return null;
     });
 
+    const [guestData, setGuestData] = useState<GuestDataType>(() => {
+        if (typeof window !== 'undefined') {
+            let storedGuestID = localStorage.getItem('guestID');
+            const storedCartID = localStorage.getItem('cartID');
+            
+            logger.component('AuthProvider', 'Initial localStorage read', {
+                guestID: storedGuestID,
+                cartID: storedCartID
+            });
+
+            if (storedGuestID === null) {
+                storedGuestID = uuidv4();
+                logger.component('AuthProvider', 'Generated new guestID', storedGuestID);
+                localStorage.setItem('guestID', storedGuestID);
+            }
+
+            const initialData = { guestID: storedGuestID, cartID: storedCartID };
+            logger.state('AuthProvider', 'guestData', { guestID: null, cartID: null }, initialData);
+            return initialData;
+        }
+        logger.component('AuthProvider', 'Server-side render - using null values');
+        return { guestID: null, cartID: null };
+    });
+
+    // Hydration effect - only runs on client after server render
+    useEffect(() => {
+        if (typeof window !== 'undefined' && guestData.guestID === null) {
+            logger.component('AuthProvider', 'Hydration - updating from localStorage');
+            
+            let storedGuestID = localStorage.getItem('guestID');
+            const storedCartID = localStorage.getItem('cartID');
+
+            if (storedGuestID === null) {
+                storedGuestID = uuidv4();
+                logger.component('AuthProvider', 'Hydration - generated new guestID', storedGuestID);
+                localStorage.setItem('guestID', storedGuestID);
+            }
+
+            const newGuestData = { guestID: storedGuestID, cartID: storedCartID };
+            logger.state('AuthProvider', 'guestData (hydration)', guestData, newGuestData);
+            setGuestData(newGuestData);
+        }
+    }, []); // Empty deps - only run once on mount
+
     const callLogout = useCallback(() => {
-        localStorage.removeItem('authTokens');
-        // TODO: remove cart details and regenerate guest ID
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('authTokens');
+            // TODO: remove cart details and regenerate guest ID
+        }
         setAuthTokens(null);
     }, []);
 
@@ -62,7 +102,7 @@ export const AuthProvider = (props: Props) => {
             setGuestData,
             callLogout,
         }}>
-            { props.children }
+            {props.children}
         </AuthContext.Provider>
     );
 };

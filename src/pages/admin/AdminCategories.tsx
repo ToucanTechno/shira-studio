@@ -9,9 +9,9 @@ import {
     Tr, useConst
 } from "@chakra-ui/react";
 import React, {FormEvent, useEffect, useState} from "react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import {ICategory} from "../../../backend/src/models/Category";
-import {Form, useNavigate} from "react-router";
+import { useRouter } from "next/navigation";
 import AdminCategoriesAdd from "./AdminCategoriesAdd";
 import Select, {SingleValue} from "react-select";
 import {SelectOption} from "../../utils/ChakraTypes";
@@ -20,16 +20,17 @@ const AdminCategories = () => {
     let [categories, setCategories] = useState<ICategory[]>([]);
     let [dirty, setDirty] = useState(false);
     let [editID, setEditID] = useState<string | null>(null);
-    let [editedName] = useState<string | undefined>();
+    let [editedName, setEditedName] = useState<string>("");
+    let [editedText, setEditedText] = useState<string>("");
     let [editedParent, setEditedParent] = useState<SelectOption | null>(null);
-    const navigate = useNavigate();
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const router = useRouter();
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
         (async () => {
             try {
                 let response = await api.get('/categories');
-                setCategories(response.data);
+                setCategories(response.data as ICategory[]);
             } catch (error: any) {
                 console.error(error);
             }
@@ -51,12 +52,13 @@ const AdminCategories = () => {
         {/* Trick to cause table update when adding a category */}
         <AdminCategoriesAdd disabled={editID !== null} onAdd={() => setDirty(!dirty)} categories={categories} />
         <TableContainer w='100%'>
-            <Form onSubmit={handleEditCategory}>
+            <form onSubmit={handleEditCategory}>
                 <Table colorScheme='gray' variant='striped'>
                     <Thead>
                         <Tr>
                             <Th isNumeric>#</Th>
-                            <Th>שם הקטגוריה</Th>
+                            <Th>שם כתובת</Th>
+                            <Th>שם תצוגה</Th>
                             <Th>קטגוריית אב</Th>
                             <Th>מס׳ מוצרים</Th>
                             <Th>פעולות</Th>
@@ -68,14 +70,23 @@ const AdminCategories = () => {
                                 <Tr key={item._id}>
                                     <Td py={6}>{item._id}</Td>
                                     <Td>{(editID === item._id) ?
-                                        // eslint-disable-next-line react/jsx-no-undef
                                         <FormControl isRequired>
                                             <Input variant='flushed'
                                                    borderColor='gray.300'
                                                    placeholder={item.name}
-                                                   value={editedName}></Input>
+                                                   value={editedName}
+                                                   onChange={(e) => setEditedName(e.target.value)}></Input>
                                         </FormControl> :
                                         item.name}</Td>
+                                    <Td>{(editID === item._id) ?
+                                        <FormControl isRequired>
+                                            <Input variant='flushed'
+                                                   borderColor='gray.300'
+                                                   placeholder={item.text}
+                                                   value={editedText}
+                                                   onChange={(e) => setEditedText(e.target.value)}></Input>
+                                        </FormControl> :
+                                        item.text}</Td>
                                     <Td>{(editID === item._id) ?
                                         <FormControl isRequired>
                                             <Select
@@ -95,13 +106,18 @@ const AdminCategories = () => {
                                                         _hover={{'backgroundColor': 'cyan.700'}}
                                                         me={1}
                                                         size='sm'
-                                                        onClick={() => setEditID(item._id as string)}>
+                                                        onClick={() => {
+                                                            setEditID(item._id as string);
+                                                            setEditedName(item.name);
+                                                            setEditedText(item.text);
+                                                            setEditedParent(item.parent ? {value: item.parent, label: item.parent} : null);
+                                                        }}>
                                                     עריכה
                                                 </Button>
                                                 <Button colorScheme='blackAlpha'
                                                         _hover={{'backgroundColor': 'red.600'}}
                                                         size='sm'
-                                                        onClick={() => navigate(`${item._id}/delete`)}>
+                                                        onClick={() => router.push(`${item._id}/delete`)}>
                                                     מחיקה
                                                 </Button>
                                             </>
@@ -127,7 +143,7 @@ const AdminCategories = () => {
                         })}
                     </Tbody>
                 </Table>
-            </Form>
+            </form>
         </TableContainer>
     </Flex>)
 };

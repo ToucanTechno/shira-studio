@@ -1,24 +1,25 @@
 import {
     Button, Card, Center, Collapse, Fade,
     Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Radio, RadioGroup, Spacer,
-    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure, useRadioGroup,
+    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure,
     Wrap
 } from "@chakra-ui/react";
 import React, {
     ChangeEvent, Dispatch, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState
 } from "react";
-import { Form, NavigateFunction, useBlocker } from "react-router";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { AuthContext } from "../services/AuthContext";
 import { ICartModel } from "../models/CartModel";
 import { CartContext } from "../services/CartContext";
 import {isEmailValidUI, isPhoneValidUI, isPostCodeValidUI} from "../utils/Validation";
+import { logger } from "../utils/logger";
 
 interface CartOrderProps {
     totalPrice: number;
     cartID: string | null;
     cart: ICartModel | null;
     setCart: Dispatch<ICartModel | null>;
-    navigate: NavigateFunction;
+    navigate: AppRouterInstance;
 }
 
 const CartOrder = (props: CartOrderProps) => {
@@ -46,33 +47,11 @@ const CartOrder = (props: CartOrderProps) => {
         phone: useRef<HTMLInputElement>(null),
         postCode: useRef<HTMLInputElement>(null)
     }
-    // If there's a cart ID and a cart, on each page transition, block the transition
-    let blocker = useBlocker(
-        ({ currentLocation, nextLocation }) =>
-            props.cartID !== null && props.cart !== null && currentLocation.pathname !== nextLocation.pathname
-    );
-
-    // On every blocker change and cart change, if blocker is now blocked, try to unlock cart.
-    useEffect(() => {
-        // TODO: && blocker.location.pathname !== 'checkout'
-        if (blocker.state === 'blocked') {
-            console.log(`page exit is blocked: ${blocker} trying to unlock...`);
-            tryLockCart(false).then(() => {
-                if (blocker.state === 'blocked') {
-                    console.log('unlock successful');
-                    blocker.proceed();
-                } else {
-                    // Should never happen!
-                    console.error('unblocked unexpectedly without proceeding.');
-                }
-            }).catch((error) => console.error(`Try unlock cart failed: ${error}`));
-        }
-    }, [blocker, tryLockCart, props.cart])
 
     const createOrder = (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault();
         if (props.cartID === null) {
-            console.error('missing cart ID');
+            logger.error('missing cart ID');
             return;
         } else if (!isEmailValid) {
             formRefs.email.current?.focus();
@@ -84,10 +63,10 @@ const CartOrder = (props: CartOrderProps) => {
             formRefs.postCode.current?.focus();
             return;
         }
-        console.log(ev);
+        logger.log(ev);
         // TODO: lock cart if unlocked
         // TODO: test added / removed amounts when cart is locked
-        api.post('/orders', {
+        api.post('/api/orders', {
             cart: props.cartID,
             name: `${firstName} ${lastName}`,
             phone: phone,
@@ -101,23 +80,27 @@ const CartOrder = (props: CartOrderProps) => {
             shipmentMethod: shipmentMethod,
             comments: 'TODO'
         }).then(res => {
-            console.log(`Order ID: ${res.data}`);
+            logger.log(`Order ID: ${res.data}`);
             removeCart();
-        }).catch(error => console.error(error));
-        props.navigate('/');
+            // Navigate to order summary page with order ID
+            props.navigate.push(`/order-summary?orderId=${res.data}`);
+        }).catch(error => {
+            logger.error(error);
+            // Handle error - maybe show a toast or error message
+        });
     };
 
     const handleOrderProceed = useCallback(async () => {
         if (props.cart === null) {
             // TODO: try create cart?
-            console.error('null cart');
+            logger.error('null cart');
             return;
         }
         onClose();
         try {
             await tryLockCart(true);
         } catch(error) {
-            console.error(error);
+            logger.error(error);
             return;
         }
     }, [onClose, tryLockCart, props.cart])
@@ -130,7 +113,7 @@ const CartOrder = (props: CartOrderProps) => {
                 </Center>
             </Collapse>
             <Fade in={!isOpen}>
-                <Form onSubmit={createOrder}>
+                <form onSubmit={createOrder}>
                     <Wrap direction='row' w='100%'>
                         <Flex direction='column' w={['100%', '100%', '60%']}>
                             <Card m={2}>
@@ -272,7 +255,7 @@ const CartOrder = (props: CartOrderProps) => {
                             <Button type='submit' colorScheme='yellow' m={1}>לתשלום</Button>
                         </Flex>
                     </Wrap>
-                </Form>
+                </form>
             </Fade>
         </>
     )

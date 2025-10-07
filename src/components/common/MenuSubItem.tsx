@@ -1,7 +1,9 @@
+'use client'
+
 import {MenuItem} from "@chakra-ui/react";
 import React from "react";
 import { ItemType } from "./MenuItem";
-import {useNavigate} from "react-router";
+import { useRouter } from "next/navigation";
 
 interface MenuSubItemProps {
     parentItem: ItemType
@@ -10,12 +12,12 @@ interface MenuSubItemProps {
 }
 
 const MenuSubItem = (props: MenuSubItemProps ) => {
-    const navigate = useNavigate();
+    const router = useRouter();
 
     return (
         <MenuItem bg='black'
                   color='white'
-                  onClick={() => {props.closeHandle(); navigate(props.item.link)}}>
+                  onClick={() => {props.closeHandle(); router.push(props.item.link)}}>
             {props.item.text}
         </MenuItem>
     );

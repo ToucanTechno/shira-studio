@@ -1,10 +1,6 @@
+'use client'
+
 import React from 'react';
-import TopImage from '../assets/images/home/top-image_2020-05-30.jpg';
-import CasuarinaNecklace from '../assets/images/home/casuarina-necklace.webp';
-import NasturtiumPaint from '../assets/images/home/nasturtium-paint.webp';
-import FabricLegBracelets from '../assets/images/home/fabric-leg-bracelets.webp';
-import GlassPeacock from '../assets/images/home/glass-peacock.webp';
-import DavidAquarel from '../assets/images/home/dudi-aqwrel.webp';
 import { BsArrowDownLeft } from "react-icons/bs";
 import './Home.css';
 import YoutubeEmbed from "../components/home/YoutubeEmbed";
@@ -15,7 +11,7 @@ const Home = () => {
     return (
         <Box className="container">
             <Box className="home-top">
-                <Image alt="Jewellery Collage" src={TopImage}/>
+                <Image alt="Jewellery Collage" src="/images/home/top-image_2020-05-30.jpg"/>
                 <Box className="button-text-header">
                     <Button className="button-style">צפה בגלריה <BsArrowDownLeft /></Button>
                     <Heading as='h2'>כל תכשיט הוא חוויה חושית ואינטלקטואלית</Heading>
@@ -32,13 +28,13 @@ const Home = () => {
                         <Button mt={2} className="button-style">תכשיטים בהשראת הטבע <BsArrowDownLeft/></Button>
                     </Flex>
                     <Box className="image-frame-container">
-                        <Image alt="Casuarina necklace" src={CasuarinaNecklace}/>
+                        <Image alt="Casuarina necklace" src="/images/home/casuarina-necklace.webp"/>
                     </Box>
                 </Flex>
                 <Flex direction={['column-reverse', 'column-reverse', 'row']} grow='0.9' alignItems='center'
                       justifyContent='center' columnGap='8vw' my={4}>
                     <Box className="image-frame-container">
-                        <Image alt="Nasturtium paint" src={NasturtiumPaint}/>
+                        <Image alt="Nasturtium paint" src="/images/home/nasturtium-paint.webp"/>
                     </Box>
                     <Flex direction='column' alignItems='flex-start' justifyContent='center' w='fit-content' grow='1'>
                         <Heading as='h2'>השראה מעולמי</Heading>
@@ -60,13 +56,13 @@ const Home = () => {
                         <Button mt={2} className="button-style">אומנויות בעבודת יד <BsArrowDownLeft/></Button>
                     </Flex>
                     <Box className="image-frame-container">
-                        <Image alt="Fabric leg bracelets" src={FabricLegBracelets}/>
+                        <Image alt="Fabric leg bracelets" src="/images/home/fabric-leg-bracelets.webp"/>
                     </Box>
                 </Flex>
                 <Flex direction={['column-reverse', 'column-reverse', 'row']} grow='0.9' alignItems='center'
                       justifyContent='center' columnGap='8vw' my={4}>
                     <Box className="image-frame-container">
-                        <Image alt="Glass peacock" src={GlassPeacock}/>
+                        <Image alt="Glass peacock" src="/images/home/glass-peacock.webp"/>
                     </Box>
                     <Flex direction='column' alignItems='flex-start' justifyContent='center' w='fit-content' grow='1'>
                         <Heading as='h2'>פיוזינג, עיצוב בזכוכית</Heading>
@@ -81,7 +77,7 @@ const Home = () => {
                     בלימודי בבצלאל התמחייתי במחלקה לצורפות. התכשיט מבחינתי הינו אובייקט שיש מאחריו סיפור, גימיק, דיאלוג, זיכרון, מסר, קומפוזיציה ועניין. התכשיטים והיצירות מיועדים לקהל יעד אקסלוסיבי, לבנות נוער ולכל מין וגיל.
                     אל טכניקות הפיוזינג בזכוכית ואל הריקמה התימנית נחשפתי לאחר אבדן בעלי דוד לירם ז"ל. </Text>
                 <Text mb={2}> בעל ואבא אהוב ומוכשר. את האתר אני מקדישה לזכרו.</Text>
-                <Image w='100px' mb={2} alt="David Aquarel" src={DavidAquarel}/>
+                <Image w='100px' mb={2} alt="David Aquarel" src="/images/home/dudi-aqwrel.webp"/>
                 <Footer/>
             </Flex>
         </Box>

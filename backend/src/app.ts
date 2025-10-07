@@ -26,9 +26,9 @@ if (process.env['DB_NAME']) {
 }
 
 // Add replica set parameter if specified
-if (process.env["REPLICA_NAME"]) {
-    connectionString += '?replicaSet=' + process.env["REPLICA_NAME"];
-}
+// if (process.env["REPLICA_NAME"]) {
+//     connectionString += '?replicaSet=' + process.env["REPLICA_NAME"];
+// }
 
 console.log("Connecting to MongoDB at", connectionString);
 

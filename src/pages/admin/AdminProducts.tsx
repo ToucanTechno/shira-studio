@@ -1,7 +1,10 @@
+'use client'
+
 import React, { useEffect, useState } from "react";
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { IProduct } from "../../models/Product";
-import { Link as ReactRouterLink, useNavigate, useSearchParams } from 'react-router'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import {
     Box, Flex, Image, Button, Heading,
@@ -19,18 +22,18 @@ interface ProductData {
 }
 
 const AdminProducts = () => {
-    let [params] = useSearchParams();  // TODO: add setPage
+    const params = useSearchParams();  // TODO: add setPage
     const productsPerPage = 10;
-    const navigate = useNavigate();
+    const router = useRouter();
     let [products, setProducts] =
         useState<ProductData>({total: 0, totalPages: 0, page: 0, products: []});
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
-        const tmpPage = (params.get('page') === null) ? 0 : parseInt(params.get('page') as string) - 1
+        const tmpPage = (params?.get('page') === null) ? 0 : parseInt(params?.get('page') as string) - 1
         let skip = tmpPage * productsPerPage;
         api.get(`/products?skip=${skip}&limit=${productsPerPage}`)
-            .then(response => {
+            .then((response: any) => {
                 // Process the response data
                 const totalPages = Math.floor((response.data.total + productsPerPage - 1) / productsPerPage);
                 setProducts({
@@ -40,7 +43,7 @@ const AdminProducts = () => {
                     products: response.data.products
                 });
             })
-            .catch(error => {
+            .catch((error: any) => {
                 // Handle any errors
                 console.error(error);
             });
@@ -49,7 +52,7 @@ const AdminProducts = () => {
     return (<Flex flexDirection='column' alignItems='center'>
         <Heading as='h1' size='xl' mb={2}>ניהול מוצרים</Heading>
         <Box>
-            <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} onClick={() => navigate('/control-panel/products/add')}>הוספת מוצר חדש</Button>
+            <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} onClick={() => router.push('/control-panel/products/add')}>הוספת מוצר חדש</Button>
         </Box>
         <TableContainer w='100%'>
             <Table colorScheme='gray' variant='striped' size='sm'>
@@ -74,7 +77,7 @@ const AdminProducts = () => {
                             <Tr key={item._id}>
                                 <Td><Image boxSize='60px' src="necklace.jpg" alt="Gold Necklace"/></Td>
                                 {/* TODO: make link work */}
-                                <Td><ChakraLink as={ReactRouterLink} to={`/products/${item._id}`}>{item.name}</ChakraLink></Td>
+                                <Td><ChakraLink as={Link} href={`/products/${item._id}`}>{item.name}</ChakraLink></Td>
                                 <Td dir='ltr'>...{(item._id as string).slice(-6)}</Td>
                                 <Td color={(item.stock === 0) ? 'red.400' : 'green.400'}>{item.stock}</Td>
                                 <Td isNumeric>
@@ -89,10 +92,10 @@ const AdminProducts = () => {
                                 <Td>{item.description}</Td>
                                 <Td>{item.views}</Td>
                                 <Td>
-                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => navigate(`${item._id}/edit`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => router.push(`${item._id}/edit`)}>
                                         עריכה
                                     </Button>
-                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => navigate(`${item._id}/delete`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => router.push(`${item._id}/delete`)}>
                                         מחיקה
                                     </Button>
                                 </Td>

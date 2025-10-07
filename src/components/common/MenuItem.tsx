@@ -1,5 +1,5 @@
 import React from "react";
-import {Link} from "react-router";
+import Link from "next/link";
 
 type ItemType = {
     name: string;
@@ -44,14 +44,14 @@ const MenuItem = (props: MenuItemProps) => {
             } : {}
             }>
 
-            <Link to={item.link}>{item.text}</Link>
+            <Link href={item.link}>{item.text}</Link>
             {(item.submenu) ?
                 <ul ref={menuRefs[item.name]}
                     className="TopNavbarSub">
                     {item.submenu.map(subItem => {
                         return (
                             <li key={subItem.name + '-sub-nav'}>
-                                <Link to={subItem.link}>{subItem.text}</Link>
+                                <Link href={subItem.link}>{subItem.text}</Link>
                             </li>
                         )
                     })}

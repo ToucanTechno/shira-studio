@@ -62,16 +62,28 @@ export const productUploadErr = (err: any, _req: Request, res: Response,_next:Ne
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-    console.log("get products", req.params, req.query['skip'], req.query['limit']);
+    console.log("get products", req.params, req.query['skip'], req.query['limit'], req.query['category']);
     try {
         // TODO: should replace with Range HTTP header
         const skip = Math.max(0, parseInt(req.query["skip"] as string) || 0);
         // Forbid limit=0 since it requests all entries
         const limit = Math.max(1, Math.min(parseInt(req.query["limit"] as string) || 10, 50));
+        const categoryName = req.query["category"] as string;
+        
+        // Build query filter
+        let filter = {};
+        if (categoryName) {
+            // Find the category by name to get its ID
+            const category = await Category.findOne({ name: categoryName });
+            if (category) {
+                filter = { categories: category._id };
+            }
+        }
+        
         // TODO: add sort as a parameter
         const [products, productsCount] = await Promise.all([
-            Product.find().populate('categories').sort({ date: -1 }).skip(skip).limit(limit),
-            Product.countDocuments()
+            Product.find(filter).populate('categories').sort({ date: -1 }).skip(skip).limit(limit),
+            Product.countDocuments(filter)
         ]);
 
         res.status(200).send({ products: products, total: productsCount });

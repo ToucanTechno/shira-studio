@@ -1,6 +1,8 @@
+'use client'
+
 import { Badge, Flex } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
-import { Link as ReactRouterLink } from "react-router";
+import Link from "next/link";
 import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import React from "react";
 
@@ -26,14 +28,14 @@ const Pagination = (props: PaginationProps) => {
                 <Flex my={1} direction='row'>
                     <Badge m={1} colorScheme={ props.page <= 0 ? 'gray' : 'blue'}>
                         <Flex direction='column' justifyContent='center' h='100%'>
-                            <ChakraLink as={ReactRouterLink} to={'?page=1'}>
+                            <ChakraLink as={Link} href={'?page=1'}>
                                 <BsChevronDoubleRight />
                             </ChakraLink>
                         </Flex>
                     </Badge>
                     <Badge m={1} colorScheme={ props.page <= 0 ? 'gray' : 'blue'}>
                         <Flex direction='column' justifyContent='center' h='100%'>
-                            <ChakraLink as={ReactRouterLink} to={`?page=${props.page}`}>
+                            <ChakraLink as={Link} href={`?page=${props.page}`}>
                                 <BsChevronRight />
                             </ChakraLink>
                         </Flex>
@@ -41,7 +43,7 @@ const Pagination = (props: PaginationProps) => {
                     <Badge m={1}
                            colorScheme='blue'
                            bgColor={props.page === toPaginationPage(props.page) - 2 ? 'orange.200' : ''}>
-                        <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) - 1)}`}>
+                        <ChakraLink as={Link} href={`?page=${(toPaginationPage(props.page) - 1)}`}>
                             {toPaginationPage(props.page) - 1}
                         </ChakraLink>
                     </Badge>
@@ -49,7 +51,7 @@ const Pagination = (props: PaginationProps) => {
                         <Badge m={1}
                                colorScheme='blue'
                                bgColor={props.page === toPaginationPage(props.page) - 1 ? 'orange.200' : ''}>
-                            <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page))}`}>
+                            <ChakraLink as={Link} href={`?page=${(toPaginationPage(props.page))}`}>
                                 {toPaginationPage(props.page)}
                             </ChakraLink>
                         </Badge>
@@ -57,7 +59,7 @@ const Pagination = (props: PaginationProps) => {
                     <Badge m={1}
                            colorScheme='blue'
                            bgColor={props.page === toPaginationPage(props.page) ? 'orange.200' : ''}>
-                        <ChakraLink as={ReactRouterLink} to={`?page=${toPaginationPage(props.page) + 1}`}>
+                        <ChakraLink as={Link} href={`?page=${toPaginationPage(props.page) + 1}`}>
                             {toPaginationPage(props.page) + 1}
                         </ChakraLink>
                     </Badge>
@@ -65,7 +67,7 @@ const Pagination = (props: PaginationProps) => {
                     <Badge m={1}
                            colorScheme='blue'
                            bgColor={props.page === toPaginationPage(props.page) + 1 ? 'orange.200' : ''}>
-                        <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) + 2)}`}>
+                        <ChakraLink as={Link} href={`?page=${(toPaginationPage(props.page) + 2)}`}>
                             {toPaginationPage(props.page) + 2}
                         </ChakraLink>
                     </Badge>
@@ -73,21 +75,21 @@ const Pagination = (props: PaginationProps) => {
                     <Badge m={1}
                            colorScheme='blue'
                            bgColor={props.page === toPaginationPage(props.page) + 2 ? 'orange.200' : ''}>
-                        <ChakraLink as={ReactRouterLink} to={`?page=${(toPaginationPage(props.page) + 3)}`}>
+                        <ChakraLink as={Link} href={`?page=${(toPaginationPage(props.page) + 3)}`}>
                             {toPaginationPage(props.page) + 3}
                         </ChakraLink>
                     </Badge>
                 }
                     <Badge m={1} colorScheme={props.page >= props.totalPages - 1 ? 'gray' : 'blue'}>
                         <Flex direction='column' justifyContent='center' h='100%'>
-                            <ChakraLink as={ReactRouterLink} to={`?page=${props.page + 2}`}>
+                            <ChakraLink as={Link} href={`?page=${props.page + 2}`}>
                                 <BsChevronLeft />
                             </ChakraLink>
                         </Flex>
                     </Badge>
                     <Badge m={1} colorScheme={props.page >= props.totalPages - 1 ? 'gray' : 'blue'}>
                         <Flex direction='column' justifyContent='center' h='100%'>
-                            <ChakraLink as={ReactRouterLink} to={`?page=${props.totalPages}`}>
+                            <ChakraLink as={Link} href={`?page=${props.totalPages}`}>
                                 <BsChevronDoubleLeft />
                             </ChakraLink>
                         </Flex>

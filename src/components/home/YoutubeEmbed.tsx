@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React from "react";
 import './YoutubeEmbed.css'
 
 interface YoutubeProps {
@@ -7,18 +7,7 @@ interface YoutubeProps {
     customBorder?: boolean;
 }
 
-class YoutubeEmbed extends Component<YoutubeProps> {
-    private readonly embedID: string;
-    private readonly className: string;
-    private readonly customBorder: boolean;
-
-    constructor(props: YoutubeProps) {
-        super(props);
-        this.embedID = props.embedID;
-        this.className = (props.className) ? props.className : '';
-        this.customBorder = props.customBorder as boolean;
-    }
-
+const YoutubeEmbed = ({ embedID, className = '', customBorder = false }: YoutubeProps) => {
     /* TODO: get oEmbed info from https://youtube.com/oembed?url=<videourl>&format=json */
 
     /* for example:
@@ -38,22 +27,25 @@ class YoutubeEmbed extends Component<YoutubeProps> {
         thumbnail_height: 360
      }
      */
-    render() {
-        /* TODO: should we care about wmode=opaque? */
-        let youtubeURL = new URL(`https://www.youtube-nocookie.com/embed/${this.embedID}`)
-        let youtubeURLParams = new URLSearchParams({
-            'loop': '0',
-            'controls': '1',
-            'mute': '0'
-        });
-        youtubeURL = new URL(`${youtubeURL.origin}${youtubeURL.pathname}?${youtubeURLParams.toString()}`)
-        return (<iframe className={this.className + ((this.customBorder) ? '' : ' no-border')}
-                        allowFullScreen
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        title="Test Title"
-                        src={youtubeURL.href}/>
-        );
-    }
+
+    /* TODO: should we care about wmode=opaque? */
+    let youtubeURL = new URL(`https://www.youtube-nocookie.com/embed/${embedID}`)
+    let youtubeURLParams = new URLSearchParams({
+        'loop': '0',
+        'controls': '1',
+        'mute': '0'
+    });
+    youtubeURL = new URL(`${youtubeURL.origin}${youtubeURL.pathname}?${youtubeURLParams.toString()}`)
+
+    return (
+        <iframe
+            className={className + (customBorder ? '' : ' no-border')}
+            allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            title="Test Title"
+            src={youtubeURL.href}
+        />
+    );
 }
 
 export default YoutubeEmbed;

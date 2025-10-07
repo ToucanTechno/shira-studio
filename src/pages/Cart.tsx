@@ -1,3 +1,6 @@
+
+'use client'
+
 import {
     Flex, Heading,
     Table, TableContainer, Tbody, Td, Tr, Th, Thead,
@@ -11,19 +14,29 @@ import {ICartModel} from "../models/CartModel";
 import CartOrder from "./CartOrder";
 import {BsCartDash} from "react-icons/bs";
 import {CartContext} from "../services/CartContext";
-import {useNavigate} from "react-router";
+import { useRouter } from "next/navigation";
+import { logger } from "../utils/logger";
 
 const Cart = () => {
+    logger.component('Cart', 'Component render start');
+    
     const [cart, setCart] = useState<ICartModel | null>(null);
     const { api, guestData } = useContext(AuthContext);
     const { tryLockCart } = useContext(CartContext);
+    
+    logger.component('Cart', 'Current state', {
+        hasCart: !!cart,
+        cartProductCount: cart ? Object.keys(cart.products).length : 0,
+        guestDataCartID: guestData.cartID
+    });
+    
     const alertToast = useToast({
         status: 'error',
         isClosable: true,
         position: 'top'
     });
     const [isInLockProcess, setIsInLockProcess] = useState(false);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const totalPrice = useMemo(() => {
         if (!cart) {
@@ -36,13 +49,28 @@ const Cart = () => {
     }, [cart]);
 
     useEffect(() => {
+        logger.component('Cart', 'useEffect triggered', {
+            hasCartID: !!guestData.cartID,
+            cartID: guestData.cartID
+        });
+        
         if (guestData.cartID) {
-            console.log('Reloading cart...')
-            api.get(`/cart/${guestData.cartID}`).then(response => {
-                setCart(response.data);
-            }).catch(error => {
-                console.log("error:", error);
-            })
+            logger.component('Cart', 'Fetching cart from API', guestData.cartID);
+            
+            api.get(`/cart/${guestData.cartID}`)
+                .then(response => {
+                    logger.component('Cart', 'Cart fetched successfully', {
+                        cartID: response.data._id,
+                        productCount: Object.keys(response.data.products).length
+                    });
+                    logger.state('Cart', 'cart', cart, response.data);
+                    setCart(response.data);
+                })
+                .catch(error => {
+                    logger.error('Cart', 'Failed to fetch cart:', error);
+                });
+        } else {
+            logger.component('Cart', 'No cartID - skipping fetch');
         }
     }, [api, guestData.cartID]);
 
@@ -114,12 +142,21 @@ const Cart = () => {
     }, [handleItemCountChange]);
 
     if (!cart || Object.keys(cart.products).length === 0) {
+        logger.component('Cart', 'Rendering empty cart message', {
+            hasCart: !!cart,
+            productCount: cart ? Object.keys(cart.products).length : 0
+        });
         return (
             <Center>
-                    <Heading as='h2'>עגלת הקניות ריקה<Icon ms={3} boxSize='.7em' as={BsCartDash}/></Heading>
+                <Heading as='h2'>עגלת הקניות ריקה<Icon ms={3} boxSize='.7em' as={BsCartDash}/></Heading>
             </Center>
         );
     }
+    
+    logger.component('Cart', 'Rendering cart with products', {
+        productCount: Object.keys(cart.products).length,
+        totalPrice
+    });
     return (
         <Flex direction='column' align='center' w={['100%', '100%', '80%']} alignSelf='center'>
             <Heading as='h1' p={2}>עגלת קניות</Heading>
@@ -174,7 +211,7 @@ const Cart = () => {
                     </Tbody>
                 </Table>
             </TableContainer>
-            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart} navigate={navigate}/>
+            <CartOrder totalPrice={totalPrice} cartID={guestData.cartID} cart={cart} setCart={setCart} navigate={router}/>
         </Flex>
     );
 };

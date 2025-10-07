@@ -1,19 +1,20 @@
-import {useNavigate, Navigate, useLocation, useParams} from "react-router";
+import { useRouter, useParams } from "next/navigation";
 import {useEffect} from "react";
 import {useConst} from "@chakra-ui/react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 
 const AdminProductsDelete = () => {
-    let navigate = useNavigate();
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    const { id } = useParams();
+    const router = useRouter();
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const params = useParams();
+    const id = params?.id;
     useEffect(() => {
 
         console.log(id);
-        api.delete('products/' + id).then(res => {
+        api.delete('products/' + id).then((res: any) => {
             console.log(res);
-        }).catch(error => console.error(error));
-        navigate(-1)
+        }).catch((error: any) => console.error(error));
+        router.back();
     });
     return (
         <></>

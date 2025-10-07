@@ -10,9 +10,8 @@ import {
 } from "@chakra-ui/react";
 import {ICategory} from "../../../backend/src/models/Category.js";
 import React, {ChangeEvent, useEffect, useState} from "react";
-import {Form} from "react-router";
 import Select, {SingleValue} from "react-select";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import {SelectOption} from "../../utils/ChakraTypes";
 
 interface CategoriesAddProps {
@@ -29,7 +28,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
         useState<string>("");
     const [parent, setParent] =
         useState<SelectOption | null>({value: '', label: '-'})
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     // Close add category if starting to edit another category
     useEffect(() => {
@@ -53,11 +52,11 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
             parent: parent?.value
         };
         console.log("update: ", update);
-        api.post('categories', update).then(res => {
+        api.post('categories', update).then((res: any) => {
             console.log(res);
             onToggle();
             props.onAdd();
-        }).catch(error => console.error(error));
+        }).catch((error: any) => console.error(error));
     }
 
     return (
@@ -70,21 +69,10 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                        transition={{ exit: { delay: .5, duration: .5 }, enter: { delay: .5, duration: .5 } }}
                        style={{overflow: 'visible'}}>
                 <Box my='2' p='2' bg='gray.100' rounded='md'>
-                    <Form onSubmit={handleAddCategory}>
+                    <form onSubmit={handleAddCategory}>
                         <Flex direction='row'>
                             <FormControl me={2}>
-                                <FormLabel htmlFor='categoryText'>שם הקטגוריה</FormLabel>
-                                <Input type='text'
-                                       bgColor='white'
-                                       name='categoryText'
-                                       required
-                                       value={text}
-                                       onChange={(el: ChangeEvent<HTMLInputElement>) => {
-                                        console.log(el);
-                                        setText(el.target.value)}}/>
-                            </FormControl>
-                            <FormControl me={2}>
-                                <FormLabel htmlFor='categoryName'>שם הקטגוריה באנגלית</FormLabel>
+                                <FormLabel htmlFor='categoryName'>שם כתובת (באנגלית)</FormLabel>
                                 <Input type='text'
                                        bgColor='white'
                                        name='categoryName'
@@ -93,6 +81,17 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                                        onChange={(el: ChangeEvent<HTMLInputElement>) => {
                                         console.log(el);
                                         setName(el.target.value)}}/>
+                            </FormControl>
+                            <FormControl me={2}>
+                                <FormLabel htmlFor='categoryText'>שם תצוגה (בעברית)</FormLabel>
+                                <Input type='text'
+                                       bgColor='white'
+                                       name='categoryText'
+                                       required
+                                       value={text}
+                                       onChange={(el: ChangeEvent<HTMLInputElement>) => {
+                                        console.log(el);
+                                        setText(el.target.value)}}/>
                             </FormControl>
                             <FormControl me={5}>
                                 <FormLabel htmlFor='parent'>קטגוריית אב</FormLabel>
@@ -115,7 +114,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                             </Button>
                             <CloseButton onClick={onToggle}/>
                         </Flex>
-                    </Form>
+                    </form>
                 </Box>
             </Collapse>
         </Box>

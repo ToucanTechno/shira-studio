@@ -1,11 +1,13 @@
 import express from "express";
-import { changeProducts, getAllCategories, getCategoryByParent, insertCategory } from "../controllers/categoryController";
+import { changeProducts, getAllCategories, getCategoryByParent, getCategoryByName, insertCategory } from "../controllers/categoryController";
 
 export const categoryRoutes = express.Router();
 
 categoryRoutes.get('/',getAllCategories);
 
 categoryRoutes.get('/parent/:name', getCategoryByParent);
+
+categoryRoutes.get('/name/:name', getCategoryByName);
 
 // TODO: add text field when editing/inserting a category
 categoryRoutes.post('/', insertCategory);

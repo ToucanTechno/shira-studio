@@ -71,6 +71,24 @@ export const getCategoryByParent = async (req: Request, res: Response) => {
     res.status(200).send(categories);
 }
 
+// Get category info by name without populating products (more efficient)
+export const getCategoryByName = async (req: Request, res: Response) => {
+    const name = req.params['name'];
+    const err = await RequestValidator.validate(
+        [{name:'name',validationFuncs:[isMissingField.bind(null,name)]}]
+    )
+    if(err){
+        err.send(res)
+        return
+    }
+    const category = await Category.findOne({name: name}).select('-__v -products');
+    if(!category){
+        res.status(404).send({message: `Category with name "${name}" not found`});
+        return;
+    }
+    res.status(200).send(category);
+}
+
 async function changeProductsLogic(addAction:boolean, products:Array<ObjectId>, categoryObj: mongoose.Document<unknown, {}, ICategory> & ICategory ){
     const promiseArr = []
     if(addAction){
