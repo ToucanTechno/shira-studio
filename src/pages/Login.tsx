@@ -1,9 +1,9 @@
 import {useCallback, useEffect, useState} from "react";
-import { Form } from "react-router";
 import {Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, Input, useConst} from "@chakra-ui/react";
 import axios, {AxiosInstance} from "axios";
 import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
-import { Link as ReactRouterLink, useNavigate } from 'react-router'
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Link as ChakraLink } from '@chakra-ui/react'
 import UserProfile from '../components/UserProfile';
 
@@ -17,7 +17,7 @@ const Login = (props: any) => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const handleEmailChange = (e: any) => setEmail(e.target.value);
     const handlePasswordChange = (e: any) => setPassword(e.target.value);
@@ -61,8 +61,8 @@ const Login = (props: any) => {
     const handleLogout = useCallback(() => {
         localStorage.removeItem('authToken');
         setCurrentUser(null);
-        navigate('/');
-    }, [navigate]);
+        router.push('/');
+    }, [router]);
 
     useEffect(() => {
         setEmailError(isEmailValidUI(email) ? '' : 'Invalid email address');
@@ -114,17 +114,17 @@ const Login = (props: any) => {
 
                 // Check if user is admin
                 if (decodedToken.role === 'admin') {
-                    navigate('/control-panel');
+                    router.push('/control-panel');
                 } else {
                     // Redirect regular users to a different page (e.g., dashboard or home)
-                    navigate('/profile'); // or wherever non-admin users should go
+                    router.push('/profile'); // or wherever non-admin users should go
                 }
             } else {
                 setPasswordError('Invalid token received.');
             }
         }
         setLoading(false);
-    }, [api, email, password, emailError, passwordError, navigate])
+    }, [api, email, password, emailError, passwordError, router])
 
     // Show loading while checking authentication
     if (checkingAuth) {
@@ -140,7 +140,7 @@ const Login = (props: any) => {
     return (
         <Box className="login-container">
             <Heading as="h2">Login</Heading>
-            <Form>
+            <form>
                 <FormControl isRequired isInvalid={email !== '' && emailError !== ''}>
                     <FormLabel>Email</FormLabel>
                     <Input
@@ -173,11 +173,11 @@ const Login = (props: any) => {
                         my={3}
                         onClick={handleLogin}
                         isDisabled={!isFormValid}>Login</Button>
-                <ChakraLink as={ReactRouterLink}
+                <ChakraLink as={Link}
                             color='blue.400'
                             fontSize='md'
-                            to='/register'>Register</ChakraLink>
-            </Form>
+                            href='/register'>Register</ChakraLink>
+            </form>
         </Box>
     );
 }

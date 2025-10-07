@@ -1,40 +1,21 @@
 import React from "react";
-import {Route, Routes, useLocation} from "react-router";
-import PanelLogin from "./PanelLogin";
-import AdminStatistics from "./AdminStatistics";
-import RequireAuth from "../../utils/RequireAuth";
+import { usePathname } from "next/navigation";
 import {AuthProvider} from "../../services/AuthContext";
-import AdminCategories from "./AdminCategories";
-import AdminProducts from "./AdminProducts";
-import AdminOrders from "./AdminOrders";
-import AdminUsers from "./AdminUsers";
 import './PanelApp.css';
-import AdminProductsEdit from "./AdminProductsEdit";
-import AdminProductsDelete from "./AdminProductsDelete";
 import TopAdminNavbar from "./TopAdminNavbar";
-import AdminCategoriesDelete from "./AdminCategoriesDelete";
 
-const PanelApp = () => {
-    const { pathname } = useLocation();
+// Note: This component is no longer needed with Next.js file-based routing
+// The routing is now handled by the app/control-panel directory structure
+// This file is kept for reference but should be removed once migration is complete
+
+const PanelApp = ({ children }: { children: React.ReactNode }) => {
+    const pathname = usePathname();
     return (
         <AuthProvider>
-            {!pathname.startsWith("/control-panel/login") &&
+            {!pathname?.startsWith("/control-panel/login") &&
             <TopAdminNavbar/>
             }
-            <Routes>
-                <Route element={<RequireAuth/>}>
-                    <Route path="/" element={<AdminStatistics/>}/>
-                    <Route path="/categories" element={<AdminCategories/>}/>
-                    <Route path="/categories/:id/delete" element={<AdminCategoriesDelete/>}/>
-                    <Route path="/products" element={<AdminProducts/>}/>
-                    <Route path="/products/add" element={<AdminProductsEdit/>}/>
-                    <Route path="/products/:id/edit" element={<AdminProductsEdit/>}/>
-                    <Route path="/products/:id/delete" element={<AdminProductsDelete/>}/>
-                    <Route path="/orders" element={<AdminOrders/>}/>
-                    <Route path="/users" element={<AdminUsers/>}/>
-                </Route>
-                <Route path="/login" element={<PanelLogin/>}/>
-            </Routes>
+            {children}
         </AuthProvider>
 )
 };

@@ -1,9 +1,8 @@
 import {useCallback, useEffect, useState} from "react";
-import { Form } from "react-router";
 import {Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, Input, useConst} from "@chakra-ui/react";
 import axios, {AxiosInstance} from "axios";
 import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
-import { Link as ReactRouterLink } from 'react-router'
+import Link from 'next/link';
 import { Link as ChakraLink } from '@chakra-ui/react'
 
 const Register = (props: any) => {
@@ -67,7 +66,7 @@ const Register = (props: any) => {
     return (
         <Box className="login-container">
             <Heading as="h2">Register</Heading>
-            <Form>
+            <form>
                 <FormControl isRequired isInvalid={email !== '' && emailError !== ''}>
                     <FormLabel>Email</FormLabel>
                     <Input
@@ -112,12 +111,12 @@ const Register = (props: any) => {
                         onClick={handleRegister}
                         tabIndex={0}
                         isDisabled={!isFormValid}>Register</Button>
-                <ChakraLink as={ReactRouterLink}
+                <ChakraLink as={Link}
                             color='blue.400'
                             fontSize='md'
                             tabIndex={0}
-                            to='/login'>Login</ChakraLink>
-            </Form>
+                            href='/login'>Login</ChakraLink>
+            </form>
         </Box>
     );
 }

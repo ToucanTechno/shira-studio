@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
-import {useNavigate} from "react-router";
+import {useRouter} from "next/navigation";
 import "./PanelLogin.css"
 import {AuthContext} from "../../services/AuthContext";
 
@@ -10,7 +10,7 @@ const PanelLogin = (props: any) => {
     const [passwordError, setPasswordError] = useState('')
     const [loginError, setLoginError] = useState('')
     const { authTokens, setAuthTokens} = useContext(AuthContext)
-    const navigate = useNavigate()
+    const router = useRouter()
 
     // Call the server API to check if the given email ID already exists
     const initiateLogin = useCallback((processLoginResult: (accountData: any) => void) => {
@@ -59,8 +59,8 @@ const PanelLogin = (props: any) => {
         localStorage.setItem('authTokens', token);
         // console.log("navigate", localStorage.getItem("authTokens"));
         setAuthTokens(token);
-        navigate('/control-panel/');
-    }, [navigate, setAuthTokens]);
+        router.push('/control-panel/');
+    }, [router, setAuthTokens]);
 
     const onLogin = useCallback(() => {
         // Reset error messages
@@ -131,9 +131,9 @@ const PanelLogin = (props: any) => {
     useEffect(() => {
         if (authTokens) {
             // console.log("Redirecting back to control-panel with user:", user);
-            navigate('/control-panel/');
+            router.push('/control-panel/');
         }
-    }, [navigate, authTokens]);
+    }, [router, authTokens]);
 
     return (
         <div className="login-container">

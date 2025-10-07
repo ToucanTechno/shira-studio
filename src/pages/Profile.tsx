@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, useConst } from '@chakra-ui/react';
-import { useNavigate } from 'react-router';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import UserProfile from '../components/UserProfile';
 
 const Profile = () => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
-    const navigate = useNavigate();
+    const router = useRouter();
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     // Function to decode JWT token (same as in Login)
@@ -59,31 +59,31 @@ const Profile = () => {
                         } else {
                             // Failed to fetch user details, redirect to login
                             localStorage.removeItem('authToken');
-                            navigate('/login');
+                            router.push('/login');
                         }
                     } else {
                         // Token expired, remove it and redirect to login
                         localStorage.removeItem('authToken');
-                        navigate('/login');
+                        router.push('/login');
                     }
                 } else {
                     // Invalid token, redirect to login
-                    navigate('/login');
+                    router.push('/login');
                 }
             } else {
                 // No token, redirect to login
-                navigate('/login');
+                router.push('/login');
             }
             setCheckingAuth(false);
         };
 
         checkAuth();
-    }, [navigate, decodeToken, fetchUserDetails]);
+    }, [router, decodeToken, fetchUserDetails]);
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('authToken');
-        navigate('/login');
-    }, [navigate]);
+        router.push('/login');
+    }, [router]);
 
     // Show loading while checking authentication
     if (checkingAuth) {

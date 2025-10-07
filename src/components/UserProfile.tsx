@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Text, VStack, HStack, Avatar, useColorModeValue } from '@chakra-ui/react';
-import { useNavigate } from 'react-router';
+import { useRouter } from 'next/navigation';
 
 interface UserProfileProps {
     user: {
@@ -13,13 +13,13 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ user, onLogout }) => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const bgColor = useColorModeValue('gray.50', 'gray.700');
     const borderColor = useColorModeValue('gray.200', 'gray.600');
 
     const handleAdminPanel = () => {
         if (user.role === 'admin') {
-            navigate('/control-panel');
+            router.push('/control-panel');
         }
     };
 
