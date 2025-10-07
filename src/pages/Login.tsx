@@ -1,3 +1,5 @@
+'use client'
+
 import {useCallback, useEffect, useState} from "react";
 import {Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, Input, useConst} from "@chakra-ui/react";
 import axios, {AxiosInstance} from "axios";

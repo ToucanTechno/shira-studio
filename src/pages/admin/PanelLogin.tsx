@@ -1,3 +1,5 @@
+'use client'
+
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import "./PanelLogin.css"

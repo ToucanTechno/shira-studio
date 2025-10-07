@@ -1,6 +1,8 @@
+'use client'
+
 import {useCallback, useEffect, useState} from "react";
 import {Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, Input, useConst} from "@chakra-ui/react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import Link from 'next/link';
 import { Link as ChakraLink } from '@chakra-ui/react'
@@ -14,7 +16,7 @@ const Register = (props: any) => {
     const [repeatPasswordError, setRepeatPasswordError] = useState('');
     const [loading, setLoading] = useState<boolean>(false);
     const [isFormValid, setIsFormValid] = useState(false);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     const handleEmailChange = (e: any) => setEmail(e.target.value);
     const handlePasswordChange = (e: any) => setPassword(e.target.value);
@@ -45,18 +47,20 @@ const Register = (props: any) => {
             return;
         }
         setLoading(true);
-        const response = await api.post('auth/',
-            { user_name: email, email, password, role: 'user' }).catch(err => {
+        try {
+            const response = await api.post('auth/',
+                { user_name: email, email, password, role: 'user' });
+
+            console.log(response);
+            if (response && response.data && (response.data as any).message === 'User registered successfully.') {
+                // TODO: Login with this user and redirect to last page (or home if no last page was set)
+            }
+        } catch (err: any) {
             setRepeatPasswordError('Unknown error.')
             console.error(err);
+        } finally {
             setLoading(false);
-        });
-
-        console.log(response);
-        if (response && response.data && response.data.message === 'User registered successfully.') {
-            // TODO: Login with this user and redirect to last page (or home if no last page was set)
         }
-        setLoading(false);
     }, [api, email, password, emailError, passwordError]);
 
     const handleRepeatPasswordChange = useCallback((e: any) => {

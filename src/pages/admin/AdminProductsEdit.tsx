@@ -1,3 +1,5 @@
+'use client'
+
 import { useRouter, useParams } from "next/navigation";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct} from "../../models/Product";

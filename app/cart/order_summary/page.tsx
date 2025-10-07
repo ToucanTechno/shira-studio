@@ -1,4 +1,4 @@
-import OrderSummary from '../../src/pages/OrderSummary'
+import OrderSummary from '@/pages/OrderSummary'
 
 export default function OrderSummaryPage() {
     return <OrderSummary />

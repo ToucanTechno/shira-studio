@@ -1,7 +1,14 @@
+'use client'
+
 import {useCallback, useRef, useState} from "react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import {IProduct} from "../models/Product";
 import {useConst} from "@chakra-ui/react";
+
+interface ApiResponse {
+    products: IProduct[];
+    total: number;
+}
 
 export interface UseInfiniteScroll {
     isLoading: boolean;
@@ -18,32 +25,34 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
     const [hasDynamicProducts, setHasDynamicProducts] = useState(false);
     const [dynamicProducts, setDynamicProducts] = useState<IProduct[]>(products);
     const [isLastPage, setIsLastPage] = useState(false);
-    const observerRef = useRef<IntersectionObserver>();
+    const observerRef = useRef<IntersectionObserver | undefined>(undefined);
     const loadMoreTimeout: NodeJS.Timeout = setTimeout(() => null, 500);
     const loadMoreTimeoutRef = useRef<NodeJS.Timeout>(loadMoreTimeout);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     const getInitialProducts = useCallback(() => {
         const url = categoryName
             ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
             : `products?skip=${10 * (page - 1)}&limit=10`;
-        api.get(url).then((resp: any) => {
-            setPage(page + 1);
-            const newProducts = resp?.data["products"];
+        api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
+            setPage(prevPage => prevPage + 1);
+            const newProducts = resp?.data?.products;
             console.log(resp);
 
             if (newProducts?.length) {
-                const newDynamicProducts = [...dynamicProducts, ...newProducts];
-                setDynamicProducts(newDynamicProducts);
-                setIsLastPage(newDynamicProducts?.length === resp?.data["total"]);
+                setDynamicProducts(prevProducts => {
+                    const newDynamicProducts = [...prevProducts, ...newProducts];
+                    setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
+                    return newDynamicProducts;
+                });
                 setHasDynamicProducts(true);
                 setIsLoading(false);
             }
         });
-    }, [api]);
+    }, [api, categoryName, page]);
 
     const handleObserver = useCallback(
-        (entries: any[]) => {
+        (entries: IntersectionObserverEntry[]) => {
             const target = entries[0];
             if (target.isIntersecting) {
                 setIsLoading(true);
@@ -55,15 +64,17 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                     const url = categoryName
                         ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
                         : `products?skip=${10 * (page - 1)}&limit=10`;
-                    api.get(url).then((resp: any) => {
-                        setPage(page + 1);
-                        const newProducts = resp?.data["products"];
+                    api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
+                        setPage(prevPage => prevPage + 1);
+                        const newProducts = resp?.data?.products;
                         console.log(resp);
 
                         if (newProducts?.length) {
-                            const newDynamicProducts = [...dynamicProducts, ...newProducts];
-                            setDynamicProducts(newDynamicProducts);
-                            setIsLastPage(newDynamicProducts?.length === resp?.data["total"]);
+                            setDynamicProducts(prevProducts => {
+                                const newDynamicProducts = [...prevProducts, ...newProducts];
+                                setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
+                                return newDynamicProducts;
+                            });
                             setHasDynamicProducts(true);
                             setIsLoading(false);
                         }
@@ -71,7 +82,7 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                 }, 500);
             }
         },
-        [loadMoreTimeoutRef, setIsLoading, page, dynamicProducts]
+        [loadMoreTimeoutRef, setIsLoading, page, api, categoryName]
     );
 
     /*

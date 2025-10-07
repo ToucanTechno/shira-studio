@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "overrides": {
+    "inflight": "npm:@aashutoshrathi/inflight@^1.0.0",
+    "glob": "^10.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

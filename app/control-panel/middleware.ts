@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtDecode } from 'jwt-decode'
 
+interface DecodedUser {
+  role?: string;
+  exp?: number;
+}
+
 export function middleware(request: NextRequest) {
   const authTokens = request.cookies.get('authTokens')?.value
 
@@ -16,7 +21,7 @@ export function middleware(request: NextRequest) {
   }
 
   try {
-    const decodedUser: any = jwtDecode(authTokens)
+    const decodedUser = jwtDecode<DecodedUser>(authTokens)
     
     // Check if user is admin
     if (!decodedUser || decodedUser.role !== 'admin') {

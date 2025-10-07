@@ -1,3 +1,5 @@
+'use client'
+
 import {
     Button, Card, Center, Collapse, Fade,
     Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Radio, RadioGroup, Spacer,
