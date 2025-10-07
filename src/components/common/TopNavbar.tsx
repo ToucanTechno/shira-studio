@@ -6,21 +6,24 @@ import { BsFacebook, BsInstagram, BsBasket3, BsFillPersonFill, BsGlobe2, BsHouse
 import {ItemType} from "./MenuItem";
 import {Link, Icon, Flex, useConst, Box} from "@chakra-ui/react";
 import HoverMenuItem from "./HoverMenuItem";
-import axios, {AxiosInstance, AxiosResponse} from "axios";
+import axios from "axios";
 import { Tooltip } from '@chakra-ui/react'
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
 const TopNavbar = () => {
     const [navbar, setNavbar] = useState<ItemType[]>([]);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const api = useConst<any>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
-        let navbarSkeleton: {[key: string]: ItemType} = {
+        const navbarSkeleton: {[key: string]: ItemType} = {
                'home': {'name': 'home', 'link': '/', 'text': 'Home'},
                'about': {'name': 'about', 'link': '/about', 'text': 'About'},
         };
-        const promises: Promise<void | AxiosResponse<any, any>>[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const promises: Promise<void | any>[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         api.get(`/categories/parent/root`).then((response: any) => {
             const topCategories = response.data;
             for (const category of topCategories) {
@@ -29,8 +32,10 @@ const TopNavbar = () => {
                     link: `/categories/${category.name}`,
                     text: category.text
                 };
-                promises.push(api.get(`/categories/parent/${category.name}`).then((response) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                promises.push(api.get(`/categories/parent/${category.name}`).then((response: any) => {
                     if (response.data.length > 0) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         navbarSkeleton[category.name]['submenu'] = response.data.map((subcategory: any) => {
                             return {
                                 name: subcategory.name,
@@ -44,6 +49,7 @@ const TopNavbar = () => {
             Promise.all(promises).then(() => {
                 setNavbar(Object.values(navbarSkeleton));
             });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((error: any) => {
             // Handle any errors
             console.error(error);

@@ -1,9 +1,10 @@
-import Category from '../../../src/pages/Category'
+import Category from '@/pages/Category'
 
 interface CategoryPageProps {
-    params: { category: string }
+    params: Promise<{ category: string }>
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-    return <Category category={params.category} />
+export default async function CategoryPage({ params }: CategoryPageProps) {
+    const { category } = await params
+    return <Category category={category} />
 }

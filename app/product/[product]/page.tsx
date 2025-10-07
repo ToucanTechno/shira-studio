@@ -1,9 +1,5 @@
-import Product from '../../../src/pages/Product'
+import Product from '@/pages/Product'
 
-interface ProductPageProps {
-    params: { product: string }
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage() {
     return <Product />
 }

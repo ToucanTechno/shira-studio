@@ -7,6 +7,7 @@ import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import Link from 'next/link';
 import { Link as ChakraLink } from '@chakra-ui/react'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const Register = (props: any) => {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -18,7 +19,9 @@ const Register = (props: any) => {
     const [isFormValid, setIsFormValid] = useState(false);
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEmailChange = (e: any) => setEmail(e.target.value);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePasswordChange = (e: any) => setPassword(e.target.value);
 
     useEffect(() => {
@@ -52,9 +55,11 @@ const Register = (props: any) => {
                 { user_name: email, email, password, role: 'user' });
 
             console.log(response);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (response && response.data && (response.data as any).message === 'User registered successfully.') {
                 // TODO: Login with this user and redirect to last page (or home if no last page was set)
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             setRepeatPasswordError('Unknown error.')
             console.error(err);
@@ -63,6 +68,7 @@ const Register = (props: any) => {
         }
     }, [api, email, password, emailError, passwordError]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleRepeatPasswordChange = useCallback((e: any) => {
         setRepeatPassword(e.target.value);
     }, [setRepeatPassword]);

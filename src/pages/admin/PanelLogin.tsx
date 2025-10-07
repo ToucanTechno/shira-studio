@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import "./PanelLogin.css"
 import {AuthContext} from "../../services/AuthContext";
 
-const PanelLogin = (props: any) => {
+const PanelLogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [emailError, setEmailError] = useState('')
@@ -15,6 +15,7 @@ const PanelLogin = (props: any) => {
     const router = useRouter()
 
     // Call the server API to check if the given email ID already exists
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const initiateLogin = useCallback((processLoginResult: (accountData: any) => void) => {
         const apiUrl = 'http://127.0.0.1:3001/api/auth/admin/sign-in';
         console.log('Attempting admin login with:', { email, isAdmin: true, endpoint: apiUrl });
@@ -32,6 +33,7 @@ const PanelLogin = (props: any) => {
                     },
                     body: JSON.stringify({ email, password }),
                 })
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .then(async (res): Promise<[number, any]> => {
                     const status = res.status;
                     let data = {};
@@ -43,6 +45,7 @@ const PanelLogin = (props: any) => {
                     }
                     return [status, data];
                 })
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .then((loginResult: [number, any]) => {
                     console.log('Login response:', loginResult[0], loginResult[1]);
                     processLoginResult(loginResult);
@@ -104,7 +107,7 @@ const PanelLogin = (props: any) => {
             if (status === 200) {
                 logIn(loginData);
             } else if (status === 404) {
-                console.error('API endpoint not found:', apiUrl);
+                console.error('API endpoint not found');
                 setLoginError('Login failed: API endpoint not found. Please check if backend server is running and the URL is correct.');
             } else if (status === 401) {
                 setLoginError('Unauthorized: Admin access denied. Please check your credentials.');
@@ -117,6 +120,7 @@ const PanelLogin = (props: any) => {
         })
     }, [email, password, initiateLogin, logIn]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleUserKeyPress = useCallback((event: any) => {
         if (event.key === 'Enter') {
             onLogin();

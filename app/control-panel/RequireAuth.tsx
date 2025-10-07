@@ -23,6 +23,7 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const decodedUser: any = jwtDecode(authTokens)
       if (!decodedUser || decodedUser.role !== 'admin') {
         router.push('/control-panel/login')
@@ -44,10 +45,12 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const decodedUser: any = jwtDecode(authTokens)
     if (!decodedUser || decodedUser.role !== 'admin') {
       return null
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return null
   }

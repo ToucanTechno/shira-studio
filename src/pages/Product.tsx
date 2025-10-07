@@ -17,11 +17,11 @@ import {AuthContext} from "../services/AuthContext";
 import {CartContext} from "../services/CartContext";
 import {logger} from "../utils/logger";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const Product = (props: any) => {
     const [product, setProduct] = useState({} as IProduct);
     const [itemsCount, setItemsCount] = useState(0);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
-    const [lastAddedCount, setLastAddedCount] = useState(0);
     const params = useParams();
     const toast = useToast();
     // TODO: move all API calls to request context
@@ -29,24 +29,27 @@ const Product = (props: any) => {
     const { tryCreateCart, wrapUnlockLock, getProductCount } = useContext(CartContext)
 
     useEffect(() => {
-        api.get(`/products/${params.product}`).then((response: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        api.get(`/products/${params?.product}`).then((response: any) => {
             // Process the response data
             if (response.data.stock === 0) {
                 setItemsCount(0);
             }
             setProduct(response.data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((error: any) => {
                 // Handle any errors
                 logger.error(error);
             }
         );
         logger.log(guestData.cartID);
-        if (guestData.cartID) {
-            getProductCount(params.product).then((productCount) => {
+        if (guestData.cartID && params?.product) {
+            const productId = Array.isArray(params.product) ? params.product[0] : params.product;
+            getProductCount(productId).then((productCount) => {
                 setItemsCount(productCount);
             });
         }
-    }, [params.product, guestData.cartID, api, getProductCount]);
+    }, [params?.product, guestData.cartID, api, getProductCount]);
 
     const handleItemsCountChange = useCallback(async (_: string, newItemsCount: number) => {
         logger.log("ItemsCount: ", itemsCount, "New count:", newItemsCount);
@@ -80,7 +83,7 @@ const Product = (props: any) => {
                 logger.log('new items', newItemsCount, 'items', itemsCount, 'amounttochange', amountToChange);
                 if (amountToChange !== 0) {
                     // Extract product ID properly from params - ensure it's a string
-                    const productId = Array.isArray(params.product) ? params.product[0] : params.product;
+                    const productId = Array.isArray(params?.product) ? params.product[0] : params?.product;
 
                     logger.log('=== API REQUEST DEBUG ===');
                     logger.log('Cart ID:', cartID);
@@ -96,7 +99,6 @@ const Product = (props: any) => {
                         .then(response => {
                             logger.log(`API success response:`, response);
                             setItemsCount(newItemsCount);
-                            setLastAddedCount(newItemsCount);
                             setIsAddingToCart(false);
 
                             toast({
@@ -140,6 +142,7 @@ const Product = (props: any) => {
                     return Promise.resolve(); // Return resolved promise for consistency
                 }
             });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch(error: any) {
             logger.error("=== WRAPPER ERROR DEBUG ===");
             logger.error('Full wrapper error:', error);
@@ -165,7 +168,7 @@ const Product = (props: any) => {
                 isClosable: true,
             });
         }
-    }, [api, itemsCount, params.product, tryCreateCart, wrapUnlockLock, guestData.cartID, product.name, toast]);
+    }, [api, itemsCount, params?.product, tryCreateCart, wrapUnlockLock, guestData.cartID, product.name, toast]);
 
     return (
         <Flex m={4} direction='column'>

@@ -1,4 +1,4 @@
-import About from '../../src/pages/About'
+import About from '@/pages/About.tsx'
 
 export default function AboutPage() {
     return <About />

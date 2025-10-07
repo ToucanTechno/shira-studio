@@ -7,6 +7,7 @@ import axios from 'axios';
 import UserProfile from '../components/UserProfile';
 
 const Profile = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const router = useRouter();
@@ -32,7 +33,8 @@ const Profile = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            return response.data.user;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return (response.data as any).user;
         } catch (error) {
             console.error('Error fetching user details:', error);
             return null;

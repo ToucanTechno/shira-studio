@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import './Footer.css'
-import {BsArrow90DegUp, BsX} from "react-icons/bs";
+import {BsArrow90DegUp} from "react-icons/bs";
 import {Box, Flex, Heading, Icon, Image, Container, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody} from "@chakra-ui/react";
 
 const Footer = () => {

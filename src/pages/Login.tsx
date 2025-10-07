@@ -2,26 +2,30 @@
 
 import {useCallback, useEffect, useState} from "react";
 import {Box, Button, FormControl, FormErrorMessage, FormLabel, Heading, Input, useConst} from "@chakra-ui/react";
-import axios, {AxiosInstance} from "axios";
+import axios from "axios";
 import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Link as ChakraLink } from '@chakra-ui/react'
 import UserProfile from '../components/UserProfile';
 
-const Login = (props: any) => {
+const Login = () => {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [loading, setLoading] = useState<boolean>(false);
     const [isFormValid, setIsFormValid] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
-    const api = useConst<AxiosInstance>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const api = useConst<any>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     const router = useRouter();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEmailChange = (e: any) => setEmail(e.target.value);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePasswordChange = (e: any) => setPassword(e.target.value);
 
     // Function to decode JWT token
@@ -85,7 +89,8 @@ const Login = (props: any) => {
         }
         setLoading(true);
 
-        const response = await api.post('auth/sign-in/', { email, password }).catch(err => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await api.post('auth/sign-in/', { email, password }).catch((err: any) => {
             if (err && err.response && err.response.data && err.response.data.message === 'Email invalid.') {
                 setPasswordError('User does not exist.');
             } else {

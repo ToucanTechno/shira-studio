@@ -57,7 +57,8 @@ const Cart = () => {
             logger.component('Cart', 'Fetching cart from API', guestData.cartID);
             
             api.get(`/cart/${guestData.cartID}`)
-                .then(response => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .then((response: any) => {
                     logger.component('Cart', 'Cart fetched successfully', {
                         cartID: response.data._id,
                         productCount: Object.keys(response.data.products).length
@@ -71,7 +72,7 @@ const Cart = () => {
         } else {
             logger.component('Cart', 'No cartID - skipping fetch');
         }
-    }, [api, guestData.cartID]);
+    }, [api, cart, guestData.cartID]);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
         if (!cart) {
@@ -172,7 +173,7 @@ const Cart = () => {
                     </Thead>
                     <Tbody>
                         {cart && Object.keys(cart.products).map(productKey => {
-                            let item = cart.products[productKey];
+                            const item = cart.products[productKey];
                             return (
                                 <Tr key={item.product._id}>
                                     <Td><Image src='test.jpg' alt='test.jpg'/></Td>

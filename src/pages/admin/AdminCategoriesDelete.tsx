@@ -11,8 +11,10 @@ const AdminCategoriesDelete = () => {
     useEffect(() => {
 
         console.log(id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         api.delete('categories/' + id).then((res: any) => {
             console.log(res);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((error: any) => console.error(error));
         router.back();
     });

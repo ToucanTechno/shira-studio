@@ -1,12 +1,13 @@
-import ProductCategory from '../../../../src/pages/ProductCategory'
+import ProductCategory from '@/pages/ProductCategory'
 
 interface ProductCategoryPageProps {
-    params: {
+    params: Promise<{
         category: string
         productCategory: string
-    }
+    }>
 }
 
-export default function ProductCategoryPage({ params }: ProductCategoryPageProps) {
-    return <ProductCategory category={params.category} productCategory={params.productCategory} />
+export default async function ProductCategoryPage({ params }: ProductCategoryPageProps) {
+    const { category, productCategory } = await params
+    return <ProductCategory category={category} productCategory={productCategory} />
 }

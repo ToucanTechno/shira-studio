@@ -25,14 +25,15 @@ const AdminProducts = () => {
     const params = useSearchParams();  // TODO: add setPage
     const productsPerPage = 10;
     const router = useRouter();
-    let [products, setProducts] =
+    const [products, setProducts] =
         useState<ProductData>({total: 0, totalPages: 0, page: 0, products: []});
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
         const tmpPage = (params?.get('page') === null) ? 0 : parseInt(params?.get('page') as string) - 1
-        let skip = tmpPage * productsPerPage;
+        const skip = tmpPage * productsPerPage;
         api.get(`/products?skip=${skip}&limit=${productsPerPage}`)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .then((response: any) => {
                 // Process the response data
                 const totalPages = Math.floor((response.data.total + productsPerPage - 1) / productsPerPage);
@@ -43,6 +44,7 @@ const AdminProducts = () => {
                     products: response.data.products
                 });
             })
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .catch((error: any) => {
                 // Handle any errors
                 console.error(error);

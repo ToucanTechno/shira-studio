@@ -25,7 +25,9 @@ export default function AdminLoginPage() {
   const { api, authTokens, setAuthTokens } = useContext(AuthContext)
   const router = useRouter()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEmailChange = (e: any) => setEmail(e.target.value)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePasswordChange = (e: any) => setPassword(e.target.value)
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function AdminLoginPage() {
   useEffect(() => {
     if (authTokens) {
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const decodedUser: any = jwtDecode(authTokens)
         if (decodedUser && decodedUser.role === 'admin') {
           router.push('/control-panel/')
@@ -60,7 +63,12 @@ export default function AdminLoginPage() {
     }
     setLoading(true)
 
-    const response = await api.post('auth/admin/sign-in/', { email, password }).catch((err: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let response: any
+    try {
+      response = await api.post('auth/admin/sign-in/', { email, password })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       if (err && err.response && err.response.data) {
         if (err.response.data.message === 'Email invalid.') {
           setPasswordError('Admin user does not exist.')
@@ -76,13 +84,15 @@ export default function AdminLoginPage() {
       }
       console.error(err)
       setLoading(false)
-    })
+      return
+    }
 
     console.log(response)
     if (response && response.data && response.data.token) {
       const token = response.data.token
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const decodedToken: any = jwtDecode(token)
 
         if (decodedToken && decodedToken.role === 'admin') {

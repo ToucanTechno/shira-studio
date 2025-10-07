@@ -48,16 +48,18 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
 
     const handleAddCategory = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        let update = {
+        const update = {
             name: name,
             text: text,
             parent: parent?.value
         };
         console.log("update: ", update);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         api.post('categories', update).then((res: any) => {
             console.log(res);
             onToggle();
             props.onAdd();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((error: any) => console.error(error));
     }
 

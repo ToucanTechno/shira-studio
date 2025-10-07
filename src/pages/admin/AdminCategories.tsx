@@ -19,20 +19,21 @@ import Select, {SingleValue} from "react-select";
 import {SelectOption} from "../../utils/ChakraTypes";
 
 const AdminCategories = () => {
-    let [categories, setCategories] = useState<ICategory[]>([]);
-    let [dirty, setDirty] = useState(false);
-    let [editID, setEditID] = useState<string | null>(null);
-    let [editedName, setEditedName] = useState<string>("");
-    let [editedText, setEditedText] = useState<string>("");
-    let [editedParent, setEditedParent] = useState<SelectOption | null>(null);
+    const [categories, setCategories] = useState<ICategory[]>([]);
+    const [dirty, setDirty] = useState(false);
+    const [editID, setEditID] = useState<string | null>(null);
+    const [editedName, setEditedName] = useState<string>("");
+    const [editedText, setEditedText] = useState<string>("");
+    const [editedParent, setEditedParent] = useState<SelectOption | null>(null);
     const router = useRouter();
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
 
     useEffect(() => {
         (async () => {
             try {
-                let response = await api.get('/categories');
+                const response = await api.get('/categories');
                 setCategories(response.data as ICategory[]);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (error: any) {
                 console.error(error);
             }

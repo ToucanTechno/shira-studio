@@ -29,13 +29,13 @@ const YoutubeEmbed = ({ embedID, className = '', customBorder = false }: Youtube
      */
 
     /* TODO: should we care about wmode=opaque? */
-    let youtubeURL = new URL(`https://www.youtube-nocookie.com/embed/${embedID}`)
-    let youtubeURLParams = new URLSearchParams({
+    const youtubeURL = new URL(`https://www.youtube-nocookie.com/embed/${embedID}`)
+    const youtubeURLParams = new URLSearchParams({
         'loop': '0',
         'controls': '1',
         'mute': '0'
     });
-    youtubeURL = new URL(`${youtubeURL.origin}${youtubeURL.pathname}?${youtubeURLParams.toString()}`)
+    const finalURL = new URL(`${youtubeURL.origin}${youtubeURL.pathname}?${youtubeURLParams.toString()}`)
 
     return (
         <iframe
@@ -43,7 +43,7 @@ const YoutubeEmbed = ({ embedID, className = '', customBorder = false }: Youtube
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             title="Test Title"
-            src={youtubeURL.href}
+            src={finalURL.href}
         />
     );
 }

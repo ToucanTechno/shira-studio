@@ -53,10 +53,11 @@ const AdminProductsEdit = () => {
     const fetchProducts = useCallback(async () => {
         if (isEdit) {
             await api.get(`/products/${params['id']}`)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .then((response: any) => {
-                    let parsedCategories: SelectOption[] = [];
+                    const parsedCategories: SelectOption[] = [];
                     // Process the response data
-                    let productSkeleton: IProduct = response.data;
+                    const productSkeleton: IProduct = response.data;
                     if (productSkeleton.categories) {
                         for (const category of productSkeleton.categories) {
                             // TODO: replace label back to text when available
@@ -79,8 +80,9 @@ const AdminProductsEdit = () => {
                     setProduct(productSkeleton);
                 });
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await api.get(`/categories`).then((response: any) => {
-            let categoriesSkeleton: {[key: string]: ICategory} = {} ;
+            const categoriesSkeleton: {[key: string]: ICategory} = {} ;
             for (const category of response.data) {
                 categoriesSkeleton[category.name] = category;
             }
@@ -110,7 +112,7 @@ const AdminProductsEdit = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        let update = {
+        const update = {
             productID: productRefs.ID.current?.value,
             productName: productRefs.name.current?.value,
             categories: categoriesData.selected,
@@ -126,7 +128,7 @@ const AdminProductsEdit = () => {
         }
         // TODO: select categories
         console.log("update: ", update);
-        let updateEntry: IProduct = {
+        const updateEntry: IProduct = {
             product_id: update.productID as string,
             name: update.productName as string,
             categories: update.categories.map(category => category.value),  // saves us category update request
@@ -136,14 +138,14 @@ const AdminProductsEdit = () => {
             stock: parseInt(update.stock.toString())
         };
 
-        let updatePromises = [];
+        const updatePromises = [];
         if (isEdit) {
             const updateURL = `products/${params['id']}`;
-            let deletedCategories = new Set(categoriesData.old.map(el => el.name));
+            const deletedCategories = new Set(categoriesData.old.map(el => el.name));
             for (const el of update.categories) {
                 deletedCategories.delete(el.name);
             }
-            let addedCategories = new Set(update.categories.map(el => el.name));
+            const addedCategories = new Set(update.categories.map(el => el.name));
             for (const el of categoriesData.old) {
                 addedCategories.delete(el.name);
             }
@@ -160,7 +162,8 @@ const AdminProductsEdit = () => {
             }));
         } else {  // Adding product
             const updateURL = 'products/';
-            let addedCategories = update.categories.map(el => el.name);
+            const addedCategories = update.categories.map(el => el.name);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             updatePromises.push(api.post(updateURL, updateEntry).then((res: any) => {
                 const productID = res.data['id'];
                 api.put(`products/${productID}/categories`, {

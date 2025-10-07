@@ -17,6 +17,7 @@ interface FileUploadProps {
     name: string;
     placeholder?: string;
     acceptedFileTypes: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     children: any;
     isRequired: boolean;
     handleUpload: (files: FileList) => void;
@@ -48,7 +49,7 @@ export const FileUpload = ({ name,
         }
     };
 
-    const handleBrowseFile = (el: React.MouseEvent<HTMLInputElement>) => {
+    const handleBrowseFile = () => {
         if (inputRef.current) {
             inputRef.current.click();
         }

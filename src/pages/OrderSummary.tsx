@@ -20,8 +20,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const OrderSummary = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const orderId = searchParams.get('orderId');
-    const [orderDetails, setOrderDetails] = useState(null);
+    const orderId = searchParams?.get('orderId');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+    const [orderDetails, setOrderDetails] = useState<any>(null);
 
     useEffect(() => {
         if (orderId) {

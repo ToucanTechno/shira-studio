@@ -7,7 +7,7 @@ import {
     Wrap
 } from "@chakra-ui/react";
 import React, {
-    ChangeEvent, Dispatch, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState
+    ChangeEvent, Dispatch, FormEvent, useCallback, useContext, useMemo, useRef, useState
 } from "react";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { AuthContext } from "../services/AuthContext";
@@ -26,7 +26,7 @@ interface CartOrderProps {
 
 const CartOrder = (props: CartOrderProps) => {
     // TODO: need to save isOpen and the form details (encrypted in some way) in local storage
-    const { isOpen, onClose} = useDisclosure({ defaultIsOpen: true })
+    const { isOpen, onClose } = useDisclosure({ defaultIsOpen: true })
     const [email, setEmail] = useState<string>('');
     const isEmailValid = useMemo(() => isEmailValidUI(email), [email])
     const [firstName, setFirstName] = useState<string>('');

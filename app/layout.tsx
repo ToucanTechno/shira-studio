@@ -1,7 +1,7 @@
 'use client'
 
 import { Box } from '@chakra-ui/react'
-import TopNavbar from '../src/components/common/TopNavbar'
+import TopNavbar from '@/components/common/TopNavbar'
 import { Providers } from './providers'
 import './globals.css'
 import { usePathname } from 'next/navigation'

@@ -44,7 +44,8 @@ const AdminOrders = () => {
     const [ordersData, setOrdersData] = useState<TOrder[]>([]);
     const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
+    const columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ordersTable = useReactTable({data: ordersData, columns: columns.current, getCoreRowModel: getCoreRowModel()});
 
     useEffect(() => {
@@ -85,7 +86,7 @@ const AdminOrders = () => {
             try {
                 const dbOrders = await api.get<OrderResponse>('/orders');
                 console.log(dbOrders);
-                let orders: TOrder[] = [];
+                const orders: TOrder[] = [];
                 for (const order of dbOrders.data.orders) {
                     orders.push({
                         id: order._id,

@@ -14,19 +14,28 @@ class MockBroadcastChannel {
     this.channel = channel;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   postMessage(_message: any) {}
   close() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   addEventListener(_type: string, _listener: any) {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   removeEventListener(_type: string, _listener: any) {}
 }
 
 // Apply all necessary global mocks and polyfills
 // This must run before any imports that might use these APIs
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 global.BroadcastChannel = MockBroadcastChannel as any;
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+global.TextEncoder = TextEncoder as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+global.TextDecoder = TextDecoder as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 global.ReadableStream = PolyfillReadableStream as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 global.WritableStream = PolyfillWritableStream as any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 global.TransformStream = PolyfillTransformStream as any;
 
 // Mock window object for browser APIs
