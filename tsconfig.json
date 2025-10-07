@@ -27,7 +27,10 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -36,13 +39,15 @@
     "app/**/*.tsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "*.ts",
-    "*.tsx"
+    "next.config.mjs",
+    "eslint.config.js",
   ],
   "exclude": [
     "node_modules",
     ".next",
     "backend",
-    "backend/**/*"
+    "backend/**",
+    "**/backend/**",
+    "./backend/**"
   ]
 }

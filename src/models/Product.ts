@@ -1,9 +1,16 @@
-import {ICategory} from "../../backend/src/models/Category.js"
-import mongoose from 'mongoose';
+// Frontend type definitions - no backend imports allowed
+export interface ICategory {
+    name: string;
+    text: string;
+    parent: string;
+    products?: Array<string>;
+    _id?: string;
+}
+
 export interface IProduct {
     product_id: string;
     name: string;
-    categories: Array<ICategory | mongoose.Schema.Types.ObjectId | string>;
+    categories: Array<ICategory | string>;
     price: number;
     image_src: string;
     created?: Date;

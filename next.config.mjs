@@ -2,6 +2,15 @@
 const nextConfig = {
     reactStrictMode: true,
     pageExtensions: ['tsx', 'ts', 'jsx', 'js'].map(ext => `page.${ext}`),
+    typescript: {
+        // Skip type checking during build - Vercel was trying to check backend files
+        ignoreBuildErrors: false,
+        tsconfigPath: './tsconfig.json',
+    },
+    eslint: {
+        // Only run ESLint on specific directories during production builds
+        dirs: ['app', 'src'],
+    },
     async rewrites() {
         return [
             {

@@ -2,7 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {IProduct} from "../../models/Product";
+import {IProduct, ICategory} from "../../models/Product";
 import axios from "axios";
 import Select, { MultiValue } from 'react-select';
 import {
@@ -17,7 +17,6 @@ import {
     Textarea, useConst
 } from "@chakra-ui/react";
 import FileUpload from "../../components/common/FileUpload";
-import {ICategory} from "../../../backend/src/models/Category";
 import {StatusCodes} from "http-status-codes";
 
 interface SelectOption {

@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import React, {FormEvent, useEffect, useState} from "react";
 import axios from "axios";
-import {ICategory} from "../../../backend/src/models/Category";
+import {ICategory} from "../../models/Product";
 import { useRouter } from "next/navigation";
 import AdminCategoriesAdd from "./AdminCategoriesAdd";
 import Select, {SingleValue} from "react-select";
@@ -101,7 +101,7 @@ const AdminCategories = () => {
                                                 ).concat([{value: '', label: '-'}])} />
                                         </FormControl> :
                                         item.parent}</Td>
-                                    <Td>{item.products.length}</Td>
+                                    <Td>{item.products?.length ?? 0}</Td>
                                     <Td>
                                         {editID === null &&
                                             <>

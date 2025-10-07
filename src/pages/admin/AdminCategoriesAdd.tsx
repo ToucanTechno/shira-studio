@@ -10,7 +10,7 @@ import {
     Input, useConst,
     useDisclosure
 } from "@chakra-ui/react";
-import {ICategory} from "../../../backend/src/models/Category.js";
+import {ICategory} from "../../models/Product";
 import React, {ChangeEvent, useEffect, useState} from "react";
 import Select, {SingleValue} from "react-select";
 import axios from "axios";

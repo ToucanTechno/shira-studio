@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from 'axios'
-import { IProduct } from "../../models/Product";
+import { IProduct, ICategory } from "../../models/Product";
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Link as ChakraLink } from '@chakra-ui/react'
@@ -11,7 +11,6 @@ import {
     Table, TableContainer, Tbody, Td, Th, Thead, Tr,
     useConst
 } from "@chakra-ui/react";
-import {ICategory} from "../../../backend/src/models/Category";
 import Pagination from "../../components/common/Pagination";
 
 interface ProductData {
