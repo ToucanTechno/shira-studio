@@ -1,6 +1,6 @@
 'use client'
 
-import AdminUsers from '@/pages/admin/AdminUsers'
+import AdminUsers from '@/views/admin/AdminUsers'
 import RequireAuth from '../RequireAuth'
 
 export default function AdminUsersPage() {

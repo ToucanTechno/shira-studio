@@ -1,6 +1,6 @@
 'use client'
 
-import AdminCategories from '@/pages/admin/AdminCategories'
+import AdminCategories from '@/views/admin/AdminCategories'
 import RequireAuth from '../RequireAuth'
 
 export default function AdminCategoriesPage() {

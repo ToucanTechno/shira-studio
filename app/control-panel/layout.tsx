@@ -1,9 +1,9 @@
 'use client'
 
 import { AuthProvider } from '@/services/AuthContext'
-import TopAdminNavbar from '@/pages/admin/TopAdminNavbar'
+import TopAdminNavbar from '@/views/admin/TopAdminNavbar'
 import { usePathname } from 'next/navigation'
-import '@/pages/admin/PanelApp.css'
+import '@/views/admin/PanelApp.css'
 
 export default function ControlPanelLayout({
   children,

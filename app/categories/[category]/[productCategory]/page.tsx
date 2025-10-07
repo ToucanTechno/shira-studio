@@ -1,4 +1,4 @@
-import ProductCategory from '@/pages/ProductCategory'
+import ProductCategory from '@/views/ProductCategory'
 
 interface ProductCategoryPageProps {
     params: Promise<{

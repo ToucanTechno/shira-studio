@@ -1,6 +1,6 @@
 'use client'
 
-import AdminStatistics from '@/pages/admin/AdminStatistics'
+import AdminStatistics from '@/views/admin/AdminStatistics'
 import RequireAuth from './RequireAuth'
 
 export default function AdminStatisticsPage() {

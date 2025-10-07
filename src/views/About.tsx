@@ -1,7 +1,7 @@
 'use client'
 
 import React, {useState} from 'react';
-import '@/pages/About.css'
+import '@/views/About.css'
 import { BsFacebook, BsInstagram, BsFillEnvelopePaperFill, BsTrophy } from "react-icons/bs";
 import YoutubeEmbed from "@/components/home/YoutubeEmbed";
 import Footer from "@/components/common/Footer";

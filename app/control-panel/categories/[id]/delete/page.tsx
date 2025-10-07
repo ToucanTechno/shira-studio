@@ -1,6 +1,6 @@
 'use client'
 
-import AdminCategoriesDelete from '@/pages/admin/AdminCategoriesDelete'
+import AdminCategoriesDelete from '@/views/admin/AdminCategoriesDelete'
 import RequireAuth from '../../../RequireAuth'
 
 export default function AdminCategoriesDeletePage() {

@@ -1,4 +1,4 @@
-import Product from '@/pages/Product'
+import Product from '@/views/Product'
 
 export default function ProductPage() {
     return <Product />

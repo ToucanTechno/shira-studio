@@ -1,6 +1,6 @@
 'use client'
 
-import AdminOrders from '@/pages/admin/AdminOrders'
+import AdminOrders from '@/views/admin/AdminOrders'
 import RequireAuth from '../RequireAuth'
 
 export default function AdminOrdersPage() {

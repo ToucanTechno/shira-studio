@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import OrderSummary from '@/pages/OrderSummary'
+import OrderSummary from '@/views/OrderSummary'
 
 export default function OrderSummaryPage() {
     return (
