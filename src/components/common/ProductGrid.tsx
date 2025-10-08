@@ -33,22 +33,29 @@ export const ProductGrid = ({ categoryName, initialProducts = [] }: ProductGridP
     return (
         <Box>
             <SimpleGrid columns={[1, 2, 3, 4, 5]} spacing={4} className="gallery">
-                {dynamicProducts.map((product) => (
-                    <Flex direction='column' justifyContent='flex-start' alignItems='center' key={product._id}>
-                        <ChakraLink as={Link} href={"/product/" + product._id} width="100%">
-                            <Image
-                                objectFit='contain'
-                                w='100%'
-                                height={['250px', '220px', '200px', '180px', '160px']}
-                                src={product.image_src}
-                                alt={product.name}
-                            />
-                            {product.description}
-                        </ChakraLink>
-                        <Box className="price">{product.price}</Box>
-                        <Button className="cart-button">הוסף לסל</Button>
-                    </Flex>
-                ))}
+                {dynamicProducts.map((product) => {
+                    // Get the first image from the images array, or use a placeholder
+                    const firstImage = product.images && product.images.length > 0
+                        ? product.images.sort((a, b) => a.order - b.order)[0]
+                        : null;
+                    
+                    return (
+                        <Flex direction='column' justifyContent='flex-start' alignItems='center' key={product._id}>
+                            <ChakraLink as={Link} href={"/product/" + product._id} width="100%">
+                                <Image
+                                    objectFit='contain'
+                                    w='100%'
+                                    height={['250px', '220px', '200px', '180px', '160px']}
+                                    src={firstImage?.url || '/placeholder-image.jpg'}
+                                    alt={firstImage?.alt_text || product.name}
+                                />
+                                {product.description}
+                            </ChakraLink>
+                            <Box className="price">{product.price}</Box>
+                            <Button className="cart-button">הוסף לסל</Button>
+                        </Flex>
+                    );
+                })}
             </SimpleGrid>
 
             <Loader

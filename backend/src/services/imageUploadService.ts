@@ -1,5 +1,4 @@
-import cloudinary from '../config/cloudinary';
-import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 
 export interface ProductImage {
     url: string;
@@ -15,9 +14,18 @@ export interface UploadResult {
 }
 
 class ImageUploadService {
-    private readonly FOLDER = 'shira-studio/products';
+    private readonly FOLDER: string;
     private readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private readonly ALLOWED_FORMATS = ['jpg', 'jpeg', 'png', 'webp'];
+
+    constructor() {
+        // Set folder based on environment to separate test and production images
+        const env = process.env['NODE_ENV'] || 'development';
+        const folderPrefix = env === 'production' ? 'shira-studio-prod' : 'shira-studio-test';
+        this.FOLDER = `${folderPrefix}/products`;
+        
+        console.log(`📁 Cloudinary upload folder set to: ${this.FOLDER} (environment: ${env})`);
+    }
 
     /**
      * Upload a single image to Cloudinary

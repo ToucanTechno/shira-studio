@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct, ICategory} from "../../models/Product";
-import axios  from "axios";
+import axios from "axios";
 import Select, { MultiValue } from 'react-select';
 import {
     Button,
@@ -49,7 +49,62 @@ const AdminProductsEdit = () => {
         name: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null)
     }
-    const api = useConst(() => axios.create({baseURL: API_URL}));
+    const api = useConst(() => {
+        const instance = axios.create({
+            baseURL: API_URL,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        // Add request interceptor for debugging
+        instance.interceptors.request.use(
+            (config) => {
+                console.log('Request:', {
+                    method: config.method,
+                    url: config.url,
+                    baseURL: config.baseURL,
+                    fullURL: `${config.baseURL}${config.url}`,
+                    headers: config.headers,
+                    data: config.data
+                });
+                return config;
+            },
+            (error) => {
+                console.error('Request error:', error);
+                return Promise.reject(error);
+            }
+        );
+        
+        // Add response interceptor for debugging
+        instance.interceptors.response.use(
+            (response) => {
+                console.log('Response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: response.data
+                });
+                return response;
+            },
+            (error) => {
+                console.error('Response error:', {
+                    message: error.message,
+                    status: error.response?.status,
+                    statusText: error.response?.statusText,
+                    data: error.response?.data,
+                    headers: error.response?.headers,
+                    config: {
+                        method: error.config?.method,
+                        url: error.config?.url,
+                        data: error.config?.data
+                    }
+                });
+                return Promise.reject(error);
+            }
+        );
+        
+        return instance;
+    });
     const router = useRouter();
 
     const fetchProducts = useCallback(async () => {
@@ -117,9 +172,8 @@ const AdminProductsEdit = () => {
         event.preventDefault();
         
         const updateEntry: Partial<IProduct> = {
-            product_id: productRefs.ID.current?.value,
             name: productRefs.name.current?.value,
-            categories: categoriesData.selected.map(category => category.value),
+            // Don't include categories or product_id - categories use dedicated endpoint, product_id is read-only
             price: price,
             description: productRefs.description.current?.value,
             stock: parseInt(stock.toString())
@@ -129,6 +183,8 @@ const AdminProductsEdit = () => {
         
         try {
             let productId = params['id'] as string;
+            
+            console.log('Starting product save...', { isEdit, productId, updateEntry });
             
             if (isEdit) {
                 // Update existing product
@@ -141,17 +197,20 @@ const AdminProductsEdit = () => {
                     addedCategories.delete(el.name);
                 }
                 
-                updatePromises.push(api.put<IProduct>(`products/${productId}`, updateEntry));
-                updatePromises.push(api.put(`products/${productId}/categories`, {
+                console.log('Adding PUT request to update product:', `/products/${productId}`);
+                updatePromises.push(api.put<IProduct>(`/products/${productId}`, updateEntry));
+                updatePromises.push(api.put(`/products/${productId}/categories`, {
                     names: Array.from(addedCategories),
-                    action: 'add'
+                    removeAction: false
                 }));
-                updatePromises.push(api.put(`products/${productId}/categories`, {
+                updatePromises.push(api.put(`/products/${productId}/categories`, {
                     names: Array.from(deletedCategories),
-                    action: 'del'
+                    removeAction: true
                 }));
                 
+                console.log('Executing update promises...', updatePromises.length);
                 await Promise.all(updatePromises);
+                console.log('Update promises completed');
                 
                 // Upload new images if any
                 if (imagesToUpload.length > 0) {
@@ -159,21 +218,21 @@ const AdminProductsEdit = () => {
                     imagesToUpload.forEach(file => {
                         formData.append('images', file);
                     });
-                    await api.post(`products/${productId}/images`, formData, {
+                    await api.post(`/products/${productId}/images`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                 }
             } else {
                 // Create new product
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const response: any = await api.post('products/', updateEntry);
+                const response: any = await api.post('/products/', updateEntry);
                 productId = response.data['id'];
                 
                 // Add categories
                 const addedCategories = categoriesData.selected.map(el => el.name);
-                await api.put(`products/${productId}/categories`, {
+                await api.put(`/products/${productId}/categories`, {
                     names: Array.from(addedCategories),
-                    action: 'add'
+                    removeAction: false
                 });
                 
                 // Upload images
@@ -182,7 +241,7 @@ const AdminProductsEdit = () => {
                     imagesToUpload.forEach(file => {
                         formData.append('images', file);
                     });
-                    await api.post(`products/${productId}/images`, formData, {
+                    await api.post(`/products/${productId}/images`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                 }
@@ -190,9 +249,12 @@ const AdminProductsEdit = () => {
             
             router.push('/control-panel/products');
         } catch (error: unknown) {
-            if (axios.isAxiosError(error) && error.response?.status === StatusCodes.NOT_MODIFIED) {
-                router.push('/control-panel/products');
-                return;
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { status?: number } };
+                if (axiosError.response?.status === StatusCodes.NOT_MODIFIED) {
+                    router.push('/control-panel/products');
+                    return;
+                }
             }
             console.error('Error saving product:', error);
         }

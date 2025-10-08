@@ -30,12 +30,22 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
     const loadMoreTimeout: NodeJS.Timeout = setTimeout(() => null, 500);
     const loadMoreTimeoutRef = useRef<NodeJS.Timeout>(loadMoreTimeout);
     const api = useConst(() => axios.create({baseURL: API_URL}));
+    const hasInitialLoadRef = useRef(false);
 
     const getInitialProducts = useCallback(() => {
+        // Prevent multiple initial loads
+        if (hasInitialLoadRef.current) {
+            console.log('[useInfiniteScroll] Skipping duplicate initial load');
+            return;
+        }
+        hasInitialLoadRef.current = true;
+        
         const url = categoryName
             ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
             : `products?skip=${10 * (page - 1)}&limit=10`;
+        console.log('[useInfiniteScroll] getInitialProducts called - page:', page, 'url:', url);
         api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
+            console.log('[useInfiniteScroll] Received products:', resp?.data?.products?.length, 'total:', resp?.data?.total);
             const newProducts = resp?.data?.products;
 
             if (newProducts?.length) {

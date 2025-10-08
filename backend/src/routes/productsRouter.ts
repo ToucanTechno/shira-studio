@@ -16,7 +16,8 @@ import {
 // Global Config
 export const productsRouter = express.Router();
 
-productsRouter.use(express.json());
+// Note: express.json() is already applied in app.ts via bodyParser.json()
+// Don't apply it again here as it can cause conflicts
 
 // GET
 productsRouter.get('/:id', getSingleProduct);

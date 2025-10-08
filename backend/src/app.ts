@@ -8,10 +8,34 @@ import mongoose from "mongoose";
 import { cartRoutes } from "./routes/cartRoutes";
 import { categoryRoutes } from "./routes/categoryRouter";
 import { orderRoutes } from "./routes/orderRoutes";
+import path from "path";
+import { v2 as cloudinary } from 'cloudinary';
 
 // Load environment variables from .env file (for local development)
 // In production (Railway), environment variables are injected directly
-dotenv.config();
+// Use explicit path to ensure .env is found regardless of working directory
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+// Configure Cloudinary (must be after dotenv.config())
+cloudinary.config({
+    cloud_name: process.env['CLOUDINARY_CLOUD_NAME'],
+    api_key: process.env['CLOUDINARY_API_KEY'],
+    api_secret: process.env['CLOUDINARY_API_SECRET'],
+    secure: true
+});
+
+// Verify Cloudinary configuration
+const cloudinaryConfig = cloudinary.config();
+if (!cloudinaryConfig.cloud_name || !cloudinaryConfig.api_key || !cloudinaryConfig.api_secret) {
+    console.error('❌ Cloudinary configuration is incomplete!');
+    console.error('Missing:', {
+        cloud_name: !cloudinaryConfig.cloud_name,
+        api_key: !cloudinaryConfig.api_key,
+        api_secret: !cloudinaryConfig.api_secret
+    });
+} else {
+    console.log('✅ Cloudinary configured successfully:', cloudinaryConfig.cloud_name);
+}
 
 if (process.env["MONGO_URL"] === undefined) {
     console.warn("Warning: Missing MONGO_URL environment variable. Using default.");
@@ -68,7 +92,9 @@ app.use(cors({
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true  // Allow cookies and authentication headers
+    credentials: true,  // Allow cookies and authentication headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Explicitly allow all methods
+    allowedHeaders: ['Content-Type', 'Authorization']  // Allow common headers
 }));
 app.use(bodyParser.json());
 

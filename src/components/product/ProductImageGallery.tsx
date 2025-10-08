@@ -10,7 +10,9 @@ import {
     ModalContent,
     ModalBody,
     ModalCloseButton,
+    Button,
 } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import { IProductImage } from '../../models/Product';
 
 interface ProductImageGalleryProps {
@@ -23,7 +25,11 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
     productName,
 }) => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [showAllThumbnails, setShowAllThumbnails] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    
+    // Number of thumbnails to show initially
+    const INITIAL_THUMBNAIL_COUNT = 5;
 
     if (!images || images.length === 0) {
         return (
@@ -79,34 +85,55 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
 
             {/* Thumbnail Strip */}
             {sortedImages.length > 1 && (
-                <HStack spacing={2} justify="center" wrap="wrap">
-                    {sortedImages.map((image, index) => (
-                        <Box
-                            key={image.public_id}
-                            width="80px"
-                            height="80px"
-                            borderRadius="md"
-                            overflow="hidden"
-                            cursor="pointer"
-                            border="2px solid"
-                            borderColor={index === selectedImageIndex ? 'blue.500' : 'gray.200'}
-                            transition="all 0.2s"
-                            _hover={{
-                                borderColor: 'blue.400',
-                                transform: 'scale(1.05)',
-                            }}
-                            onClick={() => setSelectedImageIndex(index)}
-                        >
-                            <Image
-                                src={image.url}
-                                alt={image.alt_text || `${productName} thumbnail ${index + 1}`}
-                                width="100%"
-                                height="100%"
-                                objectFit="cover"
-                            />
+                <VStack spacing={2} align="stretch">
+                    <HStack spacing={2} justify="center" wrap="wrap">
+                        {sortedImages
+                            .slice(0, showAllThumbnails ? sortedImages.length : INITIAL_THUMBNAIL_COUNT)
+                            .map((image, index) => (
+                                <Box
+                                    key={image.public_id}
+                                    width="80px"
+                                    height="80px"
+                                    borderRadius="md"
+                                    overflow="hidden"
+                                    cursor="pointer"
+                                    border="2px solid"
+                                    borderColor={index === selectedImageIndex ? 'blue.500' : 'gray.200'}
+                                    transition="all 0.2s"
+                                    _hover={{
+                                        borderColor: 'blue.400',
+                                        transform: 'scale(1.05)',
+                                    }}
+                                    onClick={() => setSelectedImageIndex(index)}
+                                >
+                                    <Image
+                                        src={image.url}
+                                        alt={image.alt_text || `${productName} thumbnail ${index + 1}`}
+                                        width="100%"
+                                        height="100%"
+                                        objectFit="cover"
+                                    />
+                                </Box>
+                            ))}
+                    </HStack>
+                    
+                    {/* Show More/Less Button */}
+                    {sortedImages.length > INITIAL_THUMBNAIL_COUNT && (
+                        <Box display="flex" justifyContent="center">
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                rightIcon={showAllThumbnails ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                                onClick={() => setShowAllThumbnails(!showAllThumbnails)}
+                            >
+                                {showAllThumbnails
+                                    ? 'הצג פחות'
+                                    : `הצג עוד (${sortedImages.length - INITIAL_THUMBNAIL_COUNT})`
+                                }
+                            </Button>
                         </Box>
-                    ))}
-                </HStack>
+                    )}
+                </VStack>
             )}
 
             {/* Zoom Modal */}

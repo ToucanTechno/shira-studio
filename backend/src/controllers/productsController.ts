@@ -101,7 +101,7 @@ export const uploadProductImages = async (req: Request, res: Response) => {
 export const deleteProductImage = async (req: Request, res: Response) => {
     try {
         const productId = req.params['id']!;
-        const publicId = req.params['imageId']!;
+        const imageId = req.params['imageId']!;
 
         const err = await RequestValidator.validate([
             {name: 'id', validationFuncs: [
@@ -122,14 +122,27 @@ export const deleteProductImage = async (req: Request, res: Response) => {
             return;
         }
 
-        const imageIndex = product.images?.findIndex(img => img.public_id === publicId);
-        if (imageIndex === undefined || imageIndex === -1) {
+        // Find image by matching the last part of public_id (the actual image ID)
+        const imageIndex = product.images?.findIndex(img => {
+            const storedImageId = img.public_id.split('/').pop();
+            return storedImageId === imageId;
+        });
+        
+        if (imageIndex === undefined || imageIndex === -1 || !product.images) {
             res.status(404).send({ message: 'Image not found' });
             return;
         }
 
-        // Delete from Cloudinary
-        const result = await ImageUploadService.deleteImage(publicId);
+        // Get the full public_id for Cloudinary deletion
+        const imageToDelete = product.images[imageIndex];
+        if (!imageToDelete) {
+            res.status(404).send({ message: 'Image not found' });
+            return;
+        }
+        const fullPublicId = imageToDelete.public_id;
+        
+        // Delete from Cloudinary using the full public_id
+        const result = await ImageUploadService.deleteImage(fullPublicId);
 
         if (!result.success) {
             res.status(500).send({ message: result.error });
@@ -301,7 +314,9 @@ export const updateProduct = async (req: Request, res: Response) => {
     // TODO: add validations to req.body not sure how to properly validate need to iterate over all vars and check if exist in Product
     //there is no way to check how many fields been updated so on validation to check existence of fields
     const result = await Product.updateOne({'_id': id}, req.body);
-    if (result  && result.modifiedCount >= 1) { //the modifiedcount is to make sure because i cant think of a way to test update fail
+    // Check matchedCount instead of modifiedCount - if document was found, operation succeeded
+    // modifiedCount can be 0 if updating with same values, which is still a successful operation
+    if (result && result.matchedCount >= 1) {
         res.status(200).send(`Successfully updated product with id ${id}`)
     } else {
         new ErrorDocNotUpdated(id,req.body).send(res);

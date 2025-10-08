@@ -86,8 +86,8 @@ const AdminProducts = () => {
                                         borderRadius="md"
                                     />
                                 </Td>
-                                {/* TODO: make link work */}
-                                <Td><ChakraLink as={Link} href={`/products/${item._id}`}>{item.name}</ChakraLink></Td>
+                                {/* Link to public product page */}
+                                <Td><ChakraLink as={Link} href={`/product/${item._id}`}>{item.name}</ChakraLink></Td>
                                 <Td dir='ltr'>...{(item._id as string).slice(-6)}</Td>
                                 <Td color={(item.stock === 0) ? 'red.400' : 'green.400'}>{item.stock}</Td>
                                 <Td isNumeric>

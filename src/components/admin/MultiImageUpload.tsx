@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     Box,
-    Button,
     Image,
     SimpleGrid,
     Text,
@@ -10,10 +9,10 @@ import {
     IconButton,
     useToast,
     Progress,
-    CloseButton,
 } from '@chakra-ui/react';
-import { DeleteIcon, DragHandleIcon } from '@chakra-ui/icons';
+import { DeleteIcon } from '@chakra-ui/icons';
 import { IProductImage } from '../../models/Product';
+import { API_URL } from '../../utils/apiConfig';
 
 interface MultiImageUploadProps {
     productId?: string;
@@ -41,6 +40,62 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const toast = useToast();
+
+    // Sync with existingImages prop when it changes
+    useEffect(() => {
+        setImages(existingImages);
+    }, [existingImages]);
+
+    const uploadFiles = useCallback(async (files: File[]) => {
+        if (!productId) {
+            console.error('Cannot upload: productId is required');
+            return;
+        }
+
+        const formData = new FormData();
+        files.forEach((file) => {
+            formData.append('images', file);
+        });
+
+        try {
+            const response = await fetch(
+                `${API_URL}/products/${productId}/images`,
+                {
+                    method: 'POST',
+                    body: formData,
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+            const newImages = data.images as IProductImage[];
+
+            const updatedImages = [...images, ...newImages];
+            setImages(updatedImages);
+            onImagesChange?.(updatedImages);
+
+            setUploadingFiles([]);
+
+            toast({
+                title: 'Upload successful',
+                description: `${files.length} image(s) uploaded`,
+                status: 'success',
+                duration: 3000,
+            });
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast({
+                title: 'Upload failed',
+                description: 'Failed to upload images. Please try again.',
+                status: 'error',
+                duration: 5000,
+            });
+            setUploadingFiles([]);
+        }
+    }, [productId, images, onImagesChange, toast]);
 
     const handleFileSelect = useCallback(
         (files: FileList | null) => {
@@ -85,7 +140,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             // Create preview URLs and add to uploading state
             const newUploadingFiles: UploadingFile[] = validFiles.map((file) => ({
                 file,
-                preview: URL.createObjectURL(file),
+preview: URL.createObjectURL(file),
                 progress: 0,
             }));
 
@@ -100,61 +155,8 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 setTimeout(() => setUploadingFiles([]), 100);
             }
         },
-        [images.length, uploadingFiles.length, maxImages, toast]
+        [images.length, uploadingFiles.length, maxImages, toast, productId, onFilesSelected, uploadFiles]
     );
-
-    const uploadFiles = async (files: File[]) => {
-        if (!productId) {
-            console.error('Cannot upload: productId is required');
-            return;
-        }
-
-        const formData = new FormData();
-        files.forEach((file) => {
-            formData.append('images', file);
-        });
-
-        try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}/images`,
-                {
-                    method: 'POST',
-                    body: formData,
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error('Upload failed');
-            }
-
-            const data = await response.json();
-            const newImages = data.images as IProductImage[];
-
-            setImages((prev) => {
-                const updated = [...prev, ...newImages];
-                onImagesChange?.(updated);
-                return updated;
-            });
-
-            setUploadingFiles([]);
-
-            toast({
-                title: 'Upload successful',
-                description: `${files.length} image(s) uploaded`,
-                status: 'success',
-                duration: 3000,
-            });
-        } catch (error) {
-            console.error('Upload error:', error);
-            toast({
-                title: 'Upload failed',
-                description: 'Failed to upload images. Please try again.',
-                status: 'error',
-                duration: 5000,
-            });
-            setUploadingFiles([]);
-        }
-    };
 
     const handleDelete = async (publicId: string) => {
         if (!productId) {
@@ -163,22 +165,27 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
         }
 
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}/images/${publicId}`,
-                {
-                    method: 'DELETE',
-                }
-            );
+            // Extract just the image ID from the full public_id path
+            // e.g., "shira-studio/products/abc123" -> "abc123"
+            const imageId = publicId.split('/').pop() || publicId;
+            const deleteUrl = `${API_URL}/products/${productId}/images/${imageId}`;
+            console.log('Deleting image:', { productId, publicId, imageId, deleteUrl });
+            
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+            });
+
+            console.log('Delete response:', { status: response.status, ok: response.ok });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Delete failed with response:', errorText);
                 throw new Error('Delete failed');
             }
 
-            setImages((prev) => {
-                const updated = prev.filter((img) => img.public_id !== publicId);
-                onImagesChange?.(updated);
-                return updated;
-            });
+            const updatedImages = images.filter((img) => img.public_id !== publicId);
+            setImages(updatedImages);
+            onImagesChange?.(updatedImages);
 
             toast({
                 title: 'Image deleted',

@@ -8,9 +8,11 @@ import {
     Heading,
     Text,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
-    useToast
+    useToast,
+    Tag,
+    HStack,
 } from "@chakra-ui/react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {IProduct} from "../models/Product";
 import {AuthContext} from "../services/AuthContext";
 import {CartContext} from "../services/CartContext";
@@ -23,7 +25,11 @@ const Product = (props: any) => {
     const [itemsCount, setItemsCount] = useState(0);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const params = useParams();
+    const searchParams = useSearchParams();
     const toast = useToast();
+    
+    // Get the category the user came from (if any)
+    const fromCategory = searchParams.get('from');
     // TODO: move all API calls to request context
     const { guestData, api } = useContext(AuthContext)
     const { tryCreateCart, wrapUnlockLock, getProductCount } = useContext(CartContext)
@@ -170,25 +176,85 @@ const Product = (props: any) => {
         }
     }, [api, itemsCount, params?.product, tryCreateCart, wrapUnlockLock, guestData.cartID, product.name, toast]);
 
+    // Find the category path to display in breadcrumbs
+    const getBreadcrumbCategory = () => {
+        if (!product.categories || !Array.isArray(product.categories)) return null;
+        
+        // If we have a 'from' parameter, find that category
+        if (fromCategory) {
+            const category = product.categories.find(cat =>
+                typeof cat !== 'string' && (cat.name === fromCategory || cat._id === fromCategory)
+            );
+            if (category && typeof category !== 'string') return category;
+        }
+        
+        // Otherwise, use the first category
+        const firstCat = product.categories[0];
+        return typeof firstCat === 'string' ? null : firstCat;
+    };
+
+    const breadcrumbCategory = getBreadcrumbCategory();
+
     return (
         <Flex m={4} direction='column'>
             <Flex direction='row' mb={2}>
-                <Card align='center'>
+                <Card width="100%">
                     <CardBody p={2}>
-                        <Breadcrumb separator='/'>
+                        <Breadcrumb separator='/' spacing={2}>
                             <BreadcrumbItem>
                                 <BreadcrumbLink href='/'>עמוד ראשי</BreadcrumbLink>
                             </BreadcrumbItem>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href='#'>Category</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href='#'>SubCategory</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbItem>
-                                <BreadcrumbLink href={product._id}>{product.name}</BreadcrumbLink>
+                            {breadcrumbCategory?.parent && (
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink href={`/categories/${breadcrumbCategory.parent}`}>
+                                        {breadcrumbCategory.parent}
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                            )}
+                            {breadcrumbCategory && (
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink
+                                        href={breadcrumbCategory.parent
+                                            ? `/categories/${breadcrumbCategory.parent}/${breadcrumbCategory.name}`
+                                            : `/categories/${breadcrumbCategory.name}`
+                                        }
+                                    >
+                                        {breadcrumbCategory.text || breadcrumbCategory.name}
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                            )}
+                            <BreadcrumbItem isCurrentPage>
+                                <Text>{product.name}</Text>
                             </BreadcrumbItem>
                         </Breadcrumb>
+                        
+                        {/* Show all categories as tags if product belongs to multiple categories */}
+                        {product.categories && Array.isArray(product.categories) && product.categories.length > 1 && (
+                            <HStack spacing={2} mt={2} wrap="wrap">
+                                <Text fontSize="sm" color="gray.600">קטגוריות:</Text>
+                                {product.categories.map((category, index) => {
+                                    const categoryObj = typeof category === 'string' ? null : category;
+                                    if (!categoryObj) return null;
+                                    
+                                    const categoryUrl = categoryObj.parent
+                                        ? `/categories/${categoryObj.parent}/${categoryObj.name}`
+                                        : `/categories/${categoryObj.name}`;
+                                    
+                                    return (
+                                        <Tag
+                                            key={categoryObj._id || index}
+                                            as="a"
+                                            href={categoryUrl}
+                                            colorScheme="blue"
+                                            cursor="pointer"
+                                            _hover={{ bg: 'blue.600', color: 'white' }}
+                                        >
+                                            {categoryObj.text || categoryObj.name}
+                                        </Tag>
+                                    );
+                                })}
+                            </HStack>
+                        )}
                     </CardBody>
                 </Card>
             </Flex>
