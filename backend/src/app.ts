@@ -9,32 +9,32 @@ import { cartRoutes } from "./routes/cartRoutes";
 import { categoryRoutes } from "./routes/categoryRouter";
 import { orderRoutes } from "./routes/orderRoutes";
 
-// Load environment variables.
-dotenv.config();
+// Load environment variables from .env file (for local development)
+// In production (Railway), environment variables are injected directly
+const dotenvResult = dotenv.config();
 
-// --- Database Connection ---
-if (process.env["DB_CONN_STRING"] === undefined) {
-    console.warn("Warning: Missing DB_CONN_STRING environment variable. Using default.");
+if (process.env["MONGO_URL"] === undefined) {
+    console.warn("Warning: Missing MONGO_URL environment variable. Using default.");
 }
 
 // Get base connection string
-let connectionString = process.env["DB_CONN_STRING"] || "mongodb://localhost:27017/";
+let connectionString = process.env["MONGO_URL"] || "mongodb://localhost:27017/";
 
-// Add database name if not already in the connection string
-if (process.env['DB_NAME']) {
-    // Ensure there's a forward slash before the database name
-    if (!connectionString.endsWith('/')) {
-        connectionString += '/';
-    }
-    connectionString += process.env["DB_NAME"];
+// Add database name (MongoDB will create it if it doesn't exist)
+const dbName = process.env['DB_NAME'] || 'shira-studio';
+
+// Ensure connection string ends with / before adding database name
+if (!connectionString.endsWith('/')) {
+    connectionString += '/';
 }
+connectionString += dbName;
 
-// Add replica set parameter if specified
-// if (process.env["REPLICA_NAME"]) {
-//     connectionString += '?replicaSet=' + process.env["REPLICA_NAME"];
-// }
+// Railway MongoDB requires authSource=admin for authentication
+// The user 'mongo' is created in the admin database, so we must authenticate there
+connectionString += '?authSource=admin';
 
-console.log("Connecting to MongoDB at", connectionString);
+// Mask password in logs for security
+const maskedConnectionString = connectionString.replace(/\/\/([^:]+):([^@]+)@/, '//$1:***@');
 
 // Connect to MongoDB
 mongoose.connect(connectionString)

@@ -14,7 +14,7 @@ console.log('  -f, --force  Remove existing admin user if one exists');
 const forceFlag = process.argv.includes('-f') || process.argv.includes('--force');
 
 // Connect to MongoDB
-let connectionString = process.env['DB_CONN_STRING'] || 'mongodb://localhost:27017/';
+let connectionString = process.env['MONGO_URL'] || 'mongodb://localhost:27017/';
 
 // Add shira-studio database name
 connectionString += process.env["DB_NAME"] || 'shira-studio';

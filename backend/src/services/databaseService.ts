@@ -7,7 +7,7 @@ import * as dotenv from "dotenv";
 // Initialize Connection
 export async function connectToDatabase () {
     dotenv.config();
-    const client: mongoDB.MongoClient = new mongoDB.MongoClient(process.env["DB_CONN_STRING"] as string);
+    const client: mongoDB.MongoClient = new mongoDB.MongoClient(process.env["MONGO_URL"] as string);
     await client.connect();
     const db: mongoDB.Db = client.db(process.env["DB_NAME"] as string);
     console.log(`Successfully connected to database: ${db.databaseName}`);

@@ -16,12 +16,12 @@ if (!secret) {
 }
 
 // Check DB connection string
-const dbConnString = process.env['DB_CONN_STRING'];
+const dbConnString = process.env['MONGO_URL'];
 if (!dbConnString) {
-  console.log('⚠️ DB_CONN_STRING environment variable is not set');
+  console.log('⚠️ MONGO_URL environment variable is not set');
   console.log('  Using default: mongodb://localhost:27017/shira-studio');
 } else {
-  console.log('✅ DB_CONN_STRING environment variable is set');
+  console.log('✅ MONGO_URL environment variable is set');
 }
 
 console.log('\nIf any required variables are missing, please add them to your .env file.');

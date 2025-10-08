@@ -19,7 +19,7 @@ const email = "user@example.com";
 const password = "MyPassword123";
 
 // Connect to MongoDB
-let connectionString = process.env['DB_CONN_STRING'] || 'mongodb://localhost:27017/';
+let connectionString = process.env['MONGO_URL'] || 'mongodb://localhost:27017/';
 
 // Add shira-studio database name
 connectionString += process.env["DB_NAME"] || 'shira-studio';

@@ -38,7 +38,7 @@ This guide provides step-by-step instructions for deploying the Shira Studio e-c
 
 #### Required Environment Variables
 
-1. **DB_CONN_STRING** (Required)
+1. **MONGO_URL** (Required)
    - Description: MongoDB connection string
    - Railway Internal: `mongodb://mongo:PtnpoSneKRrmuDwiiEKsiCqxPOqkaItg@mongodb.railway.internal:27017`
    - Railway Public: `mongodb://mongo:PtnpoSneKRrmuDwiiEKsiCqxPOqkaItg@ballast.proxy.rlwy.net:54055`
@@ -184,7 +184,7 @@ cd backend
 npm install
 
 # Create .env file with your MongoDB credentials
-# DB_CONN_STRING=your_mongodb_connection_string
+# MONGO_URL=your_mongodb_connection_string
 # DB_NAME=shira-studio
 
 # Run development server
