@@ -36,11 +36,10 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
             ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
             : `products?skip=${10 * (page - 1)}&limit=10`;
         api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
-            setPage(prevPage => prevPage + 1);
             const newProducts = resp?.data?.products;
-            console.log(resp);
 
             if (newProducts?.length) {
+                setPage(prevPage => prevPage + 1);
                 setDynamicProducts(prevProducts => {
                     const newDynamicProducts = [...prevProducts, ...newProducts];
                     setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
@@ -48,7 +47,15 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                 });
                 setHasDynamicProducts(true);
                 setIsLoading(false);
+            } else {
+                // No products returned - stop pagination
+                setIsLastPage(true);
+                setIsLoading(false);
             }
+        }).catch(err => {
+            console.error('Error fetching products:', err);
+            setIsLoading(false);
+            setIsLastPage(true);
         });
     }, [api, categoryName, page]);
 
@@ -66,11 +73,10 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                         ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
                         : `products?skip=${10 * (page - 1)}&limit=10`;
                     api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
-                        setPage(prevPage => prevPage + 1);
                         const newProducts = resp?.data?.products;
-                        console.log(resp);
 
                         if (newProducts?.length) {
+                            setPage(prevPage => prevPage + 1);
                             setDynamicProducts(prevProducts => {
                                 const newDynamicProducts = [...prevProducts, ...newProducts];
                                 setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
@@ -78,7 +84,15 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                             });
                             setHasDynamicProducts(true);
                             setIsLoading(false);
+                        } else {
+                            // No more products - stop pagination
+                            setIsLastPage(true);
+                            setIsLoading(false);
                         }
+                    }).catch(err => {
+                        console.error('Error fetching more products:', err);
+                        setIsLoading(false);
+                        setIsLastPage(true);
                     });
                 }, 500);
             }
