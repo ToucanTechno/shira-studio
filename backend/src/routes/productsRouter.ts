@@ -1,7 +1,9 @@
 import express from "express";
 import {
     ProductUpload,
-    ProductUploadLogic,
+    uploadProductImages,
+    deleteProductImage,
+    reorderProductImages,
     changeCategoriesOfProduct,
     deleteProduct,
     getProducts,
@@ -27,8 +29,8 @@ productsRouter.get('/c/:category/', getProducts);
 // POST
 // TODO: add admin authentication check for insert, update, delete
 productsRouter.post('/', insertProduct);
-//TODO: currently there needs to be products file under the backend to save files to need a way to create it automatically 
-productsRouter.post('/:id/upload',ProductUpload.single('product'),ProductUploadLogic).use(productUploadErr);
+// Upload multiple images to a product (Cloudinary)
+productsRouter.post('/:id/images', ProductUpload.array('images', 10), uploadProductImages, productUploadErr);
 
 // PUT
 productsRouter.put('/:id', updateProduct);
@@ -36,3 +38,8 @@ productsRouter.put("/:id/categories", changeCategoriesOfProduct);
 
 // DELETE
 productsRouter.delete('/:id', deleteProduct);
+// Delete a specific image from a product
+productsRouter.delete('/:id/images/:imageId', deleteProductImage);
+
+// PUT - Reorder images
+productsRouter.put('/:id/images/reorder', reorderProductImages);

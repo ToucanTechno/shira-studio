@@ -6,7 +6,6 @@ import {
     Card, CardBody,
     Flex, Wrap,
     Heading,
-    Image,
     Text,
     NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper,
     useToast
@@ -16,6 +15,7 @@ import {IProduct} from "../models/Product";
 import {AuthContext} from "../services/AuthContext";
 import {CartContext} from "../services/CartContext";
 import {logger} from "../utils/logger";
+import { ProductImageGallery } from "../components/product/ProductImageGallery";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const Product = (props: any) => {
@@ -194,14 +194,12 @@ const Product = (props: any) => {
             </Flex>
             <Card>
                 <CardBody>
-                    <Wrap direction='row'>
+                    <Wrap direction='row' spacing={4}>
                         <Flex w={['100%', '45%']} direction='column'>
-                            <Image h={[300, 180, 250, 360, 430]} bg='#00ee70' fit='contain' src={product.image_src} alt={product.description} />
-                            <Flex direction='row' mt={1} justifyContent='stretch'>
-                                <Image flexGrow='1' me={1} fit='contain' bg='#0080ff' src={product.image_src} alt={product.description} />
-                                <Image flexGrow='1' me={1} fit='contain' bg='#5080ff'  src={product.image_src} alt={product.description} />
-                                <Image flexGrow='1' fit='contain' bg='#8080ff'  src={product.image_src} alt={product.description} />
-                            </Flex>
+                            <ProductImageGallery
+                                images={product.images || []}
+                                productName={product.name || 'Product'}
+                            />
                         </Flex>
                         <Flex direction='column'>
                             <Heading as='h2' size='lg' noOfLines={1}>{product.name}</Heading>

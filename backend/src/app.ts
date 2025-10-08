@@ -11,7 +11,7 @@ import { orderRoutes } from "./routes/orderRoutes";
 
 // Load environment variables from .env file (for local development)
 // In production (Railway), environment variables are injected directly
-const dotenvResult = dotenv.config();
+dotenv.config();
 
 if (process.env["MONGO_URL"] === undefined) {
     console.warn("Warning: Missing MONGO_URL environment variable. Using default.");
@@ -32,9 +32,6 @@ connectionString += dbName;
 // Railway MongoDB requires authSource=admin for authentication
 // The user 'mongo' is created in the admin database, so we must authenticate there
 connectionString += '?authSource=admin';
-
-// Mask password in logs for security
-const maskedConnectionString = connectionString.replace(/\/\/([^:]+):([^@]+)@/, '//$1:***@');
 
 // Connect to MongoDB
 mongoose.connect(connectionString)

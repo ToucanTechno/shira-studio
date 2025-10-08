@@ -1,10 +1,17 @@
 import mongoose, { ObjectId } from 'mongoose';
 
+export interface IProductImage {
+    url: string;
+    public_id: string;
+    order: number;
+    alt_text?: string;
+}
+
 export interface IProduct {
     name: string;
     categories: Array<mongoose.Schema.Types.ObjectId>;
     price: number;
-    image_src: string;
+    images: IProductImage[];
     date?: Date;
     stock: number;
     description?: string;
@@ -30,10 +37,25 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    image_src: {
-        type: String,
-        required: true
-    },
+    images: [{
+        url: {
+            type: String,
+            required: true
+        },
+        public_id: {
+            type: String,
+            required: true
+        },
+        order: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        alt_text: {
+            type: String,
+            default: ''
+        }
+    }],
     date: {
         type: Date,
         required: true

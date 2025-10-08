@@ -77,7 +77,15 @@ const AdminProducts = () => {
                     { products.products.length > 0 && products.products.map((item: IProduct) => {
                         return (
                             <Tr key={item._id}>
-                                <Td><Image boxSize='60px' src="necklace.jpg" alt="Gold Necklace"/></Td>
+                                <Td>
+                                    <Image
+                                        boxSize='60px'
+                                        src={item.images && item.images.length > 0 ? item.images[0].url : "/placeholder-image.jpg"}
+                                        alt={item.images && item.images.length > 0 ? item.images[0].alt_text || item.name : item.name}
+                                        objectFit="cover"
+                                        borderRadius="md"
+                                    />
+                                </Td>
                                 {/* TODO: make link work */}
                                 <Td><ChakraLink as={Link} href={`/products/${item._id}`}>{item.name}</ChakraLink></Td>
                                 <Td dir='ltr'>...{(item._id as string).slice(-6)}</Td>
@@ -94,10 +102,10 @@ const AdminProducts = () => {
                                 <Td>{item.description}</Td>
                                 <Td>{item.views}</Td>
                                 <Td>
-                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => router.push(`${item._id}/edit`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'cyan.700'}} me={1} onClick={() => router.push(`/control-panel/products/${item._id}/edit`)}>
                                         עריכה
                                     </Button>
-                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => router.push(`${item._id}/delete`)}>
+                                    <Button colorScheme='blackAlpha' _hover={{'backgroundColor': 'red.600'}} onClick={() => router.push(`/control-panel/products/${item._id}/delete`)}>
                                         מחיקה
                                     </Button>
                                 </Td>

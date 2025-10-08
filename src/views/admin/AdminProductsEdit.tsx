@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct, ICategory} from "../../models/Product";
-import axios from "axios";
+import axios  from "axios";
 import Select, { MultiValue } from 'react-select';
 import {
     Button,
@@ -16,9 +16,10 @@ import {
     NumberInputField, NumberInputStepper,
     Textarea, useConst
 } from "@chakra-ui/react";
-import FileUpload from "../../components/common/FileUpload";
+import { MultiImageUpload } from "../../components/admin/MultiImageUpload";
 import {StatusCodes} from "http-status-codes";
 import { API_URL } from '../../utils/apiConfig';
+import { IProductImage } from "../../models/Product";
 
 interface SelectOption {
     value: string;
@@ -41,7 +42,8 @@ const AdminProductsEdit = () => {
         useState<CategoriesData>({all: [], selected: [], old: []});
     const [stock,  setStock] = useState(0);
     const [price,  setPrice] = useState(0);
-    const [uploadedImage, setUploadedImage] = useState("");
+    const [images, setImages] = useState<IProductImage[]>([]);
+    const [imagesToUpload, setImagesToUpload] = useState<File[]>([]);
     const productRefs = {
         ID: useRef<HTMLInputElement>(null),
         name: useRef<HTMLInputElement>(null),
@@ -77,6 +79,7 @@ const AdminProductsEdit = () => {
                     });
                     setStock(productSkeleton.stock);
                     setPrice(productSkeleton.price);
+                    setImages(productSkeleton.images || []);
                     setProduct(productSkeleton);
                 });
         }
@@ -112,85 +115,100 @@ const AdminProductsEdit = () => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const update = {
-            productID: productRefs.ID.current?.value,
-            productName: productRefs.name.current?.value,
-            categories: categoriesData.selected,
+        
+        const updateEntry: Partial<IProduct> = {
+            product_id: productRefs.ID.current?.value,
+            name: productRefs.name.current?.value,
+            categories: categoriesData.selected.map(category => category.value),
             price: price,
-            image: uploadedImage,
-            stock: stock,
-            description: productRefs.description.current?.value
-        };
-        if (product && update.image === "") {
-            // keep image
-            // TODO: probably need to have no image to avoid changing it
-            update.image = product['image_src']
-        }
-        // TODO: select categories
-        console.log("update: ", update);
-        const updateEntry: IProduct = {
-            product_id: update.productID as string,
-            name: update.productName as string,
-            categories: update.categories.map(category => category.value),  // saves us category update request
-            price: update.price,
-            image_src: update.image as string,
-            description: update.description as string,
-            stock: parseInt(update.stock.toString())
+            description: productRefs.description.current?.value,
+            stock: parseInt(stock.toString())
         };
 
         const updatePromises = [];
-        if (isEdit) {
-            const updateURL = `products/${params['id']}`;
-            const deletedCategories = new Set(categoriesData.old.map(el => el.name));
-            for (const el of update.categories) {
-                deletedCategories.delete(el.name);
-            }
-            const addedCategories = new Set(update.categories.map(el => el.name));
-            for (const el of categoriesData.old) {
-                addedCategories.delete(el.name);
-            }
-            updatePromises.push(api.put<IProduct>(updateURL, updateEntry));
-            updatePromises.push(api.put(`products/${params['id']}/categories`, {
-                names: Array.from(addedCategories),
-                id: update.productID,
-                action: 'add'
-            }));
-            updatePromises.push(api.put(`products/${params['id']}/categories`, {
-                names: Array.from(deletedCategories),
-                id: update.productID,
-                action: 'del'
-            }));
-        } else {  // Adding product
-            const updateURL = 'products/';
-            const addedCategories = update.categories.map(el => el.name);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            updatePromises.push(api.post(updateURL, updateEntry).then((res: any) => {
-                const productID = res.data['id'];
-                api.put(`products/${productID}/categories`, {
+        
+        try {
+            let productId = params['id'] as string;
+            
+            if (isEdit) {
+                // Update existing product
+                const deletedCategories = new Set(categoriesData.old.map(el => el.name));
+                for (const el of categoriesData.selected) {
+                    deletedCategories.delete(el.name);
+                }
+                const addedCategories = new Set(categoriesData.selected.map(el => el.name));
+                for (const el of categoriesData.old) {
+                    addedCategories.delete(el.name);
+                }
+                
+                updatePromises.push(api.put<IProduct>(`products/${productId}`, updateEntry));
+                updatePromises.push(api.put(`products/${productId}/categories`, {
                     names: Array.from(addedCategories),
                     action: 'add'
-                })
-            }));
-        }
-        await Promise.all(updatePromises).catch(error => {
-            if (error.response.status === StatusCodes.NOT_MODIFIED) {
+                }));
+                updatePromises.push(api.put(`products/${productId}/categories`, {
+                    names: Array.from(deletedCategories),
+                    action: 'del'
+                }));
+                
+                await Promise.all(updatePromises);
+                
+                // Upload new images if any
+                if (imagesToUpload.length > 0) {
+                    const formData = new FormData();
+                    imagesToUpload.forEach(file => {
+                        formData.append('images', file);
+                    });
+                    await api.post(`products/${productId}/images`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                }
+            } else {
+                // Create new product
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const response: any = await api.post('products/', updateEntry);
+                productId = response.data['id'];
+                
+                // Add categories
+                const addedCategories = categoriesData.selected.map(el => el.name);
+                await api.put(`products/${productId}/categories`, {
+                    names: Array.from(addedCategories),
+                    action: 'add'
+                });
+                
+                // Upload images
+                if (imagesToUpload.length > 0) {
+                    const formData = new FormData();
+                    imagesToUpload.forEach(file => {
+                        formData.append('images', file);
+                    });
+                    await api.post(`products/${productId}/images`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                }
+            }
+            
+            router.push('/control-panel/products');
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response?.status === StatusCodes.NOT_MODIFIED) {
+                router.push('/control-panel/products');
                 return;
             }
-            console.error(error);
-        });
-        router.push('/control-panel/products');
+            console.error('Error saving product:', error);
+        }
     }
 
     const handleSelectCategories = (el: MultiValue<SelectOption>) => {
         setCategoriesData({...categoriesData, selected: el as SelectOption[]});
     };
 
-    const handleImageUpload = (files: FileList) => {
-        if (files !== null && files.length > 0) {
-            // TODO: is that how we send it to server?
-            setUploadedImage(URL.createObjectURL(files[0]));
-        }
-    }
+    const handleImagesChange = (updatedImages: IProductImage[]) => {
+        setImages(updatedImages);
+    };
+
+    const handleFilesSelected = (files: File[]) => {
+        setImagesToUpload(files);
+    };
 
     return (
         <Flex direction='column' m={4}>
@@ -250,12 +268,15 @@ const AdminProductsEdit = () => {
                     </NumberInput>
                 </FormControl>
 
-                <FileUpload defaultImage={ (product) ? product.image_src : "" }
-                            handleUpload={ handleImageUpload }
-                            isRequired={ !isEdit }
-                            name="picture">
-                    העלאת תמונה
-                </FileUpload>
+                <FormControl>
+                    <FormLabel>תמונות המוצר:</FormLabel>
+                    <MultiImageUpload
+                        productId={isEdit && params['id'] ? params['id'] as string : undefined}
+                        existingImages={images}
+                        onImagesChange={handleImagesChange}
+                        onFilesSelected={handleFilesSelected}
+                    />
+                </FormControl>
 
                 <FormControl>
                 <FormLabel htmlFor="stock">מלאי:</FormLabel>

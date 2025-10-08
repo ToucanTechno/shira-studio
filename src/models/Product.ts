@@ -7,12 +7,19 @@ export interface ICategory {
     _id?: string;
 }
 
+export interface IProductImage {
+    url: string;
+    public_id: string;
+    order: number;
+    alt_text?: string;
+}
+
 export interface IProduct {
     product_id: string;
     name: string;
     categories: Array<ICategory | string>;
     price: number;
-    image_src: string;
+    images: IProductImage[];
     created?: Date;
     modified?: Date;
     stock: number;

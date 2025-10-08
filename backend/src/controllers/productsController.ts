@@ -4,9 +4,10 @@ import { Product, IProductDB } from "../models/Product";
 import { Category } from "../models/Category";
 import mongoose, {  ObjectId } from "mongoose";
 import multer from "multer"
-import { ResponseError ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorInvalidObjectId, ErrorWrongFileType, ErrorUseDedicatedUpdate } from "../utils/error";
+import { ResponseError ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated, ErrorWrongFileType, ErrorUseDedicatedUpdate } from "../utils/error";
 import { RequestValidator } from "../utils/validator";
 import { isDocNotFoundById, isInvalidObjId, isInvalidType, isMissingField } from "../utils/paramChecks";
+import ImageUploadService from "../services/imageUploadService";
 
 
 
@@ -14,49 +15,200 @@ import { isDocNotFoundById, isInvalidObjId, isInvalidType, isMissingField } from
 //https://stackoverflow.com/questions/39350040/uploading-multiple-files-with-multer
 
 
-const storage = multer.diskStorage({
-    destination: function (_req:Request, _file, cb) {
-        cb(null, process.cwd() + '/products')//TODO:when on actual server use better path
-    },
-    filename: function (_req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const fileName = file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1];//filtering to image so extension is at [1]
-        cb(null, fileName)
-    }, 
-});
-const fileFilter = async function(req: Request, file: Express.Multer.File, cb: any) {
+// Multer memory storage for Cloudinary upload
+const storage = multer.memoryStorage();
+
+const fileFilter = function(_req: Request, file: Express.Multer.File, cb: any) {
     const fileType = file.mimetype.split('/');
-    const productId = req.params['id']!;
-    if(fileType[0] !== 'image'  || (fileType[1] !== 'jpeg' && fileType[1] !== 'jpg' && fileType[1] !== 'png')) {
-        cb(new ErrorWrongFileType('image',['jpeg','jpg','png']));
+    const fileExtension = fileType[1];
+    if(fileType[0] !== 'image' || !fileExtension || !['jpeg', 'jpg', 'png', 'webp'].includes(fileExtension)) {
+        cb(new ErrorWrongFileType('image', ['jpeg', 'jpg', 'png', 'webp']));
+    } else {
+        cb(null, true);
     }
-    else if(!mongoose.isValidObjectId(productId)){
-        cb(new ErrorInvalidObjectId(productId,'id'));
-    }
-    else if(!await Product.findById(productId)){
-        cb(new ErrorDocNotFound(Product.modelName,productId));
-    }
-    else{
-        cb(null,true);
-    }
-
 }
-export const ProductUpload = multer({ storage: storage, fileFilter: fileFilter});
 
-//think what to do about if we change picture do we delete the changed picture? currently it only replace the link to the image
-export const ProductUploadLogic = async (req:Request,res:Response) =>{
-    const productId = req.params['id'];
-    const product = (await Product.findById(productId))!;    
-    product.image_src = req.file!.filename;
-    await product.save();
-    res.status(200).send('upload completed');
-}
+export const ProductUpload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// Upload multiple images to a product
+export const uploadProductImages = async (req: Request, res: Response) => {
+    try {
+        const productId = req.params['id']!;
+        
+        // Validate product exists
+        const err = await RequestValidator.validate([
+            {name: 'id', validationFuncs: [
+                isMissingField.bind(null, productId),
+                isInvalidObjId.bind(null, productId),
+                isDocNotFoundById.bind(null, productId, Product)
+            ]}
+        ]);
+        
+        if (err) {
+            err.send(res);
+            return;
+        }
+
+        const files = req.files as Express.Multer.File[];
+        if (!files || files.length === 0) {
+            res.status(400).send({ message: 'No files provided' });
+            return;
+        }
+
+        const result = await ImageUploadService.uploadMultipleImages(files);
+
+        if (result.errors.length > 0 && result.images.length === 0) {
+            res.status(400).send({
+                message: 'Failed to upload images',
+                errors: result.errors
+            });
+            return;
+        }
+
+        // Update product with new images
+        const product = await Product.findById(productId);
+        if (!product) {
+            res.status(404).send({ message: 'Product not found' });
+            return;
+        }
+
+        // Add new images to existing ones
+        const existingImagesCount = product.images?.length || 0;
+        const newImages = result.images.map((img: any, index: number) => ({
+            url: img.url,
+            public_id: img.public_id,
+            order: existingImagesCount + index,
+            alt_text: `${product.name} - Image ${existingImagesCount + index + 1}`
+        }));
+
+        product.images = [...(product.images || []), ...newImages];
+        await product.save();
+
+        res.status(200).send({
+            message: 'Images uploaded successfully',
+            images: newImages
+        });
+    } catch (error: any) {
+        res.status(500).send({ message: error.message });
+    }
+};
+
+// Delete a specific image from a product
+export const deleteProductImage = async (req: Request, res: Response) => {
+    try {
+        const productId = req.params['id']!;
+        const publicId = req.params['imageId']!;
+
+        const err = await RequestValidator.validate([
+            {name: 'id', validationFuncs: [
+                isMissingField.bind(null, productId),
+                isInvalidObjId.bind(null, productId),
+                isDocNotFoundById.bind(null, productId, Product)
+            ]}
+        ]);
+
+        if (err) {
+            err.send(res);
+            return;
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            res.status(404).send({ message: 'Product not found' });
+            return;
+        }
+
+        const imageIndex = product.images?.findIndex(img => img.public_id === publicId);
+        if (imageIndex === undefined || imageIndex === -1) {
+            res.status(404).send({ message: 'Image not found' });
+            return;
+        }
+
+        // Delete from Cloudinary
+        const result = await ImageUploadService.deleteImage(publicId);
+
+        if (!result.success) {
+            res.status(500).send({ message: result.error });
+            return;
+        }
+
+        // Remove from product
+        product.images?.splice(imageIndex, 1);
+        
+        // Reorder remaining images
+        product.images?.forEach((img, index) => {
+            img.order = index;
+        });
+
+        await product.save();
+
+        res.status(200).send({ message: 'Image deleted successfully' });
+    } catch (error: any) {
+        res.status(500).send({ message: error.message });
+    }
+};
+
+// Reorder product images
+export const reorderProductImages = async (req: Request, res: Response) => {
+    try {
+        const productId = req.params['id']!;
+        const { imageOrders } = req.body; // Array of { public_id, order }
+
+        const err = await RequestValidator.validate([
+            {name: 'id', validationFuncs: [
+                isMissingField.bind(null, productId),
+                isInvalidObjId.bind(null, productId),
+                isDocNotFoundById.bind(null, productId, Product)
+            ]}
+        ]);
+
+        if (err) {
+            err.send(res);
+            return;
+        }
+
+        if (!imageOrders || !Array.isArray(imageOrders)) {
+            res.status(400).send({ message: 'Invalid imageOrders format' });
+            return;
+        }
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            res.status(404).send({ message: 'Product not found' });
+            return;
+        }
+
+        // Update order for each image
+        imageOrders.forEach((orderItem: { public_id: string, order: number }) => {
+            const image = product.images?.find(img => img.public_id === orderItem.public_id);
+            if (image) {
+                image.order = orderItem.order;
+            }
+        });
+
+        // Sort images by order
+        product.images?.sort((a, b) => a.order - b.order);
+
+        await product.save();
+
+        res.status(200).send({
+            message: 'Images reordered successfully',
+            images: product.images
+        });
+    } catch (error: any) {
+        res.status(500).send({ message: error.message });
+    }
+};
+
 //TODO: err:any should be of type Error that we created or error that is thrown from multer
-export const productUploadErr = (err: any, _req: Request, res: Response,_next:NextFunction) => {
-    if (err instanceof ResponseError){
+export const productUploadErr = (err: any, _req: Request, res: Response, _next: NextFunction) => {
+    if (err instanceof ResponseError) {
         err.send(res);
-    }
-    else {
+    } else {
         res.status(400).send(err.message);
     }
 }
@@ -118,7 +270,7 @@ export const insertProduct = async (req: Request, res: Response) => {
             name: product.name,
             categories: product.categories, //TODO: make sure that it checks its valid ref to categories and update categories as well
             price: product.price,
-            image_src: product.image_src,
+            images: product.images || [],
             date: Date.now(),
             stock: product.stock,
             description: product.description,
