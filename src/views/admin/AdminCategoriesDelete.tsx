@@ -2,10 +2,11 @@ import { useRouter, useParams } from "next/navigation";
 import {useEffect} from "react";
 import {useConst} from "@chakra-ui/react";
 import axios from "axios";
+import { API_URL } from '../../utils/apiConfig';
 
 const AdminCategoriesDelete = () => {
     const router = useRouter();
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
     const params = useParams();
     const id = params?.id;
     useEffect(() => {

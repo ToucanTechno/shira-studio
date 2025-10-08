@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Link as ChakraLink } from '@chakra-ui/react'
 import UserProfile from '../components/UserProfile';
+import { API_URL } from '../utils/apiConfig';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ const Login = () => {
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const api = useConst<any>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst<any>(() => axios.create({baseURL: API_URL}));
     const router = useRouter();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

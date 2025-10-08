@@ -17,6 +17,7 @@ import { ChangeEvent, MutableRefObject, useEffect, useRef, useState } from "reac
 import { SelectOption } from "../../utils/ChakraTypes";
 import axios from "axios";
 import { ColumnDef, createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { API_URL } from '../../utils/apiConfig';
 
 interface OrderResponse {
     orders: Array<{
@@ -42,7 +43,7 @@ const AdminOrders = () => {
     const [typeFilter, setTypeFilter] =
         useState<SelectOption | null>({value: 'all', label: 'כל ההזמנות'});
     const [ordersData, setOrdersData] = useState<TOrder[]>([]);
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const columns: MutableRefObject<ColumnDef<TOrder, any>[]> = useRef([]);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

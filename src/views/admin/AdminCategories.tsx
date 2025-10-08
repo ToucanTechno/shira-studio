@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import AdminCategoriesAdd from "./AdminCategoriesAdd";
 import Select, {SingleValue} from "react-select";
 import {SelectOption} from "../../utils/ChakraTypes";
+import { API_URL } from '../../utils/apiConfig';
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState<ICategory[]>([]);
@@ -26,7 +27,7 @@ const AdminCategories = () => {
     const [editedText, setEditedText] = useState<string>("");
     const [editedParent, setEditedParent] = useState<SelectOption | null>(null);
     const router = useRouter();
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     useEffect(() => {
         (async () => {

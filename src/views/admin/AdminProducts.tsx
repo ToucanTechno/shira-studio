@@ -12,6 +12,7 @@ import {
     useConst
 } from "@chakra-ui/react";
 import Pagination from "../../components/common/Pagination";
+import { API_URL } from '../../utils/apiConfig';
 
 interface ProductData {
     total: number;
@@ -26,7 +27,7 @@ const AdminProducts = () => {
     const router = useRouter();
     const [products, setProducts] =
         useState<ProductData>({total: 0, totalPages: 0, page: 0, products: []});
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     useEffect(() => {
         const tmpPage = (params?.get('page') === null) ? 0 : parseInt(params?.get('page') as string) - 1

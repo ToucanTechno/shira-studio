@@ -7,6 +7,7 @@ import {v4 as uuidv4} from "uuid";
 import {useConst} from "@chakra-ui/react";
 import axios from "axios";
 import { logger } from "../utils/logger";
+import { API_URL } from "../utils/apiConfig";
 
 export interface GuestDataType {
     guestID: string | null;
@@ -30,7 +31,7 @@ export const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 
 export const AuthProvider = (props: Props) => {
     logger.component('AuthProvider', 'Initializing');
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     // Initialize state with localStorage values if available (client-side only)
     const [authTokens, setAuthTokens] = useState<string | null>(() => {

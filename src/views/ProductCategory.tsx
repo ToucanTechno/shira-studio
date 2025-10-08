@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import {Box, Heading, Spinner, Text} from "@chakra-ui/react";
 import axios from "axios";
 import {ProductGrid} from "../components/common/ProductGrid";
+import { API_URL } from '../utils/apiConfig';
 
 interface ProductCategoryInfo {
     _id: string;
@@ -27,7 +28,7 @@ export const ProductCategory = ({ category, productCategory }: ProductCategoryPr
             try {
                 setIsFetchingCategory(true);
                 // Fetch only the category metadata without products (more efficient)
-                const response = await axios.get<ProductCategoryInfo>(`http://localhost:3001/api/categories/name/${productCategory}`);
+                const response = await axios.get<ProductCategoryInfo>(`${API_URL}/categories/name/${productCategory}`);
                 setCategoryInfo(response.data);
             } catch (err) {
                 console.error('Error fetching category:', err);

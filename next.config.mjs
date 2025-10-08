@@ -11,13 +11,9 @@ const nextConfig = {
         // Only run ESLint on specific directories during production builds
         dirs: ['app', 'src'],
     },
-    async rewrites() {
-        return [
-            {
-                source: '/api/:path*',
-                destination: 'http://localhost:3001/api/:path*',
-            },
-        ]
+    env: {
+        // Make API_URL available to the client
+        API_URL: process.env.API_URL,
     },
     webpack: (config, { isServer }) => {
         // Exclude backend directory from webpack compilation

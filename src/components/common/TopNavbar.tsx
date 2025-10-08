@@ -8,13 +8,14 @@ import {Link, Icon, Flex, useConst, Box} from "@chakra-ui/react";
 import HoverMenuItem from "./HoverMenuItem";
 import axios from "axios";
 import { Tooltip } from '@chakra-ui/react'
+import { API_URL } from '@/utils/apiConfig';
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
 const TopNavbar = () => {
     const [navbar, setNavbar] = useState<ItemType[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const api = useConst<any>(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst<any>(() => axios.create({baseURL: API_URL}));
 
     useEffect(() => {
         const navbarSkeleton: {[key: string]: ItemType} = {

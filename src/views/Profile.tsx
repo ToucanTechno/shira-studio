@@ -5,13 +5,14 @@ import { Box, useConst } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import UserProfile from '../components/UserProfile';
+import { API_URL } from '../utils/apiConfig';
 
 const Profile = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const router = useRouter();
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     // Function to decode JWT token (same as in Login)
     const decodeToken = useCallback((token: string) => {

@@ -8,6 +8,7 @@ import './Category.css'
 import {Box, Heading, Spinner, Text} from "@chakra-ui/react";
 import axios from "axios";
 import {ProductGrid} from "../components/common/ProductGrid";
+import { API_URL } from '../utils/apiConfig';
 
 interface CategoryInfo {
     _id: string;
@@ -33,11 +34,11 @@ const Category = ({ category }: CategoryProps) => {
                 setIsLoadingCategory(true);
                 
                 // Fetch the parent category info
-                const categoryResponse = await axios.get<CategoryInfo>(`http://localhost:3001/api/categories/name/${category}`);
+                const categoryResponse = await axios.get<CategoryInfo>(`${API_URL}/categories/name/${category}`);
                 setCategoryInfo(categoryResponse.data);
                 
                 // Fetch subcategories
-                const subcategoriesResponse = await axios.get<CategoryInfo[]>(`http://localhost:3001/api/categories/parent/${category}`);
+                const subcategoriesResponse = await axios.get<CategoryInfo[]>(`${API_URL}/categories/parent/${category}`);
                 setSubcategories(subcategoriesResponse.data);
             } catch (err) {
                 console.error('Error fetching category:', err);

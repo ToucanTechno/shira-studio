@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import FileUpload from "../../components/common/FileUpload";
 import {StatusCodes} from "http-status-codes";
+import { API_URL } from '../../utils/apiConfig';
 
 interface SelectOption {
     value: string;
@@ -46,7 +47,7 @@ const AdminProductsEdit = () => {
         name: useRef<HTMLInputElement>(null),
         description: useRef<HTMLTextAreaElement>(null)
     }
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
     const router = useRouter();
 
     const fetchProducts = useCallback(async () => {

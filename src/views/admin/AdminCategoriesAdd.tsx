@@ -15,6 +15,7 @@ import React, {ChangeEvent, useEffect, useState} from "react";
 import Select, {SingleValue} from "react-select";
 import axios from "axios";
 import {SelectOption} from "../../utils/ChakraTypes";
+import { API_URL } from '../../utils/apiConfig';
 
 interface CategoriesAddProps {
     categories: ICategory[];
@@ -30,7 +31,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
         useState<string>("");
     const [parent, setParent] =
         useState<SelectOption | null>({value: '', label: '-'})
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     // Close add category if starting to edit another category
     useEffect(() => {

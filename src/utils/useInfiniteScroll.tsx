@@ -4,6 +4,7 @@ import {useCallback, useRef, useState} from "react";
 import axios from "axios";
 import {IProduct} from "../models/Product";
 import {useConst} from "@chakra-ui/react";
+import { API_URL } from "./apiConfig";
 
 interface ApiResponse {
     products: IProduct[];
@@ -28,7 +29,7 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
     const observerRef = useRef<IntersectionObserver | undefined>(undefined);
     const loadMoreTimeout: NodeJS.Timeout = setTimeout(() => null, 500);
     const loadMoreTimeoutRef = useRef<NodeJS.Timeout>(loadMoreTimeout);
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     const getInitialProducts = useCallback(() => {
         const url = categoryName

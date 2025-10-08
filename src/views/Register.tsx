@@ -6,6 +6,7 @@ import axios from "axios";
 import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import Link from 'next/link';
 import { Link as ChakraLink } from '@chakra-ui/react'
+import { API_URL } from '../utils/apiConfig';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const Register = (props: any) => {
@@ -17,7 +18,7 @@ const Register = (props: any) => {
     const [repeatPasswordError, setRepeatPasswordError] = useState('');
     const [loading, setLoading] = useState<boolean>(false);
     const [isFormValid, setIsFormValid] = useState(false);
-    const api = useConst(() => axios.create({baseURL: 'http://localhost:3001/api'}));
+    const api = useConst(() => axios.create({baseURL: API_URL}));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEmailChange = (e: any) => setEmail(e.target.value);
