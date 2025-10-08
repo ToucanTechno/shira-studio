@@ -140,19 +140,19 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             // Create preview URLs and add to uploading state
             const newUploadingFiles: UploadingFile[] = validFiles.map((file) => ({
                 file,
-preview: URL.createObjectURL(file),
+                preview: URL.createObjectURL(file),
                 progress: 0,
             }));
 
             setUploadingFiles((prev) => [...prev, ...newUploadingFiles]);
 
-            // If productId exists, upload immediately. Otherwise, notify parent
+            // If productId exists, upload immediately. Otherwise, notify parent and keep previews
             if (productId) {
                 uploadFiles(validFiles);
             } else {
                 onFilesSelected?.(validFiles);
-                // Clear uploading state for new products
-                setTimeout(() => setUploadingFiles([]), 100);
+                // Keep uploading state to show previews for new products
+                // Don't clear it - let the parent component handle the upload after product creation
             }
         },
         [images.length, uploadingFiles.length, maxImages, toast, productId, onFilesSelected, uploadFiles]
@@ -250,20 +250,20 @@ preview: URL.createObjectURL(file),
                     Maximum {maxImages} images, up to 5MB each
                 </Text>
                 <Text fontSize="sm" color="gray.600">
-                    {images.length} / {maxImages} images uploaded
+                    {images.length + uploadingFiles.length} / {maxImages} images {productId ? 'uploaded' : 'selected'}
                 </Text>
             </Box>
 
-            {/* Uploading Files */}
+            {/* Uploading/Selected Files */}
             {uploadingFiles.length > 0 && (
                 <VStack spacing={2} align="stretch">
-                    <Text fontWeight="bold">Uploading...</Text>
+                    <Text fontWeight="bold">{productId ? 'Uploading...' : 'Selected images (will upload when product is created)'}</Text>
                     {uploadingFiles.map((file, index) => (
                         <Box key={index} p={2} border="1px" borderColor="gray.200" borderRadius="md">
                             <HStack>
                                 <Image
                                     src={file.preview}
-                                    alt="Uploading"
+                                    alt={productId ? "Uploading" : "Selected"}
                                     boxSize="50px"
                                     objectFit="cover"
                                     borderRadius="md"
@@ -272,12 +272,14 @@ preview: URL.createObjectURL(file),
                                     <Text fontSize="sm" noOfLines={1}>
                                         {file.file.name}
                                     </Text>
-                                    <Progress
-                                        value={file.progress}
-                                        size="sm"
-                                        colorScheme="blue"
-                                        isIndeterminate
-                                    />
+                                    {productId && (
+                                        <Progress
+                                            value={file.progress}
+                                            size="sm"
+                                            colorScheme="blue"
+                                            isIndeterminate
+                                        />
+                                    )}
                                 </VStack>
                             </HStack>
                         </Box>
