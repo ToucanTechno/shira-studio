@@ -17,17 +17,9 @@ import { useRouter } from "next/navigation";
 import { logger } from "../utils/logger";
 
 const Cart = () => {
-    logger.component('Cart', 'Component render start');
-    
     const [cart, setCart] = useState<ICartModel | null>(null);
     const { api, guestData } = useContext(AuthContext);
     const { tryLockCart } = useContext(CartContext);
-    
-    logger.component('Cart', 'Current state', {
-        hasCart: !!cart,
-        cartProductCount: cart ? Object.keys(cart.products).length : 0,
-        guestDataCartID: guestData.cartID
-    });
     
     const alertToast = useToast({
         status: 'error',
@@ -48,31 +40,17 @@ const Cart = () => {
     }, [cart]);
 
     useEffect(() => {
-        logger.component('Cart', 'useEffect triggered', {
-            hasCartID: !!guestData.cartID,
-            cartID: guestData.cartID
-        });
-        
         if (guestData.cartID) {
-            logger.component('Cart', 'Fetching cart from API', guestData.cartID);
-            
             api.get(`/cart/${guestData.cartID}`)
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .then((response: any) => {
-                    logger.component('Cart', 'Cart fetched successfully', {
-                        cartID: response.data._id,
-                        productCount: Object.keys(response.data.products).length
-                    });
-                    logger.state('Cart', 'cart', cart, response.data);
                     setCart(response.data);
                 })
                 .catch(error => {
                     logger.error('Cart', 'Failed to fetch cart:', error);
                 });
-        } else {
-            logger.component('Cart', 'No cartID - skipping fetch');
         }
-    }, [api, cart, guestData.cartID]);
+    }, [api, guestData.cartID]);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
         if (!cart) {
@@ -176,7 +154,7 @@ const Cart = () => {
                             const item = cart.products[productKey];
                             return (
                                 <Tr key={item.product._id}>
-                                    <Td><Image src='test.jpg' alt='test.jpg'/></Td>
+                                    <Td><Image src={item.product.images?.[0]?.url || '/placeholder.jpg'} alt={item.product.name} boxSize='50px' objectFit='cover'/></Td>
                                     <Td>{item.product.name}</Td>
                                     <Td>{item.product.price}₪</Td>
                                     <Td>
