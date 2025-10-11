@@ -132,9 +132,8 @@ export const updateCart = async (req: Request, res:Response) => {
 }
 //update the cart lock and product amount depends on if wanting to lock or unlock cart
 async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & ICart, lock:Boolean): Promise<ResponseError | undefined>{
-    const session = await Cart.startSession()
-    session.startTransaction()
-    cart.$session(session)
+    console.log(`[CART LOCK] Updating cart items stock (lock=${lock})`);
+    
     cart.lock = lock
     
     // Set lock timestamps
@@ -150,22 +149,34 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
         console.log(`[CART LOCK] Cart unlocked, timestamps cleared`);
     }
     
-    for (const cartItem of cart.products.values()){//when cart is locked remove the stock from products temporarily
+    // Update product stock for each item in cart
+    for (const cartItem of cart.products.values()){
         if (typeof cartItem.product === 'object') {
-            if (lock && cartItem.product.stock - cartItem.amount < 0){//this make sure we have enough in stock if locking
-                await session.abortTransaction() //TODO: check that this actually abort transaction and ends session
-                await session.endSession()
-                return new ErrorAmountAboveStock(cartItem.product._id!.toString(),cartItem.product.stock,cartItem.amount)
+            // Validate that product has a stock value
+            const currentStock = cartItem.product.stock;
+            if (currentStock === undefined || currentStock === null || isNaN(currentStock)) {
+                console.error(`[CART LOCK] Product ${cartItem.product._id} has invalid stock value: ${currentStock}`);
+                return new ResponseError(`Product ${cartItem.product._id} has invalid stock configuration`, 500);
             }
-            cartItem.product.stock = cartItem.product.stock + (lock ? -cartItem.amount : cartItem.amount)
-            await Product.findByIdAndUpdate(cartItem.product._id,{stock: cartItem.product.stock}).session(session)
+            
+            // Check if we have enough stock when locking
+            if (lock && currentStock - cartItem.amount < 0){
+                console.error(`[CART LOCK] Insufficient stock for product ${cartItem.product._id}`);
+                return new ErrorAmountAboveStock(cartItem.product._id!.toString(), currentStock, cartItem.amount)
+            }
+            
+            // Update stock: decrease when locking, increase when unlocking
+            const newStock = currentStock + (lock ? -cartItem.amount : cartItem.amount);
+            console.log(`[CART LOCK] Updating product ${cartItem.product._id} stock: ${currentStock} -> ${newStock}`);
+            
+            cartItem.product.stock = newStock;
+            await Product.findByIdAndUpdate(cartItem.product._id, {stock: newStock});
         }
     }
-    await cart.save()
-    //TODO: make sure to send message if commit failed
-    await session.commitTransaction()
-    await session.endSession()
-    return undefined
+    
+    await cart.save();
+    console.log(`[CART LOCK] Cart saved successfully`);
+    return undefined;
 }
 
 export const cartLockAction = async(req: Request, res: Response) => {

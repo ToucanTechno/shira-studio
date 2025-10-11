@@ -3,7 +3,7 @@
 import {
     Button, Card, Center, Collapse, Fade,
     Flex, FormControl, FormHelperText, FormLabel, Heading, Input, Radio, RadioGroup, Spacer,
-    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure,
+    Stack, Table, TableCaption, TableContainer, Tbody, Td, Text, Tfoot, Tr, useDisclosure, useToast,
     Wrap
 } from "@chakra-ui/react";
 import React, {
@@ -92,33 +92,126 @@ const CartOrder = (props: CartOrderProps) => {
         });
     };
 
+    const toast = useToast();
+    const [isLocking, setIsLocking] = useState(false);
+    
+    const refreshCart = useCallback(async () => {
+        if (!props.cartID) return;
+        
+        try {
+            const response = await api.get<ICartModel>(`/cart/${props.cartID}`);
+            props.setCart(response.data);
+            logger.log('Cart refreshed successfully with updated stock values');
+        } catch (error) {
+            logger.error('Failed to refresh cart:', error);
+        }
+    }, [api, props]);
+    
     const handleOrderProceed = useCallback(async () => {
+        logger.log('=== handleOrderProceed START ===');
         if (props.cart === null) {
-            // TODO: try create cart?
             logger.error('null cart');
             return;
         }
-        onClose();
+        
+        // Prevent concurrent lock operations
+        if (isLocking) {
+            logger.log('Lock operation already in progress, ignoring click');
+            return;
+        }
+        
+        logger.log('Current cart state:', {
+            cartId: props.cartID,
+            isLocked: props.cart.lock,
+            productsCount: props.cart.products?.size || 0
+        });
         
         // Check if cart is already locked
         if (props.cart.lock) {
             logger.log('Cart is already locked, skipping lock attempt');
+            onClose();
             return;
         }
         
+        setIsLocking(true);
+        logger.log('Attempting to lock cart...');
         try {
-            await tryLockCart(true);
-        } catch(error) {
-            logger.error(error);
+            const lockResult = await tryLockCart(true);
+            logger.log('Lock result:', lockResult);
+            
+            // Refresh cart to get updated stock values after locking
+            await refreshCart();
+            
+            onClose();
+        } catch(error: unknown) {
+            setIsLocking(false);
+            logger.error('Failed to lock cart - Full error object:', error);
+            
+            // Extract error message from the response
+            let errorMessage = 'שגיאה בנעילת העגלה';
+            
+            if (error && typeof error === 'object') {
+                const err = error as { response?: { data?: unknown }; message?: string };
+                
+                logger.log('Error structure:', {
+                    hasResponse: !!err.response,
+                    hasData: !!err.response?.data,
+                    dataType: typeof err.response?.data,
+                    data: err.response?.data,
+                    hasMessage: !!err.message,
+                    message: err.message
+                });
+                
+                // Check if response.data has a message property
+                if (err.response?.data && typeof err.response.data === 'object' && 'message' in err.response.data) {
+                    errorMessage = (err.response.data as { message: string }).message;
+                    logger.log('Using response.data.message:', errorMessage);
+                }
+                // Check if response.data is a string
+                else if (typeof err.response?.data === 'string') {
+                    errorMessage = err.response.data;
+                    logger.log('Using response.data (string):', errorMessage);
+                }
+                // Check if error has a message property
+                else if (err.message) {
+                    errorMessage = err.message;
+                    logger.log('Using error.message:', errorMessage);
+                }
+            }
+            
+            logger.log('Final error message for toast:', errorMessage);
+            
+            // Show error toast to user
+            toast({
+                title: 'שגיאה',
+                description: errorMessage,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top'
+            });
+            
             return;
+        } finally {
+            setIsLocking(false);
         }
-    }, [onClose, tryLockCart, props.cart])
+        logger.log('=== handleOrderProceed END ===');
+    }, [onClose, tryLockCart, props.cart, props.cartID, toast, refreshCart, isLocking])
 
     return (
         <>
             <Collapse in={isOpen} animateOpacity>
                 <Center>
-                    <Button onClick={handleOrderProceed} colorScheme='yellow' mt={2}>לביצוע ההזמנה</Button>
+                    <Button
+                        onClick={handleOrderProceed}
+                        colorScheme='yellow'
+                        mt={2}
+                        isLoading={isLocking}
+                        loadingText="נועל עגלה..."
+                        isDisabled={isLocking}
+                    >
+                        לביצוע ההזמנה
+                    </Button>
                 </Center>
             </Collapse>
             <Fade in={!isOpen}>

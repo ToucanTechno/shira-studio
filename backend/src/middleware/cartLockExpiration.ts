@@ -36,21 +36,15 @@ export const checkCartLockExpiration = async (
         if (cart.lockExpiresAt && now > cart.lockExpiresAt) {
             console.log(`[CART LOCK EXPIRATION] Cart ${cartId} lock expired at ${cart.lockExpiresAt.toISOString()}, auto-unlocking`);
             
-            // Release stock for all products in cart
-            const session = await Cart.startSession();
-            session.startTransaction();
-            
             try {
-                cart.$session(session);
-                
                 // Release stock back to products
                 for (const cartItem of cart.products.values()) {
                     if (typeof cartItem.product === 'object') {
                         const newStock = cartItem.product.stock + cartItem.amount;
+                        console.log(`[CART LOCK EXPIRATION] Releasing stock for product ${cartItem.product._id}: ${cartItem.product.stock} -> ${newStock}`);
                         await mongoose.model('Product').findByIdAndUpdate(
                             cartItem.product._id,
-                            { stock: newStock },
-                            { session }
+                            { stock: newStock }
                         );
                     }
                 }
@@ -61,13 +55,9 @@ export const checkCartLockExpiration = async (
                 cart.lockExpiresAt = undefined;
                 await cart.save();
                 
-                await session.commitTransaction();
                 console.log(`[CART LOCK EXPIRATION] Cart ${cartId} successfully unlocked and stock released`);
             } catch (error) {
-                await session.abortTransaction();
                 console.error(`[CART LOCK EXPIRATION] Failed to unlock cart ${cartId}:`, error);
-            } finally {
-                await session.endSession();
             }
         }
         

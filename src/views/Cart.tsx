@@ -54,9 +54,19 @@ const Cart = () => {
     }, [api, guestData.cartID]);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
+        console.log('=== handleItemCountChange CALLED ===', { val, productKey });
+        console.log('Call stack:', new Error().stack);
+        
         if (!cart) {
             // Should never happen
             return Promise.reject('No cart to change items count');
+        }
+
+        // Check if value actually changed - do this BEFORE unlocking to avoid unnecessary operations
+        const amountToChange = val - cart.products[productKey].amount;
+        if (amountToChange === 0) {
+            console.log('Amount unchanged, skipping update');
+            return;
         }
 
         // Try to unlock cart if it was previously locked
@@ -81,10 +91,6 @@ const Cart = () => {
         }
 
         // Update product amount in DB
-        const amountToChange = val - cart.products[productKey].amount;
-        if (amountToChange === 0) {
-            return;
-        }
         console.log('amount to change', amountToChange)
         try {
             await api.put(`/cart/${guestData.cartID}`, {
@@ -121,6 +127,8 @@ const Cart = () => {
     }, [handleItemCountChange]);
 
     const handleLockExpire = useCallback(async () => {
+        console.log('=== handleLockExpire CALLED ===');
+        console.log('Call stack:', new Error().stack);
         logger.log('[CART] Lock expired, unlocking cart');
         
         alertToast({

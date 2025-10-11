@@ -83,30 +83,70 @@ export const CartProvider = (props: Props) => {
      * If cart is already locked or unlocked, resolves with false.
      */
     const tryLockCart = useCallback(async (lockAction: boolean) => {
+        // Log stack trace to see who called this function
+        console.log(`=== tryLockCart START (action: ${lockAction ? 'LOCK' : 'UNLOCK'}) ===`);
+        console.log('Call stack:', new Error().stack);
+        logger.log(`=== tryLockCart START (action: ${lockAction ? 'LOCK' : 'UNLOCK'}) ===`);
+        
         if (!guestData) {
+            logger.error('No guest data');
             return Promise.reject('No guest data');
         }
         if (guestData.cartID === null) {
+            logger.error(`No cart to ${(lockAction) ? '' : 'un'}lock`);
             return Promise.reject(`No cart to ${(lockAction) ? '' : 'un'}lock`);
         }
+        
+        logger.log(`Making API call to /cart/${guestData.cartID}/lock with lock=${lockAction}`);
+        
         try {
             const lockResult = await api.put(`/cart/${guestData.cartID}/lock`, {lock: lockAction});
-            logger.log(`cart ${(lockAction) ? '' : 'un'}lock result:`, lockResult);
-            // TODO: how to trigger cart reload in all use cases?
+            logger.log(`Cart ${(lockAction) ? '' : 'un'}lock successful:`, lockResult.data);
             return Promise.resolve(true);
         } catch(error: unknown) {
-            // TODO: change when error handling updates
-            const axiosError = error as { response?: { data?: string } };
-            if (axiosError.response?.data === "cart already locked") {
-                logger.log("Trying to lock cart, but cart is already locked");
+            logger.error('Lock API call failed:', error);
+            
+            const axiosError = error as {
+                response?: {
+                    status?: number;
+                    data?: string | { message?: string; errorCode?: string; cartId?: string }
+                }
+            };
+            
+            logger.log('Error details:', {
+                status: axiosError.response?.status,
+                data: axiosError.response?.data,
+                dataType: typeof axiosError.response?.data
+            });
+            
+            const errorData = axiosError.response?.data;
+            
+            // Handle both string and object responses
+            let errorMessage = '';
+            let errorCode = '';
+            
+            if (typeof errorData === 'string') {
+                errorMessage = errorData;
+            } else if (errorData && typeof errorData === 'object') {
+                errorMessage = errorData.message || '';
+                errorCode = errorData.errorCode || '';
+            }
+            
+            logger.log('Parsed error:', { errorMessage, errorCode });
+            
+            // Check for cart already locked/unlocked errors
+            if (errorMessage.includes('is locked') || errorMessage.includes('locked') || errorCode === 'CART_LOCKED') {
+                logger.log("Cart is already locked - this is expected, continuing");
                 return Promise.resolve(false);
-            } else if (axiosError.response?.data === "cart already unlocked") {
-                logger.log("Trying to unlock cart, but cart is already unlocked");
+            } else if (errorMessage.includes('is unlocked') || errorMessage.includes('unlocked') || errorCode === 'CART_UNLOCKED') {
+                logger.log("Cart is already unlocked - this is expected, continuing");
                 return Promise.resolve(false);
             }
-            logger.error(error);
-            logger.log('resolve or reject tryLockCart?')
+            
+            logger.error('Unhandled lock error, rejecting');
             return Promise.reject(error);
+        } finally {
+            logger.log('=== tryLockCart END ===');
         }
     }, [guestData, api]);
 
