@@ -6,6 +6,10 @@ import CartWrapper from 'src/utils/CartWrapper'
 
 const theme = extendTheme({
     direction: 'rtl',
+    fonts: {
+        heading: `'Alef', 'Segoe UI', system-ui, -apple-system, sans-serif`,
+        body: `'Alef', 'Segoe UI', system-ui, -apple-system, sans-serif`,
+    },
 })
 
 export function Providers({ children }: { children: React.ReactNode }) {

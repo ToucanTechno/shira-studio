@@ -1,26 +1,58 @@
 .gallery {
-    width: 85vw; /* Not % since vw includes scrollbar */
     display: flex;
-    flex-direction: row;
-    column-gap: 3vw;
-    justify-content: flex-start;
-    align-items: flex-start;
     flex-wrap: wrap;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    justify-content: flex-start;
+}
+
+.gallery-item {
+    flex: 0 0 auto;
 }
 
 .gallery-item a {
-    width: inherit;
-    color: black;
+    width: 180px;
+    color: #2D3748;
     text-decoration: none;
-    font-size: 2vw;
-    color: #cea525;
+    font-size: 1.125rem;
+    font-weight: 600;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #E2E8F0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: 0.01em;
 }
 
 .gallery-item a:hover {
-    color: #9a7918;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #CBD5E0;
+}
+
+.gallery-item img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border: 2px solid #F7FAFC;
+    transition: border-color 0.3s ease;
+}
+
+.gallery-item a:hover img {
+    border-color: #E2E8F0;
 }
 
 .gallery-item mark {
-    background-color: initial;
+    background-color: transparent;
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 400;
 }

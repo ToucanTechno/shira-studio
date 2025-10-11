@@ -51,7 +51,15 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
             if (newProducts?.length) {
                 setPage(prevPage => prevPage + 1);
                 setDynamicProducts(prevProducts => {
-                    const newDynamicProducts = [...prevProducts, ...newProducts];
+                    console.log('[useInfiniteScroll] prevProducts length:', prevProducts.length, 'newProducts length:', newProducts.length);
+                    
+                    // Filter out products that already exist (prevent duplicates from React strict mode)
+                    const existingIds = new Set(prevProducts.map(p => p._id));
+                    const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p._id));
+                    
+                    console.log('[useInfiniteScroll] unique new products:', uniqueNewProducts.length);
+                    const newDynamicProducts = [...prevProducts, ...uniqueNewProducts];
+                    console.log('[useInfiniteScroll] combined length:', newDynamicProducts.length);
                     setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
                     return newDynamicProducts;
                 });
@@ -88,7 +96,11 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                         if (newProducts?.length) {
                             setPage(prevPage => prevPage + 1);
                             setDynamicProducts(prevProducts => {
-                                const newDynamicProducts = [...prevProducts, ...newProducts];
+                                // Filter out products that already exist (prevent duplicates)
+                                const existingIds = new Set(prevProducts.map(p => p._id));
+                                const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p._id));
+                                
+                                const newDynamicProducts = [...prevProducts, ...uniqueNewProducts];
                                 setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
                                 return newDynamicProducts;
                             });

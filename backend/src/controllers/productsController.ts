@@ -236,12 +236,20 @@ export const getProducts = async (req: Request, res: Response) => {
         const categoryName = req.query["category"] as string;
         
         // Build query filter
-        let filter = {};
+        let filter: any = {};
+        let category = null;
         if (categoryName) {
             // Find the category by name to get its ID
-            const category = await Category.findOne({ name: categoryName });
+            category = await Category.findOne({ name: categoryName });
             if (category) {
+                // Use the ObjectId directly - categories are stored as ObjectIds in the database
                 filter = { categories: category._id };
+                
+            } else {
+                console.log(`Category "${categoryName}" not found in database`);
+                // Return empty result set if category doesn't exist
+                res.status(200).send({ products: [], total: 0 });
+                return;
             }
         }
         
@@ -253,7 +261,9 @@ export const getProducts = async (req: Request, res: Response) => {
 
         res.status(200).send({ products: products, total: productsCount });
     } catch (error: any) {
-        res.status(500).send(error.message);
+        console.error('Error in getProducts:', error);
+        // Always return proper structure even on error
+        res.status(500).send({ products: [], total: 0, error: error.message });
     }
 };
 

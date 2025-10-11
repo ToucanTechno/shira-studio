@@ -5,6 +5,13 @@ import TopNavbar from '@/components/common/TopNavbar'
 import { Providers } from './providers'
 import './globals.css'
 import { usePathname } from 'next/navigation'
+import { Alef } from 'next/font/google'
+
+const alef = Alef({
+    subsets: ['latin', 'hebrew'],
+    weight: ['400', '700'],
+    display: 'swap',
+})
 
 export default function RootLayout({
                                        children,
@@ -16,7 +23,7 @@ export default function RootLayout({
 
     return (
         <html lang="he" dir="rtl">
-        <body>
+        <body className={alef.className}>
         <Providers>
             <Box className="App" dir="rtl">
                 {!isControlPanel && <TopNavbar />}

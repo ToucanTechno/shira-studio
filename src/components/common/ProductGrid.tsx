@@ -23,8 +23,11 @@ export const ProductGrid = ({ categoryName, initialProducts = [] }: ProductGridP
     } = useInfiniteScroll(initialProducts, categoryName);
 
     useEffect(() => {
-        getInitialProducts();
-    }, [getInitialProducts]);
+        // Only fetch initial products if we don't have SSR products
+        if (initialProducts.length === 0) {
+            getInitialProducts();
+        }
+    }, [getInitialProducts, initialProducts.length]);
 
     if (dynamicProducts.length === 0 && !isLoading) {
         return null;

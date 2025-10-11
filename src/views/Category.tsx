@@ -9,13 +9,14 @@ import {Box, Heading, Spinner, Text} from "@chakra-ui/react";
 import axios from "axios";
 import {ProductGrid} from "../components/common/ProductGrid";
 import { API_URL } from '../utils/apiConfig';
+import { IProduct } from '../models/Product';
 
 interface CategoryInfo {
     _id: string;
     name: string;
     text: string;
     parent: string;
-    products: string[];
+    products: (string | IProduct)[];
 }
 
 interface CategoryProps {
@@ -76,20 +77,64 @@ const Category = ({ category }: CategoryProps) => {
     }
 
     return (
-        <Box>
-            <h2>{categoryInfo.text}</h2>
+        <Box className="container" py={6}>
+            {/* Main Category Title */}
+            <Heading
+                as="h1"
+                size="2xl"
+                mb={8}
+                textAlign="center"
+                color="gray.800"
+                fontWeight="bold"
+            >
+                {categoryInfo.text}
+            </Heading>
             
             {/* Subcategories Section */}
             {subcategories.length > 0 && (
-                <Box mb={8}>
-                    <Heading as="h3" size="md" mb={4}>קטגוריות</Heading>
+                <Box
+                    mb={8}
+                    p={6}
+                    bg="white"
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    boxShadow="sm"
+                >
+                    <Heading
+                        as="h3"
+                        size="lg"
+                        mb={6}
+                        color="gray.700"
+                        fontWeight="semibold"
+                        borderBottom="2px solid"
+                        borderColor="gray.300"
+                        pb={3}
+                    >
+                        קטגוריות
+                    </Heading>
                     <Box className="gallery">
                         {subcategories.map(item => {
+                            const productCount = item.products?.length || 0;
+                            
+                            // Get the first product's first image as thumbnail
+                            let thumbnailUrl = CategorySampleImage.src; // Default fallback
+                            
+                            if (item.products && item.products.length > 0) {
+                                const firstProduct = item.products[0];
+                                // Check if it's a populated product object (not just an ID string)
+                                if (typeof firstProduct === 'object' && firstProduct.images && firstProduct.images.length > 0) {
+                                    // Sort images by order and get the first one
+                                    const sortedImages = [...firstProduct.images].sort((a, b) => a.order - b.order);
+                                    thumbnailUrl = sortedImages[0].url;
+                                }
+                            }
+                            
                             return (
                                 <Box className="gallery-item" key={item.name}>
                                     <ChakraLink as={Link} href={`/categories/${category}/${item.name}`}>
-                                        <img src={CategorySampleImage.src} alt={item.name}/>
-                                        {item.text} <mark>({item.products.length})</mark>
+                                        <img src={thumbnailUrl} alt={item.text}/>
+                                        {item.text} <mark>({productCount})</mark>
                                     </ChakraLink>
                                 </Box>
                             )
@@ -99,8 +144,26 @@ const Category = ({ category }: CategoryProps) => {
             )}
 
             {/* Products Section */}
-            <Box>
-                <Heading as="h3" size="md" mb={4}>מוצרים</Heading>
+            <Box
+                p={6}
+                bg="white"
+                borderRadius="lg"
+                border="1px solid"
+                borderColor="gray.200"
+                boxShadow="sm"
+            >
+                <Heading
+                    as="h3"
+                    size="lg"
+                    mb={6}
+                    color="gray.700"
+                    fontWeight="semibold"
+                    borderBottom="2px solid"
+                    borderColor="gray.300"
+                    pb={3}
+                >
+                    מוצרים
+                </Heading>
                 <ProductGrid categoryName={category} />
             </Box>
 

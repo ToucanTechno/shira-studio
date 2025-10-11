@@ -66,9 +66,42 @@ export const ProductCategory = ({ category, productCategory }: ProductCategoryPr
     }
 
     return (
-        <Box className="container">
-            <Heading as='h2'>{categoryInfo.text}</Heading>
-            <ProductGrid categoryName={productCategory} />
+        <Box className="container" py={6}>
+            {/* Main Category Title */}
+            <Heading
+                as="h1"
+                size="2xl"
+                mb={8}
+                textAlign="center"
+                color="gray.800"
+                fontWeight="bold"
+            >
+                {categoryInfo.text}
+            </Heading>
+            
+            {/* Products Section */}
+            <Box
+                p={6}
+                bg="white"
+                borderRadius="lg"
+                border="1px solid"
+                borderColor="gray.200"
+                boxShadow="sm"
+            >
+                <Heading
+                    as="h3"
+                    size="lg"
+                    mb={6}
+                    color="gray.700"
+                    fontWeight="semibold"
+                    borderBottom="2px solid"
+                    borderColor="gray.300"
+                    pb={3}
+                >
+                    מוצרים
+                </Heading>
+                <ProductGrid categoryName={productCategory} />
+            </Box>
         </Box>
     );
 }
