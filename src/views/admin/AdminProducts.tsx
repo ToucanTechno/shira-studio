@@ -80,7 +80,7 @@ const AdminProducts = () => {
                                 <Td>
                                     <Image
                                         boxSize='60px'
-                                        src={item.images && item.images.length > 0 ? item.images[0].url : "/placeholder-image.jpg"}
+                                        src={item.images && item.images.length > 0 ? item.images[0].url : "/images/placeholder-image.svg"}
                                         alt={item.images && item.images.length > 0 ? item.images[0].alt_text || item.name : item.name}
                                         objectFit="cover"
                                         borderRadius="md"

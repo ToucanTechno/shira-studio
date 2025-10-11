@@ -43,7 +43,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
                 borderRadius="md"
             >
                 <Image
-                    src="/placeholder-image.jpg"
+                    src="/images/placeholder-image.svg"
                     alt={productName}
                     maxH="500px"
                     objectFit="contain"

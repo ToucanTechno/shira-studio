@@ -28,8 +28,14 @@ export const getCart = async (req:Request,res:Response) => {
     let cart = (await Cart.findById(cartId).populate('products.$*.product'))
     if (cart !== null && cart.products !== null) {
         cart.products.forEach((prod) => {
-            delete (prod.product as any)._doc.__v
-            delete (prod as any)._doc._id
+            // Add diagnostic logging for null products
+            if (prod.product === null) {
+                console.error(`[CART DEBUG] Null product found in cart ${cartId}`);
+                console.error(`[CART DEBUG] Product entry:`, JSON.stringify(prod, null, 2));
+            } else {
+                delete (prod.product as any)._doc.__v
+                delete (prod as any)._doc._id
+            }
         });
     }
     delete (cart as any)._doc.__v

@@ -49,7 +49,7 @@ export const ProductGrid = ({ categoryName, initialProducts = [] }: ProductGridP
                                     objectFit='contain'
                                     w='100%'
                                     height={['250px', '220px', '200px', '180px', '160px']}
-                                    src={firstImage?.url || '/placeholder-image.jpg'}
+                                    src={firstImage?.url || '/images/placeholder-image.svg'}
                                     alt={firstImage?.alt_text || product.name}
                                 />
                                 {product.description}

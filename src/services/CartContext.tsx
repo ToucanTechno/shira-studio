@@ -125,27 +125,26 @@ export const CartProvider = (props: Props) => {
 
         let wasLocked = false;
 
-        // First, check current cart state and unlock if needed
+        // First, check current cart lock state
         try {
-            logger.log('Attempting to unlock cart...');
-            const unlockResult = await api.put(`/cart/${cartID}/lock`, {lock: false});
-            logger.log(`Cart unlock successful:`, unlockResult.data);
-            wasLocked = true; // Cart was locked, so we unlocked it
-        } catch(error: unknown) {
-            logger.log('Unlock failed, checking error...');
-            const axiosError = error as { response?: { data?: { errorCode?: number; message?: string } } };
-            logger.log('Unlock error response:', axiosError.response?.data);
+            logger.log('Checking cart lock state...');
+            const cartResponse = await api.get<{ lock: boolean }>(`/cart/${cartID}`);
+            const currentLockState = cartResponse.data.lock;
+            logger.log(`Current cart lock state: ${currentLockState ? 'LOCKED' : 'UNLOCKED'}`);
 
-            // Check if the error is specifically about cart being already unlocked
-            if (axiosError.response?.data &&
-                axiosError.response.data.errorCode === 13 &&
-                axiosError.response.data.message?.includes("is unlocked")) {
-                logger.log("Cart was already unlocked, proceeding with operation");
-                wasLocked = false; // Cart was already unlocked
+            // Only attempt to unlock if cart is actually locked
+            if (currentLockState) {
+                logger.log('Cart is locked, unlocking...');
+                const unlockResult = await api.put(`/cart/${cartID}/lock`, {lock: false});
+                logger.log(`Cart unlock successful:`, unlockResult.data);
+                wasLocked = true; // Cart was locked, so we unlocked it
             } else {
-                logger.log('Unlock failed with unexpected error:', error);
-                return Promise.reject(error);
+                logger.log('Cart is already unlocked, skipping unlock step');
+                wasLocked = false; // Cart was already unlocked
             }
+        } catch(error: unknown) {
+            logger.error('Failed to check/unlock cart:', error);
+            return Promise.reject(error);
         }
 
         logger.log("About to execute operation...");
