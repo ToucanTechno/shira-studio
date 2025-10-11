@@ -99,6 +99,13 @@ const CartOrder = (props: CartOrderProps) => {
             return;
         }
         onClose();
+        
+        // Check if cart is already locked
+        if (props.cart.lock) {
+            logger.log('Cart is already locked, skipping lock attempt');
+            return;
+        }
+        
         try {
             await tryLockCart(true);
         } catch(error) {

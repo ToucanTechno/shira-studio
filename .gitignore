@@ -28,3 +28,6 @@ package-lock.json
 
 .env
 backend/.env
+backend/src/scripts/*.csv
+backend/src/scripts/*.json
+backup/*

@@ -15,6 +15,7 @@ import {BsCartDash} from "react-icons/bs";
 import {CartContext} from "../services/CartContext";
 import { useRouter } from "next/navigation";
 import { logger } from "../utils/logger";
+import { CartLockTimer } from "../components/CartLockTimer";
 
 const Cart = () => {
     const [cart, setCart] = useState<ICartModel | null>(null);
@@ -119,6 +120,25 @@ const Cart = () => {
         handleItemCountChange(0, productKey);
     }, [handleItemCountChange]);
 
+    const handleLockExpire = useCallback(async () => {
+        logger.log('[CART] Lock expired, unlocking cart');
+        
+        alertToast({
+            title: 'הזמן פג',
+            description: 'הזמן להשלמת ההזמנה פג. העגלה שוחררה.',
+            status: 'warning',
+            duration: 5000,
+        });
+        
+        try {
+            await tryLockCart(false);
+            // Reload the page to refresh cart state
+            window.location.reload();
+        } catch (error) {
+            logger.error('[CART] Failed to unlock expired cart:', error);
+        }
+    }, [tryLockCart, alertToast]);
+
     if (!cart || Object.keys(cart.products).length === 0) {
         logger.component('Cart', 'Rendering empty cart message', {
             hasCart: !!cart,
@@ -135,9 +155,17 @@ const Cart = () => {
         productCount: Object.keys(cart.products).length,
         totalPrice
     });
+    
     return (
         <Flex direction='column' align='center' w={['100%', '100%', '80%']} alignSelf='center'>
             <Heading as='h1' p={2}>עגלת קניות</Heading>
+            
+            {cart?.lock && cart?.lockExpiresAt && (
+                <CartLockTimer
+                    lockExpiresAt={cart.lockExpiresAt}
+                    onExpire={handleLockExpire}
+                />
+            )}
             <TableContainer w='100%'>
                 <Table colorScheme='orange' size={['sm', 'sm', 'md']}>
                     <Thead>

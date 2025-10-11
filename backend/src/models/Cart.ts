@@ -9,9 +9,11 @@ export interface ProductOrder {//maybe have better name used both in cart and in
 export interface ICart {
     userId?: Types.ObjectId;
     products: Map<string , ProductOrder>
-    createdAt?: Date 
-    updatedAt?: Date //TODO: add accessedAt so we can delete cart more gracefully 
+    createdAt?: Date
+    updatedAt?: Date //TODO: add accessedAt so we can delete cart more gracefully
     lock: Boolean
+    lockedAt?: Date  // When the cart was locked
+    lockExpiresAt?: Date  // When the lock will expire (15 minutes after lockedAt)
 }
 
 const cartSchema = new mongoose.Schema<ICart>({
@@ -31,6 +33,14 @@ const cartSchema = new mongoose.Schema<ICart>({
     lock: {
         type: Boolean,
         default: false
+    },
+    lockedAt: {
+        type: Date,
+        required: false
+    },
+    lockExpiresAt: {
+        type: Date,
+        required: false
     }
 }, { timestamps: true , minimize: false});
 

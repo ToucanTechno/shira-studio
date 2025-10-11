@@ -13,4 +13,6 @@ export interface ICartModel {
     createdAt?: string;
     updatedAt?: string; //TODO: add accessedAt so we can delete cart more gracefully
     lock: boolean;
+    lockedAt?: string;
+    lockExpiresAt?: string;
 }

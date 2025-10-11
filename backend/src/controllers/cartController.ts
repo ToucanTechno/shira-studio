@@ -83,8 +83,8 @@ export const updateCart = async (req: Request, res:Response) => {
     let amountToChange = req.body['amount']
     const err = await RequestValidator.validate(
         [{name: 'id', validationFuncs: [isMissingField.bind(null,cartId), isInvalidObjId.bind(null,cartId),
-                                        isDocNotFoundById.bind(null,cartId,Cart), isCartLocked.bind(null, cartId,false)]},
-         {name: 'productId', validationFuncs: [isMissingField.bind(null,prodId), isInvalidObjId.bind(null,prodId), 
+                                        isDocNotFoundById.bind(null,cartId,Cart)]},
+         {name: 'productId', validationFuncs: [isMissingField.bind(null,prodId), isInvalidObjId.bind(null,prodId),
                                                isDocNotFoundById.bind(null,prodId,Product)]},
          {name: 'amount', validationFuncs: [isMissingField.bind(null,amountToChange),isInvalidType.bind(null,amountToChange,'number')]}
         ]
@@ -94,7 +94,21 @@ export const updateCart = async (req: Request, res:Response) => {
         return
     }
 
-    const cart = (await Cart.findById(cartId))!
+    let cart = (await Cart.findById(cartId).populate('products.$*.product'))!
+    
+    // Auto-unlock cart if it's locked (this releases reserved stock)
+    if (cart.lock) {
+        console.log(`[CART UPDATE] Cart ${cartId} is locked, auto-unlocking before modification`);
+        const unlockError = await updateCartItemsStock(cart, false);
+        if (unlockError) {
+            console.error(`[CART UPDATE] Failed to unlock cart: ${unlockError.message}`);
+            unlockError.send(res);
+            return;
+        }
+        // Refresh cart after unlock
+        cart = (await Cart.findById(cartId).populate('products.$*.product'))!;
+    }
+    
     const product = (await Product.findById(prodId))!;
     const prodToModify = (await cart.populate('products.$*.product')).products.get(prodId)
     let newAmount = amountToChange
@@ -122,6 +136,20 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
     session.startTransaction()
     cart.$session(session)
     cart.lock = lock
+    
+    // Set lock timestamps
+    if (lock) {
+        const now = new Date();
+        const lockDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
+        cart.lockedAt = now;
+        cart.lockExpiresAt = new Date(now.getTime() + lockDuration);
+        console.log(`[CART LOCK] Cart locked until ${cart.lockExpiresAt.toISOString()}`);
+    } else {
+        cart.lockedAt = undefined;
+        cart.lockExpiresAt = undefined;
+        console.log(`[CART LOCK] Cart unlocked, timestamps cleared`);
+    }
+    
     for (const cartItem of cart.products.values()){//when cart is locked remove the stock from products temporarily
         if (typeof cartItem.product === 'object') {
             if (lock && cartItem.product.stock - cartItem.amount < 0){//this make sure we have enough in stock if locking
@@ -143,6 +171,7 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
 export const cartLockAction = async(req: Request, res: Response) => {
     const cartId = req.params['id']!
     const lock = req.body['lock'];
+    console.log(`[CART LOCK ACTION] Called with cartId=${cartId}, lock=${lock}`);
     const err = await RequestValidator.validate(
         [
             {name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),
@@ -156,8 +185,10 @@ export const cartLockAction = async(req: Request, res: Response) => {
     }
     else {
         const cart = (await Cart.findById(cartId).populate('products.$*.product'))!
+        console.log(`[CART LOCK ACTION] Current cart lock state: ${cart.lock}`);
         const expectedLock = await isCartLocked(cartId,!lock,"")
         if(expectedLock !== undefined){
+            console.log(`[CART LOCK ACTION] Validation failed, sending error`);
             expectedLock.send(res)
             return
         }
