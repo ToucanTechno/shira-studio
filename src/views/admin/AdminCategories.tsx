@@ -18,6 +18,7 @@ import AdminCategoriesAdd from "./AdminCategoriesAdd";
 import Select, {SingleValue} from "react-select";
 import {SelectOption} from "../../utils/ChakraTypes";
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 const AdminCategories = () => {
     const [categories, setCategories] = useState<ICategory[]>([]);
@@ -36,13 +37,13 @@ const AdminCategories = () => {
                 setCategories(response.data as ICategory[]);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (error: any) {
-                console.error(error);
+                logger.error(error);
             }
         })();
     }, [api, dirty]);
 
     const handleEditCategory = async (el: FormEvent<HTMLFormElement>) => {
-        console.log(el);
+        logger.log(el);
         // TODO: edit category when possible
         // try {
         // api.put(`/categories/${editID}`, )

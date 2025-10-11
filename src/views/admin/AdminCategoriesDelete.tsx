@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {useConst} from "@chakra-ui/react";
 import axios from "axios";
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 const AdminCategoriesDelete = () => {
     const router = useRouter();
@@ -11,12 +12,12 @@ const AdminCategoriesDelete = () => {
     const id = params?.id;
     useEffect(() => {
 
-        console.log(id);
+        logger.log(id);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         api.delete('categories/' + id).then((res: any) => {
-            console.log(res);
+            logger.log(res);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }).catch((error: any) => console.error(error));
+        }).catch((error: any) => logger.error(error));
         router.back();
     });
     return (

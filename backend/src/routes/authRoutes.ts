@@ -1,6 +1,7 @@
 import express from "express";
 import { login, profile, register } from "../controllers/userController";
 import { authorize } from "../services/authorizationService";
+import { logger } from "../utils/logger";
 
 export const authRoutes = express.Router();
 
@@ -15,15 +16,15 @@ authRoutes.post("/admin/sign-in", login);
 
 // Add debugging endpoint for GET requests to sign-in
 authRoutes.get("/sign-in", (req, res) => {
-    console.log('GET request received at /api/auth/sign-in');
-    console.log('Query parameters:', req.query);
+    logger.log('GET request received at /api/auth/sign-in');
+    logger.log('Query parameters:', req.query);
     res.status(200).send({ message: "Sign-in endpoint is working. Please use POST method for actual sign-in." });
 });
 
 // Add debugging endpoint for GET requests to admin sign-in
 authRoutes.get("/admin/sign-in", (req, res) => {
-    console.log('GET request received at /api/auth/admin/sign-in');
-    console.log('Query parameters:', req.query);
+    logger.log('GET request received at /api/auth/admin/sign-in');
+    logger.log('Query parameters:', req.query);
     res.status(200).send({ message: "Admin sign-in endpoint is working. Please use POST method for actual admin sign-in." });
 });
 

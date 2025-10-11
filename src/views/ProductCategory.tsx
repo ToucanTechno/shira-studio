@@ -5,6 +5,7 @@ import {Box, Heading, Spinner, Text} from "@chakra-ui/react";
 import axios from "axios";
 import {ProductGrid} from "../components/common/ProductGrid";
 import { API_URL } from '../utils/apiConfig';
+import { logger } from '../utils/logger';
 
 interface ProductCategoryInfo {
     _id: string;
@@ -31,7 +32,7 @@ export const ProductCategory = ({ category, productCategory }: ProductCategoryPr
                 const response = await axios.get<ProductCategoryInfo>(`${API_URL}/categories/name/${productCategory}`);
                 setCategoryInfo(response.data);
             } catch (err) {
-                console.error('Error fetching category:', err);
+                logger.error('Error fetching category:', err);
                 setError('Failed to load category data');
             } finally {
                 setIsFetchingCategory(false);

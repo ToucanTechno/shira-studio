@@ -8,6 +8,7 @@ import { ResponseError ,ErrorDocNotDeleted,ErrorDocNotFound, ErrorDocNotUpdated,
 import { RequestValidator } from "../utils/validator";
 import { isDocNotFoundById, isInvalidObjId, isInvalidType, isMissingField } from "../utils/paramChecks";
 import ImageUploadService from "../services/imageUploadService";
+import { logger } from "../utils/logger";
 
 
 
@@ -227,7 +228,7 @@ export const productUploadErr = (err: any, _req: Request, res: Response, _next: 
 }
 
 export const getProducts = async (req: Request, res: Response) => {
-    console.log("get products", req.params, req.query['skip'], req.query['limit'], req.query['category']);
+    logger.log("get products", req.params, req.query['skip'], req.query['limit'], req.query['category']);
     try {
         // TODO: should replace with Range HTTP header
         const skip = Math.max(0, parseInt(req.query["skip"] as string) || 0);
@@ -246,7 +247,7 @@ export const getProducts = async (req: Request, res: Response) => {
                 filter = { categories: category._id };
                 
             } else {
-                console.log(`Category "${categoryName}" not found in database`);
+                logger.log(`Category "${categoryName}" not found in database`);
                 // Return empty result set if category doesn't exist
                 res.status(200).send({ products: [], total: 0 });
                 return;
@@ -261,7 +262,7 @@ export const getProducts = async (req: Request, res: Response) => {
 
         res.status(200).send({ products: products, total: productsCount });
     } catch (error: any) {
-        console.error('Error in getProducts:', error);
+        logger.error('Error in getProducts:', error);
         // Always return proper structure even on error
         res.status(500).send({ products: [], total: 0, error: error.message });
     }

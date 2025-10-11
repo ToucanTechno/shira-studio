@@ -13,6 +13,7 @@ import {
 } from "../utils/paramChecks";
 import { User } from "../models/User";
 import {ErrorAmountAboveStock, ResponseError} from "../utils/error";
+import { logger } from "../utils/logger";
 
 
 
@@ -30,8 +31,8 @@ export const getCart = async (req:Request,res:Response) => {
         cart.products.forEach((prod) => {
             // Add diagnostic logging for null products
             if (prod.product === null) {
-                console.error(`[CART DEBUG] Null product found in cart ${cartId}`);
-                console.error(`[CART DEBUG] Product entry:`, JSON.stringify(prod, null, 2));
+                logger.error(`[CART DEBUG] Null product found in cart ${cartId}`);
+                logger.error(`[CART DEBUG] Product entry:`, JSON.stringify(prod, null, 2));
             } else {
                 delete (prod.product as any)._doc.__v
                 delete (prod as any)._doc._id
@@ -60,7 +61,7 @@ export const insertCart = async (req: Request, res: Response) => {
     //TODO: have interval to remove unactive carts
     const cartObj = new Cart({products: new Map(), lock: false});
     const userId = req.body["userId"]
-    console.log(`Try creating new cart with ${req.body['userId']}`);
+    logger.log(`Try creating new cart with ${req.body['userId']}`);
     if (userId){
         const err = await RequestValidator.validate(
             [{name:'userId',validationFuncs:[isInvalidObjId.bind(null,userId),isDocNotFoundById.bind(null,userId,User),
@@ -98,10 +99,10 @@ export const updateCart = async (req: Request, res:Response) => {
     
     // Auto-unlock cart if it's locked (this releases reserved stock)
     if (cart.lock) {
-        console.log(`[CART UPDATE] Cart ${cartId} is locked, auto-unlocking before modification`);
+        logger.log(`[CART UPDATE] Cart ${cartId} is locked, auto-unlocking before modification`);
         const unlockError = await updateCartItemsStock(cart, false);
         if (unlockError) {
-            console.error(`[CART UPDATE] Failed to unlock cart: ${unlockError.message}`);
+            logger.error(`[CART UPDATE] Failed to unlock cart: ${unlockError.message}`);
             unlockError.send(res);
             return;
         }
@@ -132,7 +133,7 @@ export const updateCart = async (req: Request, res:Response) => {
 }
 //update the cart lock and product amount depends on if wanting to lock or unlock cart
 async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & ICart, lock:Boolean): Promise<ResponseError | undefined>{
-    console.log(`[CART LOCK] Updating cart items stock (lock=${lock})`);
+    logger.log(`[CART LOCK] Updating cart items stock (lock=${lock})`);
     
     cart.lock = lock
     
@@ -142,11 +143,11 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
         const lockDuration = 15 * 60 * 1000; // 15 minutes in milliseconds
         cart.lockedAt = now;
         cart.lockExpiresAt = new Date(now.getTime() + lockDuration);
-        console.log(`[CART LOCK] Cart locked until ${cart.lockExpiresAt.toISOString()}`);
+        logger.log(`[CART LOCK] Cart locked until ${cart.lockExpiresAt.toISOString()}`);
     } else {
         cart.lockedAt = undefined;
         cart.lockExpiresAt = undefined;
-        console.log(`[CART LOCK] Cart unlocked, timestamps cleared`);
+        logger.log(`[CART LOCK] Cart unlocked, timestamps cleared`);
     }
     
     // Update product stock for each item in cart
@@ -155,19 +156,19 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
             // Validate that product has a stock value
             const currentStock = cartItem.product.stock;
             if (currentStock === undefined || currentStock === null || isNaN(currentStock)) {
-                console.error(`[CART LOCK] Product ${cartItem.product._id} has invalid stock value: ${currentStock}`);
+                logger.error(`[CART LOCK] Product ${cartItem.product._id} has invalid stock value: ${currentStock}`);
                 return new ResponseError(`Product ${cartItem.product._id} has invalid stock configuration`, 500);
             }
             
             // Check if we have enough stock when locking
             if (lock && currentStock - cartItem.amount < 0){
-                console.error(`[CART LOCK] Insufficient stock for product ${cartItem.product._id}`);
+                logger.error(`[CART LOCK] Insufficient stock for product ${cartItem.product._id}`);
                 return new ErrorAmountAboveStock(cartItem.product._id!.toString(), currentStock, cartItem.amount)
             }
             
             // Update stock: decrease when locking, increase when unlocking
             const newStock = currentStock + (lock ? -cartItem.amount : cartItem.amount);
-            console.log(`[CART LOCK] Updating product ${cartItem.product._id} stock: ${currentStock} -> ${newStock}`);
+            logger.log(`[CART LOCK] Updating product ${cartItem.product._id} stock: ${currentStock} -> ${newStock}`);
             
             cartItem.product.stock = newStock;
             await Product.findByIdAndUpdate(cartItem.product._id, {stock: newStock});
@@ -175,14 +176,14 @@ async function updateCartItemsStock(cart: mongoose.Document<unknown,{},ICart> & 
     }
     
     await cart.save();
-    console.log(`[CART LOCK] Cart saved successfully`);
+    logger.log(`[CART LOCK] Cart saved successfully`);
     return undefined;
 }
 
 export const cartLockAction = async(req: Request, res: Response) => {
     const cartId = req.params['id']!
     const lock = req.body['lock'];
-    console.log(`[CART LOCK ACTION] Called with cartId=${cartId}, lock=${lock}`);
+    logger.log(`[CART LOCK ACTION] Called with cartId=${cartId}, lock=${lock}`);
     const err = await RequestValidator.validate(
         [
             {name:'id',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),
@@ -196,10 +197,10 @@ export const cartLockAction = async(req: Request, res: Response) => {
     }
     else {
         const cart = (await Cart.findById(cartId).populate('products.$*.product'))!
-        console.log(`[CART LOCK ACTION] Current cart lock state: ${cart.lock}`);
+        logger.log(`[CART LOCK ACTION] Current cart lock state: ${cart.lock}`);
         const expectedLock = await isCartLocked(cartId,!lock,"")
         if(expectedLock !== undefined){
-            console.log(`[CART LOCK ACTION] Validation failed, sending error`);
+            logger.log(`[CART LOCK ACTION] Validation failed, sending error`);
             expectedLock.send(res)
             return
         }

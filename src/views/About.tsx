@@ -6,12 +6,13 @@ import { BsFacebook, BsInstagram, BsFillEnvelopePaperFill, BsTrophy } from "reac
 import YoutubeEmbed from "@/components/home/YoutubeEmbed";
 import Footer from "@/components/common/Footer";
 import {Box, Button, Center, Container, Heading, ListItem, Text, UnorderedList, Collapse} from "@chakra-ui/react";
+import { logger } from '../utils/logger';
 
 const About = () => {
     const [isPublicationsDisplayed, setIsPublicationsDisplayed] = useState(false);
 
     const togglePublications = () => {
-        console.log('Button clicked, current state:', isPublicationsDisplayed); // Debug log
+        logger.log('Button clicked, current state:', isPublicationsDisplayed);
         setIsPublicationsDisplayed(!isPublicationsDisplayed);
     };
 

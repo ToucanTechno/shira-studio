@@ -11,6 +11,7 @@ import {
     isMissingField,
 } from "../utils/paramChecks";
 import {ErrorDocNotUpdated} from "../utils/error";
+import { logger } from "../utils/logger";
 
 
 export const getOrder = async (req:Request, res:Response) => {
@@ -44,8 +45,8 @@ export const getOrders = async (req: Request, res: Response) => {
 export const insertOrder = async (req: Request, res: Response) => {
     const order: IOrder = req.body
     const cartId = req.body['cart']
-    console.log('[ORDER DEBUG] insertOrder called with cartId:', cartId);
-    console.log('[ORDER DEBUG] Request body:', JSON.stringify(req.body, null, 2));
+    logger.log('[ORDER DEBUG] insertOrder called with cartId:', cartId);
+    logger.log('[ORDER DEBUG] Request body:', JSON.stringify(req.body, null, 2));
     //TODO:add payment receipt and type depends how the payment would be implemented
     const err = await RequestValidator.validate(
         [{name:'cart',validationFuncs:[isMissingField.bind(null,cartId),isInvalidObjId.bind(null,cartId),

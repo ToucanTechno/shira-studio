@@ -9,6 +9,7 @@ import HoverMenuItem from "./HoverMenuItem";
 import axios from "axios";
 import { Tooltip } from '@chakra-ui/react'
 import { API_URL } from '@/utils/apiConfig';
+import { logger } from '@/utils/logger';
 // Potential history icon: import { BsClockHistory } from "react-icons/bs";
 // Alternative to basket: import { BsFillBagFill } from "react-icons/bs";
 
@@ -53,7 +54,7 @@ const TopNavbar = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).catch((error: any) => {
             // Handle any errors
-            console.error(error);
+            logger.error(error);
         });
 
     }, [api]);

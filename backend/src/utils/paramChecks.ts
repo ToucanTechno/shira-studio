@@ -11,6 +11,7 @@ import {
 } from "./error"
 import { Cart } from "../models/Cart"
 import { Order} from "../models/Order";
+import { logger } from "./logger";
 
 
 export const isMissingField = (field:any,name:string): ResponseError | undefined => {
@@ -72,20 +73,20 @@ export const isValueAlreadyInUse = async (field:string,value:any,model:any, _nam
 
 export const isCartLocked = async (cartId:string,expected:boolean, _name:string) => {
     const cart = await Cart.findById(cartId)
-    console.log(`[CART LOCK DEBUG] Checking cart ${cartId}: current lock=${cart?.lock}, expected=${expected}`);
+    logger.log(`[CART LOCK DEBUG] Checking cart ${cartId}: current lock=${cart?.lock}, expected=${expected}`);
     if(expected){
         if(!cart?.lock){
-            console.log(`[CART LOCK DEBUG] ERROR: Cart is unlocked but expected to be locked`);
+            logger.log(`[CART LOCK DEBUG] ERROR: Cart is unlocked but expected to be locked`);
             return new ErrorCartUnlocked(cartId)
         }
     }
     else{
         if(cart?.lock){
-            console.log(`[CART LOCK DEBUG] ERROR: Cart is locked but expected to be unlocked`);
+            logger.log(`[CART LOCK DEBUG] ERROR: Cart is locked but expected to be unlocked`);
             return new ErrorCartLocked(cartId)
         }
     }
-    console.log(`[CART LOCK DEBUG] Validation passed`);
+    logger.log(`[CART LOCK DEBUG] Validation passed`);
     return undefined
 }
 

@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import Pagination from "../../components/common/Pagination";
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 interface ProductData {
     total: number;
@@ -47,7 +48,7 @@ const AdminProducts = () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .catch((error: any) => {
                 // Handle any errors
-                console.error(error);
+                logger.error(error);
             });
     }, [params, api]);
 

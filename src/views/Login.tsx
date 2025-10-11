@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { Link as ChakraLink } from '@chakra-ui/react'
 import UserProfile from '../components/UserProfile';
 import { API_URL } from '../utils/apiConfig';
+import { logger } from '../utils/logger';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -36,7 +37,7 @@ const Login = () => {
             const decoded = JSON.parse(atob(payload));
             return decoded;
         } catch (error) {
-            console.error('Error decoding token:', error);
+            logger.error('Error decoding token:', error);
             return null;
         }
     };
@@ -85,7 +86,7 @@ const Login = () => {
             return;
         }
         if (emailError !== '' || passwordError !== ''){
-            console.log(emailError, passwordError)
+            logger.log(emailError, passwordError)
             return;
         }
         setLoading(true);
@@ -96,12 +97,12 @@ const Login = () => {
                 setPasswordError('User does not exist.');
             } else {
                 setPasswordError('Invalid login credentials. Please try again.')
-                console.error(err);
+                logger.error(err);
             }
             setLoading(false);
         });
 
-        console.log(response);
+        logger.log(response);
         if (response && response.data && response.data.message == 'Password valid.') {
             const token = response.data.token;
 

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Cart } from '../models/Cart';
 import mongoose from 'mongoose';
+import { logger } from '../utils/logger';
 
 /**
  * Middleware to check if a cart's lock has expired and auto-unlock if necessary
@@ -34,14 +35,14 @@ export const checkCartLockExpiration = async (
         // Check if lock has expired
         const now = new Date();
         if (cart.lockExpiresAt && now > cart.lockExpiresAt) {
-            console.log(`[CART LOCK EXPIRATION] Cart ${cartId} lock expired at ${cart.lockExpiresAt.toISOString()}, auto-unlocking`);
+            logger.log(`[CART LOCK EXPIRATION] Cart ${cartId} lock expired at ${cart.lockExpiresAt.toISOString()}, auto-unlocking`);
             
             try {
                 // Release stock back to products
                 for (const cartItem of cart.products.values()) {
                     if (typeof cartItem.product === 'object') {
                         const newStock = cartItem.product.stock + cartItem.amount;
-                        console.log(`[CART LOCK EXPIRATION] Releasing stock for product ${cartItem.product._id}: ${cartItem.product.stock} -> ${newStock}`);
+                        logger.log(`[CART LOCK EXPIRATION] Releasing stock for product ${cartItem.product._id}: ${cartItem.product.stock} -> ${newStock}`);
                         await mongoose.model('Product').findByIdAndUpdate(
                             cartItem.product._id,
                             { stock: newStock }
@@ -55,15 +56,15 @@ export const checkCartLockExpiration = async (
                 cart.lockExpiresAt = undefined;
                 await cart.save();
                 
-                console.log(`[CART LOCK EXPIRATION] Cart ${cartId} successfully unlocked and stock released`);
+                logger.log(`[CART LOCK EXPIRATION] Cart ${cartId} successfully unlocked and stock released`);
             } catch (error) {
-                console.error(`[CART LOCK EXPIRATION] Failed to unlock cart ${cartId}:`, error);
+                logger.error(`[CART LOCK EXPIRATION] Failed to unlock cart ${cartId}:`, error);
             }
         }
         
         next();
     } catch (error) {
-        console.error('[CART LOCK EXPIRATION] Middleware error:', error);
+        logger.error('[CART LOCK EXPIRATION] Middleware error:', error);
         // Don't block the request if middleware fails
         next();
     }

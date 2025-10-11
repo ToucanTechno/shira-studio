@@ -83,10 +83,8 @@ export const CartProvider = (props: Props) => {
      * If cart is already locked or unlocked, resolves with false.
      */
     const tryLockCart = useCallback(async (lockAction: boolean) => {
-        // Log stack trace to see who called this function
-        console.log(`=== tryLockCart START (action: ${lockAction ? 'LOCK' : 'UNLOCK'}) ===`);
-        console.log('Call stack:', new Error().stack);
         logger.log(`=== tryLockCart START (action: ${lockAction ? 'LOCK' : 'UNLOCK'}) ===`);
+        logger.log('Call stack:', new Error().stack);
         
         if (!guestData) {
             logger.error('No guest data');

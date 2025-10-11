@@ -1,6 +1,7 @@
 // External Dependencies
 import * as mongoDB from "mongodb";
 import * as dotenv from "dotenv";
+import { logger } from "../utils/logger";
 
 // Global Variables
 
@@ -10,5 +11,5 @@ export async function connectToDatabase () {
     const client: mongoDB.MongoClient = new mongoDB.MongoClient(process.env["MONGO_URL"] as string);
     await client.connect();
     const db: mongoDB.Db = client.db(process.env["DB_NAME"] as string);
-    console.log(`Successfully connected to database: ${db.databaseName}`);
+    logger.log(`Successfully connected to database: ${db.databaseName}`);
 }

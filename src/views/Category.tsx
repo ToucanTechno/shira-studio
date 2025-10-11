@@ -10,6 +10,7 @@ import axios from "axios";
 import {ProductGrid} from "../components/common/ProductGrid";
 import { API_URL } from '../utils/apiConfig';
 import { IProduct } from '../models/Product';
+import { logger } from '../utils/logger';
 
 interface CategoryInfo {
     _id: string;
@@ -42,7 +43,7 @@ const Category = ({ category }: CategoryProps) => {
                 const subcategoriesResponse = await axios.get<CategoryInfo[]>(`${API_URL}/categories/parent/${category}`);
                 setSubcategories(subcategoriesResponse.data);
             } catch (err) {
-                console.error('Error fetching category:', err);
+                logger.error('Error fetching category:', err);
                 setError('Failed to load category data');
             } finally {
                 setIsLoadingCategory(false);

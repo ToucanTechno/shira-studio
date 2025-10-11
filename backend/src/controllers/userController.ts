@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import {User, IUser, IUserLogin} from "../models/User";
 import {RequestValidator} from "../utils/validator";
 import {isInvalidType, isMissingField, isValueAlreadyInUse} from "../utils/paramChecks";
+import { logger } from "../utils/logger";
 
 
 export const register = async(req: Request, res: Response) => {
@@ -76,18 +77,18 @@ export const login = async(req: Request, res: Response) => {
                 { expiresIn: '7d', subject: 'TODO' });
             // Check if this is an admin endpoint request (by URL path)
             if (req.path.includes('/admin/')) {
-                console.log('Admin login attempt:', { 
+                logger.log('Admin login attempt:', {
                     email: user.email,
-                    userRole: user.role, 
+                    userRole: user.role,
                     requestedAdminAccess: true,
                     path: req.path
                 });
                 if (user.role !== 'admin') {
-                    console.log('Admin login rejected: User does not have admin role');
+                    logger.log('Admin login rejected: User does not have admin role');
                     res.status(401).send({message: "Unauthorized: Admin access required"});
                     return;
                 }
-                console.log('Admin login successful');
+                logger.log('Admin login successful');
             }
             res.status(200).send({ message: "Password valid.",
                                                token: token } );

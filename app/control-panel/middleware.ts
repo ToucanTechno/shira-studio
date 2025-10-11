@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtDecode } from 'jwt-decode'
 
+// Simple logger for middleware (server-side)
+const logger = {
+  error: (...args: unknown[]) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(...args);
+    }
+  }
+};
+
 interface DecodedUser {
   role?: string;
   exp?: number;
@@ -35,7 +44,7 @@ export function middleware(request: NextRequest) {
 
     return NextResponse.next()
   } catch (error) {
-    console.error('Token validation error:', error)
+    logger.error('Token validation error:', error)
     return NextResponse.redirect(new URL('/control-panel/login', request.url))
   }
 }

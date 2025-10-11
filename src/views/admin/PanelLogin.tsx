@@ -4,6 +4,7 @@ import React, {useCallback, useContext, useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import "./PanelLogin.css"
 import {AuthContext} from "../../services/AuthContext";
+import { logger } from "../../utils/logger";
 
 const PanelLogin = () => {
     const [email, setEmail] = useState('')
@@ -18,13 +19,13 @@ const PanelLogin = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const initiateLogin = useCallback((processLoginResult: (accountData: any) => void) => {
         const apiUrl = 'http://127.0.0.1:3001/api/auth/admin/sign-in';
-        console.log('Attempting admin login with:', { email, isAdmin: true, endpoint: apiUrl });
+        logger.log('Attempting admin login with:', { email, isAdmin: true, endpoint: apiUrl });
 
         // First test if the server is reachable
         fetch('http://127.0.0.1:3001', { method: 'GET' })
             .then(res => {
-                console.log('Server status check:', res.status, res.ok ? 'online' : 'issue detected');
-                console.log('Proceeding with admin login request to:', apiUrl);
+                logger.log('Server status check:', res.status, res.ok ? 'online' : 'issue detected');
+                logger.log('Proceeding with admin login request to:', apiUrl);
                 // Now try the actual login
                 return fetch(apiUrl, {
                     method: 'POST',
@@ -40,19 +41,19 @@ const PanelLogin = () => {
                     try {
                         data = await res.json();
                     } catch (e) {
-                        console.error('Error parsing response:', e);
+                        logger.error('Error parsing response:', e);
                         data = { error: 'Invalid response format' };
                     }
                     return [status, data];
                 })
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .then((loginResult: [number, any]) => {
-                    console.log('Login response:', loginResult[0], loginResult[1]);
+                    logger.log('Login response:', loginResult[0], loginResult[1]);
                     processLoginResult(loginResult);
                 });
             })
             .catch(error => {
-                console.error('Server connection error:', error);
+                logger.error('Server connection error:', error);
                 setLoginError('Cannot connect to server. Please check if the backend is running.');
             })
     }, [email, password]);
@@ -107,14 +108,14 @@ const PanelLogin = () => {
             if (status === 200) {
                 logIn(loginData);
             } else if (status === 404) {
-                console.error('API endpoint not found');
+                logger.error('API endpoint not found');
                 setLoginError('Login failed: API endpoint not found. Please check if backend server is running and the URL is correct.');
             } else if (status === 401) {
                 setLoginError('Unauthorized: Admin access denied. Please check your credentials.');
             } else if (status === 403) {
                 setLoginError('Forbidden: You do not have admin privileges.');
             } else {
-                console.error('Login error:', status, loginData);
+                logger.error('Login error:', status, loginData);
                 setLoginError(`Failed to login as admin (${status}). ${loginData.message || ''}`);
             }
         })

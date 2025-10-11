@@ -16,6 +16,7 @@ import {
     Center
 } from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { logger } from '../utils/logger';
 
 const OrderSummary = () => {
     const router = useRouter();
@@ -28,7 +29,7 @@ const OrderSummary = () => {
         if (orderId) {
             // You can fetch order details here if needed
             // For now, we'll just show the order ID
-            console.log('Order created with ID:', orderId);
+            logger.log('Order created with ID:', orderId);
         }
     }, [orderId]);
 

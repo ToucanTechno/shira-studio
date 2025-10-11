@@ -16,6 +16,7 @@ import Select, {SingleValue} from "react-select";
 import axios from "axios";
 import {SelectOption} from "../../utils/ChakraTypes";
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 interface CategoriesAddProps {
     categories: ICategory[];
@@ -54,14 +55,14 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
             text: text,
             parent: parent?.value
         };
-        console.log("update: ", update);
+        logger.log("update: ", update);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         api.post('categories', update).then((res: any) => {
-            console.log(res);
+            logger.log(res);
             onToggle();
             props.onAdd();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }).catch((error: any) => console.error(error));
+        }).catch((error: any) => logger.error(error));
     }
 
     return (
@@ -84,7 +85,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                                        required
                                        value={name}
                                        onChange={(el: ChangeEvent<HTMLInputElement>) => {
-                                        console.log(el);
+                                        logger.log(el);
                                         setName(el.target.value)}}/>
                             </FormControl>
                             <FormControl me={2}>
@@ -95,7 +96,7 @@ const AdminCategoriesAdd = (props: CategoriesAddProps) => {
                                        required
                                        value={text}
                                        onChange={(el: ChangeEvent<HTMLInputElement>) => {
-                                        console.log(el);
+                                        logger.log(el);
                                         setText(el.target.value)}}/>
                             </FormControl>
                             <FormControl me={5}>

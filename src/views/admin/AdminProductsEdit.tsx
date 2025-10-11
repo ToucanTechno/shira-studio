@@ -5,6 +5,7 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {IProduct, ICategory} from "../../models/Product";
 import axios from "axios";
 import Select, { MultiValue } from 'react-select';
+import { logger } from '../../utils/logger';
 import {
     Button,
     Flex,
@@ -60,7 +61,7 @@ const AdminProductsEdit = () => {
         // Add request interceptor for debugging
         instance.interceptors.request.use(
             (config) => {
-                console.log('Request:', {
+                logger.log('Request:', {
                     method: config.method,
                     url: config.url,
                     baseURL: config.baseURL,
@@ -71,7 +72,7 @@ const AdminProductsEdit = () => {
                 return config;
             },
             (error) => {
-                console.error('Request error:', error);
+                logger.error('Request error:', error);
                 return Promise.reject(error);
             }
         );
@@ -79,7 +80,7 @@ const AdminProductsEdit = () => {
         // Add response interceptor for debugging
         instance.interceptors.response.use(
             (response) => {
-                console.log('Response:', {
+                logger.log('Response:', {
                     status: response.status,
                     statusText: response.statusText,
                     data: response.data
@@ -87,7 +88,7 @@ const AdminProductsEdit = () => {
                 return response;
             },
             (error) => {
-                console.error('Response error:', {
+                logger.error('Response error:', {
                     message: error.message,
                     status: error.response?.status,
                     statusText: error.response?.statusText,
@@ -165,7 +166,7 @@ const AdminProductsEdit = () => {
     }, [api, isEdit, params]);
 
     useEffect(() => {
-        fetchProducts().catch(error => console.error(error));
+        fetchProducts().catch(error => logger.error(error));
     }, [fetchProducts])
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -184,7 +185,7 @@ const AdminProductsEdit = () => {
         try {
             let productId = params['id'] as string;
             
-            console.log('Starting product save...', { isEdit, productId, updateEntry });
+            logger.log('Starting product save...', { isEdit, productId, updateEntry });
             
             if (isEdit) {
                 // Update existing product
@@ -197,7 +198,7 @@ const AdminProductsEdit = () => {
                     addedCategories.delete(el.name);
                 }
                 
-                console.log('Adding PUT request to update product:', `/products/${productId}`);
+                logger.log('Adding PUT request to update product:', `/products/${productId}`);
                 updatePromises.push(api.put<IProduct>(`/products/${productId}`, updateEntry));
                 updatePromises.push(api.put(`/products/${productId}/categories`, {
                     names: Array.from(addedCategories),
@@ -208,9 +209,9 @@ const AdminProductsEdit = () => {
                     removeAction: true
                 }));
                 
-                console.log('Executing update promises...', updatePromises.length);
+                logger.log('Executing update promises...', updatePromises.length);
                 await Promise.all(updatePromises);
-                console.log('Update promises completed');
+                logger.log('Update promises completed');
                 
                 // Upload new images if any
                 if (imagesToUpload.length > 0) {
@@ -256,7 +257,7 @@ const AdminProductsEdit = () => {
                     return;
                 }
             }
-            console.error('Error saving product:', error);
+            logger.error('Error saving product:', error);
         }
     }
 

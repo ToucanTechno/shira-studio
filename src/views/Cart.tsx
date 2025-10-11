@@ -54,8 +54,8 @@ const Cart = () => {
     }, [api, guestData.cartID]);
 
     const handleItemCountChange = useCallback(async (val: number, productKey: string) => {
-        console.log('=== handleItemCountChange CALLED ===', { val, productKey });
-        console.log('Call stack:', new Error().stack);
+        logger.log('=== handleItemCountChange CALLED ===', { val, productKey });
+        logger.log('Call stack:', new Error().stack);
         
         if (!cart) {
             // Should never happen
@@ -65,7 +65,7 @@ const Cart = () => {
         // Check if value actually changed - do this BEFORE unlocking to avoid unnecessary operations
         const amountToChange = val - cart.products[productKey].amount;
         if (amountToChange === 0) {
-            console.log('Amount unchanged, skipping update');
+            logger.log('Amount unchanged, skipping update');
             return;
         }
 
@@ -91,7 +91,7 @@ const Cart = () => {
         }
 
         // Update product amount in DB
-        console.log('amount to change', amountToChange)
+        logger.log('amount to change', amountToChange)
         try {
             await api.put(`/cart/${guestData.cartID}`, {
                 productId: productKey,
@@ -118,17 +118,17 @@ const Cart = () => {
             }
         }
         setCart({...cart, products: cart.products});
-        console.log("Finished updating product:", productKey, val);
+        logger.log("Finished updating product:", productKey, val);
     }, [alertToast, api, cart, guestData.cartID, tryLockCart]);
 
     const handleClose = useCallback((productKey: string) => {
-        console.log('Closing', productKey);
+        logger.log('Closing', productKey);
         handleItemCountChange(0, productKey);
     }, [handleItemCountChange]);
 
     const handleLockExpire = useCallback(async () => {
-        console.log('=== handleLockExpire CALLED ===');
-        console.log('Call stack:', new Error().stack);
+        logger.log('=== handleLockExpire CALLED ===');
+        logger.log('Call stack:', new Error().stack);
         logger.log('[CART] Lock expired, unlocking cart');
         
         alertToast({

@@ -10,6 +10,7 @@ import { categoryRoutes } from "./routes/categoryRouter";
 import { orderRoutes } from "./routes/orderRoutes";
 import path from "path";
 import { v2 as cloudinary } from 'cloudinary';
+import { logger } from "./utils/logger";
 
 // Load environment variables from .env file (for local development)
 // In production (Railway), environment variables are injected directly
@@ -27,18 +28,18 @@ cloudinary.config({
 // Verify Cloudinary configuration
 const cloudinaryConfig = cloudinary.config();
 if (!cloudinaryConfig.cloud_name || !cloudinaryConfig.api_key || !cloudinaryConfig.api_secret) {
-    console.error('❌ Cloudinary configuration is incomplete!');
-    console.error('Missing:', {
+    logger.error('❌ Cloudinary configuration is incomplete!');
+    logger.error('Missing:', {
         cloud_name: !cloudinaryConfig.cloud_name,
         api_key: !cloudinaryConfig.api_key,
         api_secret: !cloudinaryConfig.api_secret
     });
 } else {
-    console.log('✅ Cloudinary configured successfully:', cloudinaryConfig.cloud_name);
+    logger.log('✅ Cloudinary configured successfully:', cloudinaryConfig.cloud_name);
 }
 
 if (process.env["MONGO_URL"] === undefined) {
-    console.warn("Warning: Missing MONGO_URL environment variable. Using default.");
+    logger.warn("Warning: Missing MONGO_URL environment variable. Using default.");
 }
 
 // Get base connection string
@@ -59,14 +60,14 @@ connectionString += '?authSource=admin';
 
 // Connect to MongoDB
 mongoose.connect(connectionString)
-    .then(() => console.log("✅ Connected to MongoDB successfully"))
+    .then(() => logger.log("✅ Connected to MongoDB successfully"))
     .catch((error) => {
-        console.error("❌ Error connecting to MongoDB:", error);
-        console.log("\nTroubleshooting tips:");
-        console.log("1. Make sure MongoDB is running");
-        console.log("2. Check if the connection string is correct");
-        console.log("3. If using a replica set, ensure it's properly configured");
-        console.log("4. Try connecting without replica set parameters for local development");
+        logger.error("❌ Error connecting to MongoDB:", error);
+        logger.log("\nTroubleshooting tips:");
+        logger.log("1. Make sure MongoDB is running");
+        logger.log("2. Check if the connection string is correct");
+        logger.log("3. If using a replica set, ensure it's properly configured");
+        logger.log("4. Try connecting without replica set parameters for local development");
         process.exit(1);
     });
 const app: Express = express();
@@ -94,7 +95,7 @@ app.use(cors({
             callback(null, true);
         }
         else {
-            console.warn(`CORS blocked request from origin: ${origin}`);
+            logger.warn(`CORS blocked request from origin: ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -118,7 +119,7 @@ app.get('/', (_req, res) => {
 
 // --- Start the Server ---
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    logger.log(`Server is running on http://localhost:${port}`);
 });
 
 export default app;

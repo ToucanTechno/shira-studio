@@ -13,6 +13,7 @@ import {
 import { DeleteIcon } from '@chakra-ui/icons';
 import { IProductImage } from '../../models/Product';
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 interface MultiImageUploadProps {
     productId?: string;
@@ -48,7 +49,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 
     const uploadFiles = useCallback(async (files: File[]) => {
         if (!productId) {
-            console.error('Cannot upload: productId is required');
+            logger.error('Cannot upload: productId is required');
             return;
         }
 
@@ -86,7 +87,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 duration: 3000,
             });
         } catch (error) {
-            console.error('Upload error:', error);
+            logger.error('Upload error:', error);
             toast({
                 title: 'Upload failed',
                 description: 'Failed to upload images. Please try again.',
@@ -160,7 +161,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 
     const handleDelete = async (publicId: string) => {
         if (!productId) {
-            console.error('Cannot delete: productId is required');
+            logger.error('Cannot delete: productId is required');
             return;
         }
 
@@ -169,17 +170,17 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
             // e.g., "shira-studio/products/abc123" -> "abc123"
             const imageId = publicId.split('/').pop() || publicId;
             const deleteUrl = `${API_URL}/products/${productId}/images/${imageId}`;
-            console.log('Deleting image:', { productId, publicId, imageId, deleteUrl });
+            logger.log('Deleting image:', { productId, publicId, imageId, deleteUrl });
             
             const response = await fetch(deleteUrl, {
                 method: 'DELETE',
             });
 
-            console.log('Delete response:', { status: response.status, ok: response.ok });
+            logger.log('Delete response:', { status: response.status, ok: response.ok });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Delete failed with response:', errorText);
+                logger.error('Delete failed with response:', errorText);
                 throw new Error('Delete failed');
             }
 
@@ -193,7 +194,7 @@ export const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
                 duration: 2000,
             });
         } catch (error) {
-            console.error('Delete error:', error);
+            logger.error('Delete error:', error);
             toast({
                 title: 'Delete failed',
                 description: 'Failed to delete image. Please try again.',

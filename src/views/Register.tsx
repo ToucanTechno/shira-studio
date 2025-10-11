@@ -7,6 +7,7 @@ import {getPasswordErrorUI, isEmailValidUI } from "../utils/Validation";
 import Link from 'next/link';
 import { Link as ChakraLink } from '@chakra-ui/react'
 import { API_URL } from '../utils/apiConfig';
+import { logger } from '../utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const Register = (props: any) => {
@@ -47,7 +48,7 @@ const Register = (props: any) => {
             return;
         }
         if (emailError !== '' || passwordError !== ''){
-            console.log(emailError, passwordError)
+            logger.log(emailError, passwordError)
             return;
         }
         setLoading(true);
@@ -55,7 +56,7 @@ const Register = (props: any) => {
             const response = await api.post('auth/',
                 { user_name: email, email, password, role: 'user' });
 
-            console.log(response);
+            logger.log(response);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (response && response.data && (response.data as any).message === 'User registered successfully.') {
                 // TODO: Login with this user and redirect to last page (or home if no last page was set)
@@ -63,7 +64,7 @@ const Register = (props: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             setRepeatPasswordError('Unknown error.')
-            console.error(err);
+            logger.error(err);
         } finally {
             setLoading(false);
         }

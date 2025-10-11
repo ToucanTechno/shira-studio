@@ -5,6 +5,7 @@ import axios from "axios";
 import {IProduct} from "../models/Product";
 import {useConst} from "@chakra-ui/react";
 import { API_URL } from "./apiConfig";
+import { logger } from "./logger";
 
 interface ApiResponse {
     products: IProduct[];
@@ -35,7 +36,7 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
     const getInitialProducts = useCallback(() => {
         // Prevent multiple initial loads
         if (hasInitialLoadRef.current) {
-            console.log('[useInfiniteScroll] Skipping duplicate initial load');
+            logger.log('[useInfiniteScroll] Skipping duplicate initial load');
             return;
         }
         hasInitialLoadRef.current = true;
@@ -43,23 +44,23 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
         const url = categoryName
             ? `products?skip=${10 * (page - 1)}&limit=10&category=${categoryName}`
             : `products?skip=${10 * (page - 1)}&limit=10`;
-        console.log('[useInfiniteScroll] getInitialProducts called - page:', page, 'url:', url);
+        logger.log('[useInfiniteScroll] getInitialProducts called - page:', page, 'url:', url);
         api.get<ApiResponse>(url).then((resp: { data: ApiResponse }) => {
-            console.log('[useInfiniteScroll] Received products:', resp?.data?.products?.length, 'total:', resp?.data?.total);
+            logger.log('[useInfiniteScroll] Received products:', resp?.data?.products?.length, 'total:', resp?.data?.total);
             const newProducts = resp?.data?.products;
 
             if (newProducts?.length) {
                 setPage(prevPage => prevPage + 1);
                 setDynamicProducts(prevProducts => {
-                    console.log('[useInfiniteScroll] prevProducts length:', prevProducts.length, 'newProducts length:', newProducts.length);
+                    logger.log('[useInfiniteScroll] prevProducts length:', prevProducts.length, 'newProducts length:', newProducts.length);
                     
                     // Filter out products that already exist (prevent duplicates from React strict mode)
                     const existingIds = new Set(prevProducts.map(p => p._id));
                     const uniqueNewProducts = newProducts.filter(p => !existingIds.has(p._id));
                     
-                    console.log('[useInfiniteScroll] unique new products:', uniqueNewProducts.length);
+                    logger.log('[useInfiniteScroll] unique new products:', uniqueNewProducts.length);
                     const newDynamicProducts = [...prevProducts, ...uniqueNewProducts];
-                    console.log('[useInfiniteScroll] combined length:', newDynamicProducts.length);
+                    logger.log('[useInfiniteScroll] combined length:', newDynamicProducts.length);
                     setIsLastPage(newDynamicProducts?.length === resp?.data?.total);
                     return newDynamicProducts;
                 });
@@ -71,7 +72,7 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                 setIsLoading(false);
             }
         }).catch(err => {
-            console.error('Error fetching products:', err);
+            logger.error('Error fetching products:', err);
             setIsLoading(false);
             setIsLastPage(true);
         });
@@ -112,7 +113,7 @@ export const useInfiniteScroll = (products: IProduct[], categoryName?: string): 
                             setIsLoading(false);
                         }
                     }).catch(err => {
-                        console.error('Error fetching more products:', err);
+                        logger.error('Error fetching more products:', err);
                         setIsLoading(false);
                         setIsLastPage(true);
                     });

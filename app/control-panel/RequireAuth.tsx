@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AuthContext } from '@/services/AuthContext'
 import { jwtDecode } from 'jwt-decode'
+import { logger } from '@/utils/logger'
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const { authTokens } = useContext(AuthContext)
@@ -29,7 +30,7 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
         router.push('/control-panel/login')
       }
     } catch (error) {
-      console.error('Token decode error:', error)
+      logger.error('Token decode error:', error)
       router.push('/control-panel/login')
     }
   }, [authTokens, router, isClient])

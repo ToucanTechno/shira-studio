@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import UserProfile from '../components/UserProfile';
 import { API_URL } from '../utils/apiConfig';
+import { logger } from '../utils/logger';
 
 const Profile = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,7 +22,7 @@ const Profile = () => {
             const decoded = JSON.parse(atob(payload));
             return decoded;
         } catch (error) {
-            console.error('Error decoding token:', error);
+            logger.error('Error decoding token:', error);
             return null;
         }
     }, []);
@@ -37,7 +38,7 @@ const Profile = () => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return (response.data as any).user;
         } catch (error) {
-            console.error('Error fetching user details:', error);
+            logger.error('Error fetching user details:', error);
             return null;
         }
     }, [api]);

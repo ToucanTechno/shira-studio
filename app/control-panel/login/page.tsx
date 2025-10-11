@@ -14,6 +14,7 @@ import {
 import { AuthContext } from '@/services/AuthContext'
 import { getPasswordErrorUI, isEmailValidUI } from '@/utils/Validation'
 import { jwtDecode } from 'jwt-decode'
+import { logger } from '@/utils/logger'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -48,7 +49,7 @@ export default function AdminLoginPage() {
           router.push('/control-panel/')
         }
       } catch (error) {
-        console.error('Token decode error:', error)
+        logger.error('Token decode error:', error)
       }
     }
   }, [authTokens, router])
@@ -58,7 +59,7 @@ export default function AdminLoginPage() {
       return
     }
     if (emailError !== '' || passwordError !== '') {
-      console.log(emailError, passwordError)
+      logger.log(emailError, passwordError)
       return
     }
     setLoading(true)
@@ -82,12 +83,12 @@ export default function AdminLoginPage() {
       } else {
         setPasswordError('Cannot connect to server. Please check if the backend is running.')
       }
-      console.error(err)
+      logger.error(err)
       setLoading(false)
       return
     }
 
-    console.log(response)
+    logger.log(response)
     if (response && response.data && response.data.token) {
       const token = response.data.token
 
@@ -109,7 +110,7 @@ export default function AdminLoginPage() {
           setPasswordError('You do not have admin privileges.')
         }
       } catch (error) {
-        console.error('Token decode error:', error)
+        logger.error('Token decode error:', error)
         setPasswordError('Invalid token received.')
       }
     }

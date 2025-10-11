@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import {NextFunction, Request, Response} from "express";
+import { logger } from "../utils/logger";
 
 export const authorize = (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.headers)
+    logger.log(req.headers)
     try {
         if (!req.headers.authorization) {
             throw new Error("Missing authorization field");

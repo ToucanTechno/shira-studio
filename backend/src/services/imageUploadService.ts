@@ -1,4 +1,5 @@
 import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import { logger } from '../utils/logger';
 
 export interface ProductImage {
     url: string;
@@ -24,7 +25,7 @@ class ImageUploadService {
         const folderPrefix = env === 'production' ? 'shira-studio-prod' : 'shira-studio-test';
         this.FOLDER = `${folderPrefix}/products`;
         
-        console.log(`📁 Cloudinary upload folder set to: ${this.FOLDER} (environment: ${env})`);
+        logger.log(`📁 Cloudinary upload folder set to: ${this.FOLDER} (environment: ${env})`);
     }
 
     /**
@@ -76,7 +77,7 @@ class ImageUploadService {
                 }
             };
         } catch (error: any) {
-            console.error('Error uploading image to Cloudinary:', error);
+            logger.error('Error uploading image to Cloudinary:', error);
             return {
                 success: false,
                 error: error.message || 'Failed to upload image'
@@ -125,7 +126,7 @@ class ImageUploadService {
                 error: `Failed to delete image: ${result.result}`
             };
         } catch (error: any) {
-            console.error('Error deleting image from Cloudinary:', error);
+            logger.error('Error deleting image from Cloudinary:', error);
             return {
                 success: false,
                 error: error.message || 'Failed to delete image'

@@ -18,6 +18,7 @@ import { SelectOption } from "../../utils/ChakraTypes";
 import axios from "axios";
 import { ColumnDef, createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { API_URL } from '../../utils/apiConfig';
+import { logger } from '../../utils/logger';
 
 interface OrderResponse {
     orders: Array<{
@@ -86,7 +87,7 @@ const AdminOrders = () => {
         (async () => {
             try {
                 const dbOrders = await api.get<OrderResponse>('/orders');
-                console.log(dbOrders);
+                logger.log(dbOrders);
                 const orders: TOrder[] = [];
                 for (const order of dbOrders.data.orders) {
                     orders.push({
@@ -100,7 +101,7 @@ const AdminOrders = () => {
                 }
                 setOrdersData(orders);
             } catch (error) {
-                console.error(error);
+                logger.error(error);
             }
         })();
     }, [api]);
@@ -110,7 +111,7 @@ const AdminOrders = () => {
     };
 
     const handleSearch = () => {
-        console.log('handling search: ', searchPhrase)
+        logger.log('handling search: ', searchPhrase)
     };
     // searchInput.addEventListener('input', applyFilters);
     // statusFilter.addEventListener('change', applyFilters);
